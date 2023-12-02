@@ -28,7 +28,7 @@ app.listen(portti, () => {
 
 });
 
-// prisma asennus ja käyttö:
+// prisma asennus ja käyttö: (demo4)
 /**
  * npm install prisma --save-dev
  * sitten client

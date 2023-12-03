@@ -6,6 +6,36 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite" 
+  url      = "file:./data.db"
+}
+
+model Team {
+  id          Int     @id @default(autoincrement())
+  name        String
+  def         Int
+  speed       Int
+  mat         Int
+  rat         Int
+  reactions   Int
+  motivation  Int
+  skill       Int
+  save        Int
+  armourFront Int
+  armourSide  Int
+  armourTop   Int
+  type        String
+  faction     String
+  imgSide     String
+  imgTop      String
+  effects     String
+  specials    String
+  desc        String
+  order       String
+  weapons     String
+  unit        String
+  transport   Int
+  transporting String
+  nickname    String
+  target      String
 }

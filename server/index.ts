@@ -57,3 +57,4 @@ app.listen(portti, () => {
 
 // npm start
 // npx prisma studio
+// https://github.com/xamk-so2/soveltava-harjoitustyo-dpera005xamk/tree/main

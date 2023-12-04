@@ -76,7 +76,11 @@ apiTeamsRouter.put("/:id", async (req : express.Request, res : express.Response,
                         transport : req.body.transport,
                         transporting : req.body.transporting,
                         nickname: req.body.nickname,
-                        target  : req.body.target
+                        target  : req.body.target,
+                        cross   : req.body.cross,
+                        points  : req.body.points,
+                        height  : req.body.height,
+                        width   : req.body.height
                     }
                 });
                         // palautetaan taas vastauksena kaikki
@@ -96,7 +100,7 @@ apiTeamsRouter.put("/:id", async (req : express.Request, res : express.Response,
 });
 
 apiTeamsRouter.post("/", async (req : express.Request, res : express.Response, next : express.NextFunction) => {
- 
+      console.log('received POST: ', req.body);
       if (req.body.name?.length > 0) {
 
         try {
@@ -127,7 +131,11 @@ apiTeamsRouter.post("/", async (req : express.Request, res : express.Response, n
                     transport : req.body.transport,
                     transporting : req.body.transporting,
                     nickname: req.body.nickname,
-                    target  : req.body.target
+                    target  : req.body.target,
+                    cross   : req.body.cross,
+                    points  : req.body.points,
+                    height  : req.body.height,
+                    width   : req.body.height
                 }
             });
     

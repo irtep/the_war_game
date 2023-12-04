@@ -6,12 +6,15 @@ import apiTeamsRouter from './routes/apiTeams';
 import errorhandler from './errors/errorhandler';
 //import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'; 
+import cors from 'cors';
 
 dotenv.config(); 
 
 const app : express.Application = express();
 
-const portti : number = Number(process.env.PORT);
+const port : number = Number(process.env.PORT);
+
+app.use(cors({origin : "http://localhost:3000"}))
 /*
 const checkToken = (req : express.Request, res : express.Response, next : express.NextFunction) => {
     
@@ -49,9 +52,9 @@ app.use((req : express.Request, res : express.Response, next : express.NextFunct
     next();
 });
 
-app.listen(portti, () => {
+app.listen(port, () => {
 
-    console.log(`Server online on port : ${portti}`);    
+    console.log(`Server online on port : ${port}`);    
 
 });
 

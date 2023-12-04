@@ -38,4 +38,8 @@ model Team {
   transporting String
   nickname    String
   target      String
+  cross       Int
+  points      Int
+  height      Int
+  width       Int
 }

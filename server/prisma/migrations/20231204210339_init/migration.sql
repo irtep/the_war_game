@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE "Weapon" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "AT" INTEGER NOT NULL,
+    "FP" INTEGER NOT NULL,
+    "specials" TEXT NOT NULL,
+    "game" TEXT NOT NULL
+);

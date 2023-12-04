@@ -10,6 +10,17 @@ datasource db {
   url      = "file:./data.db"
 }
 
+model Weapon {
+  id          Int     @id @default(autoincrement())
+  name        String
+  AT          Int
+  FP          Int
+  specials    String
+  firerate    Int
+  range       Int @default(20)
+  game        String
+}
+
 model Team {
   id          Int     @id @default(autoincrement())
   name        String
@@ -42,4 +53,5 @@ model Team {
   points      Int
   height      Int
   width       Int
+  game        String
 }

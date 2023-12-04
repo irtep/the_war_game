@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import apiTeamsRouter from './routes/apiTeams';
-//import apiAuthRouter from './routes/apiAuth';
+import apiWeaponsRouter from './routes/apiWeapons';
 //import apiUsersRouter from './routes/apiUsers';
 import errorhandler from './errors/errorhandler';
 //import jwt from 'jsonwebtoken';
@@ -40,6 +40,7 @@ app.use(express.static(path.resolve(__dirname, "public")));
 //app.use("/api/credentials", checkToken, apiCredentialsRouter);
 
 app.use("/api/teams", apiTeamsRouter);
+app.use("/api/weapons", apiWeaponsRouter);
 
 app.use(errorhandler);
 
@@ -60,4 +61,5 @@ app.listen(port, () => {
 
 // npm start
 // npx prisma studio
+// muutoksen jälkeen: npx prisma migrate dev --name init
 // https://github.com/xamk-so2/soveltava-harjoitustyo-dpera005xamk/tree/main

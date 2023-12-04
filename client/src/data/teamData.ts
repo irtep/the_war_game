@@ -2,7 +2,7 @@
 interface TeamProps {
     value: string;
     type: string;
-}
+};
 
 export const teamProps : Array<TeamProps> = [
     {value: "name", type: "string"},
@@ -34,5 +34,6 @@ export const teamProps : Array<TeamProps> = [
     {value: "cross", type: "number"},
     {value: "points", type: "number"},
     {value: "height", type: "number"},
-    {value: "width", type: "number"}
+    {value: "width", type: "number"},
+    {value: "game", type: "string"}
 ];

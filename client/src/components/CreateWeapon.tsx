@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button, TextField, Stack, Typography, Container, RadioGroup, FormControlLabel, Radio } from '@mui/material';
-import { teamProps } from '../data/teamData';
+import { weaponProps } from '../data/weaponData';
 
 const container = {
     margin: "auto",
@@ -10,7 +10,7 @@ const container = {
     color: "rgb(170,170,170)"
 };
 
-const CreateUnit: React.FC = (): React.ReactElement => {
+const CreateWeapon: React.FC = (): React.ReactElement => {
     const [msg, setMsg] = useState<string>('');
 
     const formRef: any = useRef<HTMLFormElement>();
@@ -22,7 +22,7 @@ const CreateUnit: React.FC = (): React.ReactElement => {
         const formData = {} as Record<string, string | number>;
         let isValid = true;
 
-        teamProps.forEach((field) => {
+        weaponProps.forEach((field) => {
             const input = event.currentTarget[field.value] as HTMLInputElement;
             const inputValue = input.value.trim();
 
@@ -42,7 +42,7 @@ const CreateUnit: React.FC = (): React.ReactElement => {
         }
 
         try {
-            const response = await fetch('http://localhost:3111/api/teams', {
+            const response = await fetch('http://localhost:3111/api/weapons', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,11 +76,11 @@ const CreateUnit: React.FC = (): React.ReactElement => {
                 >
 
                     <Typography sx={{ marginBottom: 5 }}>
-                        Lisää yksikkö
+                        Lisää ase
                     </Typography>
 
                     {
-                        teamProps.map((field, index) => {
+                        weaponProps.map((field, index) => {
                             return (
                                 <TextField
                                     key={index}
@@ -113,4 +113,4 @@ const CreateUnit: React.FC = (): React.ReactElement => {
     );
 }
 
-export default CreateUnit;
+export default CreateWeapon;

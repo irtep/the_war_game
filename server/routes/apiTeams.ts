@@ -80,7 +80,8 @@ apiTeamsRouter.put("/:id", async (req : express.Request, res : express.Response,
                         cross   : req.body.cross,
                         points  : req.body.points,
                         height  : req.body.height,
-                        width   : req.body.height
+                        width   : req.body.width,
+                        game    : req.body.game
                     }
                 });
                         // palautetaan taas vastauksena kaikki
@@ -135,7 +136,8 @@ apiTeamsRouter.post("/", async (req : express.Request, res : express.Response, n
                     cross   : req.body.cross,
                     points  : req.body.points,
                     height  : req.body.height,
-                    width   : req.body.height
+                    width   : req.body.width,
+                    game    : req.body.game
                 }
             });
     

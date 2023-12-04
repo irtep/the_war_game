@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import StartMenu from './components/StartMenu';
-import CreateUnit from './components/CreateUnit';
+import CreateStuff from './components/CreateStuff';
 
 const App: React.FC = (): React.ReactElement => {
 
@@ -18,9 +18,9 @@ const App: React.FC = (): React.ReactElement => {
         />
 
         <Route
-          path="/createunit"
+          path="/createstuff"
           element={
-            <CreateUnit
+            <CreateStuff
             />
           }
         />

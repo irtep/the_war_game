@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, TextField, Stack, Typography, Container, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Button, TextField, Stack, Typography, Container } from '@mui/material';
 import { teamProps } from '../data/teamData';
 
 const container = {
@@ -10,7 +10,7 @@ const container = {
     color: "rgb(170,170,170)"
 };
 
-const CreateUnit: React.FC = (): React.ReactElement => {
+const CreateTeam: React.FC = (): React.ReactElement => {
     const [msg, setMsg] = useState<string>('');
 
     const formRef: any = useRef<HTMLFormElement>();
@@ -113,4 +113,4 @@ const CreateUnit: React.FC = (): React.ReactElement => {
     );
 }
 
-export default CreateUnit;
+export default CreateTeam;

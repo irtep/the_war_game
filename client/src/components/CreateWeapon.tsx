@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, TextField, Stack, Typography, Container, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Button, TextField, Stack, Typography, Container } from '@mui/material';
 import { weaponProps } from '../data/weaponData';
 
 const container = {

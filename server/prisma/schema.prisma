@@ -10,6 +10,15 @@ datasource db {
   url      = "file:./data.db"
 }
 
+model Terrain {
+  id          Int     @id @default(autoincrement())
+  name        String
+  type        String
+  houses      String
+  trees       String
+  waters      String
+}
+
 model Weapon {
   id          Int     @id @default(autoincrement())
   name        String

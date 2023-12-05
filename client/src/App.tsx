@@ -31,3 +31,5 @@ const App: React.FC = (): React.ReactElement => {
 }
 
 export default App;
+
+// https://github.com/irtep/TheRockRally/blob/master/public/race/draw.js

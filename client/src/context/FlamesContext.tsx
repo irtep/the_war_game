@@ -13,13 +13,16 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     const [teams, setTeams] = useState<Array<any>>([]);
 
     const fetchTeams = async (): Promise<void> => {
+        console.log('fetching');
         try {
             const response = await fetch('http://localhost:3111/api/teams', {
                 method: 'GET'
             });
 
             if (response.ok) {
-                console.log('response', await response.json()); // Call response.json() as a function
+                const resp = await response.json();
+                setTeams(resp);
+                console.log('resp: ', resp);
             } else {
                 console.log('Error fetching data');
             }
@@ -29,18 +32,18 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     }
 
     useEffect(() => {
-
+        console.log('context effect: ');
         if (!fetched.current) {
-          //  fetchTeams();
+            fetchTeams();
+            fetched.current = true
         }
-
-        return () => { fetched.current = true }
 
     }, []);
 
     return (
         <FlamesContext.Provider value={{
-            teams
+            teams,
+            fetchTeams
         }}>
             {props.children}
         </FlamesContext.Provider>

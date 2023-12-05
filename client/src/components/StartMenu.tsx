@@ -3,7 +3,7 @@ import Header from './Header';
 
 const container = {
     margin: "auto",
-    width: "50%",
+    width: "100%",
     borderRadius: "10px",
     padding: "10px",
     background: "rgb(80,80,80)",

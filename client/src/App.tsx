@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import StartMenu from './components/StartMenu';
 import CreateStuff from './components/CreateStuff';
+import BuildArmy from './components/BuildArmy';
 
 const App: React.FC = (): React.ReactElement => {
 
@@ -21,6 +22,14 @@ const App: React.FC = (): React.ReactElement => {
           path="/createstuff"
           element={
             <CreateStuff
+            />
+          }
+        />
+
+        <Route
+          path="/buildarmy"
+          element={
+            <BuildArmy
             />
           }
         />

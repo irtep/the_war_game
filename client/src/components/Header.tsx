@@ -34,6 +34,17 @@ const Header: React.FC = (): React.ReactElement => {
             >
                 create stuff
             </button>
+
+            <button
+                style={{
+                    ...buttons,
+                    background: "green",
+                }}
+                value='/createstuff'
+                onClick={() => { navigate(`/buildarmy`);}}
+            >
+                build an army
+            </button>
         </div>
     );
 }

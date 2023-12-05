@@ -166,7 +166,6 @@ const CreateMap: React.FC = () => {
             >
                 <DialogTitle>Anna tiedot</DialogTitle>
 
-
                 <DialogContent style={{ paddingTop: 10 }}>
                     <Stack
                         spacing={1}
@@ -175,7 +174,6 @@ const CreateMap: React.FC = () => {
                         ref={formRef}
                     >
 
-                        <></>:
                         <TextField
                             required
                             name="name"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from './Header';
-import CreateUnit from './CreateUnit';
+import CreateTeam from './CreateTeam';
 import CreateWeapon from './CreateWeapon';
 
 const container = {
@@ -36,7 +36,7 @@ const CreateStuff: React.FC = (): React.ReactElement => {
 
             {
                 (show === 'createTeam') ?
-                <CreateUnit/> : <></>
+                <CreateTeam/> : <></>
             }
             {
                 (show === 'createWeapon') ?

@@ -31,7 +31,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     useEffect(() => {
 
         if (!fetched.current) {
-            fetchTeams();
+          //  fetchTeams();
         }
 
         return () => { fetched.current = true }

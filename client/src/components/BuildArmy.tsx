@@ -20,14 +20,13 @@ const BuildArmy: React.FC = (): React.ReactElement => {
     const [nameOfGame, setNameOfGame] = useState<string>('');
     const [army, setArmy] = useState<string>(''); // this is faction! army is that armyCreated
     const [pointLimit, setPointLimit] = useState<number>(50);
-    const [pointsUsed, setPointsUsed] = useState<number>(0);
     const { teams } = useContext(FlamesContext);
     const [unitDialog, setUnitDialog] = useState<boolean>(false);
     const formRef: any = useRef<HTMLFormElement>();
     const [unitName, setUnitName] = useState<string>('');
     const [teamSelectors, setTeamSelectors] = useState<stringOrUndefined[]>(['']);
     const [crewSelectors, setCrewSelectors] = useState<stringOrUndefined[]>(['']);
-    const [armyCreated, setArmyCreated] = useState<any>({
+    const [armyCreated, setArmyCreated] = useState<Army>({
         name: '',
         faction: '',
         game: '',
@@ -39,12 +38,23 @@ const BuildArmy: React.FC = (): React.ReactElement => {
         e.preventDefault();
 
         const newUnit: SavedUnit = {
+            id: armyCreated.units.length,
             name: JSON.stringify(unitName),
-            teams: []
+            teams: [],
+            points: 0
         };
 
         for (let i = 0; i < teamSelectors.length; i++) {
             let newTeam: SavedTeam = { team: '', crew: '' };
+            const teamStats = teams.filter((team: Faction) => team.name === teamSelectors[i]);
+            const factionStats = factions
+                .filter((value: Faction) => value.game === nameOfGame)
+                .filter((value: Faction) => value.name === army);
+            const crewStats = factionStats[0].crews.filter( (crew: Crews) => crew.experience === crewSelectors[i]);
+
+            console.log('crew: ', crewStats[0]);
+            console.log('team: ', teamStats[0]);
+
             newTeam.team = teamSelectors[i];
             newTeam.crew = crewSelectors[i];
 
@@ -172,7 +182,7 @@ const BuildArmy: React.FC = (): React.ReactElement => {
             >
                 <DialogTitle>Choose 1-5 teams for this unit</DialogTitle>
 
-                <DialogContent style={{ paddingTop: 10 }}>
+                <DialogContent style={{ paddingTop: 10, display: 'flex' }}>
                     <Stack
                         spacing={1}
                         component="form"
@@ -189,92 +199,111 @@ const BuildArmy: React.FC = (): React.ReactElement => {
                             value={unitName}
                             onChange={(e) => { setUnitName(e.target.value) }}
                         />
+                        <div style={{ flex: 1, marginRight: 20 }}>
+                            {teamSelectors.map((selectedTeam, index) => (
+                                <div key={`teamSelector${index}`}>
+                                    <InputLabel id={`unit${index + 1}-label`}>
+                                        {`Choose team ${index + 1}`}
+                                    </InputLabel>
+                                    <Select
+                                        labelId={`unit${index + 1}-label`}
+                                        id={`unit${index + 1}`}
+                                        label={`choose team`}
+                                        value={selectedTeam}
+                                        onChange={(e) => {
+                                            handleTeamSelectorChange(index, e.target.value as stringOrUndefined);
+                                        }}
+                                    >
+                                        {/* Add an empty string value option */}
+                                        <MenuItem value="">
+                                            -
+                                        </MenuItem>
+                                        {
+                                            teams
+                                                .filter((value: Team) => value.faction === army)
+                                                .map((value: Team, teamIndex: number) => (
+                                                    <MenuItem
+                                                        key={`teamselect${index + 1}:${teamIndex}`}
+                                                        value={value.name}
+                                                    >
+                                                        {`${value.nickname} (${value.points} p.)`}
+                                                    </MenuItem>
+                                                ))}
+                                    </Select>
 
-                        {teamSelectors.map((selectedTeam, index) => (
-                            <div key={`teamSelector${index}`}>
-                                <InputLabel id={`unit${index + 1}-label`}>
-                                    Choose team
-                                </InputLabel>
-                                <Select
-                                    labelId={`unit${index + 1}-label`}
-                                    id={`unit${index + 1}`}
-                                    label={`choose team`}
-                                    value={selectedTeam}
-                                    onChange={(e) => {
-                                        handleTeamSelectorChange(index, e.target.value as stringOrUndefined);
-                                    }}
-                                >
-                                    {/* Add an empty string value option */}
-                                    <MenuItem value="">
-                                        -
-                                    </MenuItem>
-                                    {
-                                        teams
-                                            .filter((value: Team) => value.faction === army)
-                                            .map((value: Team, teamIndex: number) => (
-                                                <MenuItem
-                                                    key={`teamselect${index + 1}:${teamIndex}`}
-                                                    value={value.name}
-                                                >
-                                                    {`${value.nickname} (${value.points} p.)`}
-                                                </MenuItem>
-                                            ))}
-                                </Select>
-                                <InputLabel id={`crew${index + 1}-label`}>
-                                    Choose crew
-                                </InputLabel>
-                                <Select
-                                    labelId={`crew${index + 1}-label`}
-                                    id={`crew${index + 1}`}
-                                    label={`choose crew for this team`}
-                                    placeholder="choose crew"
-                                    value={crewSelectors[index]}
-                                    onChange={(e) => {
-                                        handleCrewSelectorChange(index, e.target.value as stringOrUndefined);
-                                    }}
-                                >
-                                    {/* Add an empty string value option */}
-                                    <MenuItem value="">
-                                        -
-                                    </MenuItem>
-                                    {factions
-                                        .filter((faction) => faction.name === army)
-                                        .map((faction) =>
-                                            faction.crews.map((crew, crewIndex) => (
-                                                <MenuItem key={`crewSelect${index + 1}:${crewIndex}`} value={crew.experience}>
-                                                    {crew.experience}
-                                                </MenuItem>
-                                            ))
-                                        )}
-                                </Select>
-                            </div>
-                        ))}
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            {crewSelectors.map((selectedCrew, index) => (
+                                <div key={`crewSelector${index}`}>
+                                    <InputLabel id={`crew${index + 1}-label`}>
+                                        {`Choose crew for team ${index + 1}`}
+                                    </InputLabel>
+                                    <Select
+                                        labelId={`crew${index + 1}-label`}
+                                        id={`crew${index + 1}`}
+                                        label={`choose team`}
+                                        value={selectedCrew}
+                                        onChange={(e) => {
+                                            handleCrewSelectorChange(index, e.target.value as stringOrUndefined);
+                                        }}
+                                    >
+                                        {/* Add an empty string value option */}
+                                        <MenuItem value="">
+                                            -
+                                        </MenuItem>
+                                        {factions
+                                            .filter((faction) => faction.name === army)
+                                            .filter((faction) => faction.game === nameOfGame)
+                                            .map((faction) =>
+                                                faction.crews.map((crew, crewIndex) => (
+                                                    <MenuItem key={`crewSelect${index + 1}:${crewIndex}`} value={crew.experience}>
+                                                        {`${crew.experience} (${crew.cost})`}
+                                                    </MenuItem>
+                                                ))
+                                            )}
+                                    </Select>
+                                </div>
+                            ))}
+                        </div>
 
                         <Button
                             variant="contained"
                             type="submit"
-                        >Tallenna</Button>
+                        >
+                            Tallenna
+                        </Button>
 
                         <Button
                             variant="outlined"
                             onClick={() => {
                                 setUnitDialog(false);
                                 setTeamSelectors(['']);
-                                setPointsUsed(0);
+                                setCrewSelectors(['']);
                             }}
-                        >Peruuta</Button>
+                        >
+                            Peruuta / Poistu
+                        </Button>
 
                     </Stack>
                 </DialogContent>
 
-            </Dialog>
+            </Dialog >
 
             <Container>
                 Units: <br />
                 {
                     armyCreated.units.map((unit: SavedUnit, idx: number) => {
                         return (
-                            <Container key={`ac ${idx}`}>
+                            <Container sx={{
+                                backgroundImage: "linear-gradient(rgb(70,70,70), rgb(80,80,80))",
+                                margin: 2,
+                                borderRadius: 3,
+                                padding: 2,
+                                width: "30%"
+                            }}
+                                key={`ac ${idx}`}>
                                 <Typography>
                                     {
                                         `name: ${unit.name}`
@@ -283,21 +312,20 @@ const BuildArmy: React.FC = (): React.ReactElement => {
                                 <Typography>
                                     {
                                         unit.teams.map((team: SavedTeam, id: number) =>
-
                                             <span key={`teams ${id}`}>
-                                                {team.crew} {team.team} <br/>
+                                                {team.crew} {team.team} <br />
                                             </span>
-
                                         )
                                     }
                                 </Typography>
+                                <button>delete unit</button>
                             </Container>
                         )
                     })
                 }
             </Container>
 
-        </div>
+        </div >
     );
 }
 

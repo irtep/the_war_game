@@ -46,8 +46,10 @@ export interface SavedTeam {
 };
 
 export interface SavedUnit {
+    id: number;
     name: string;
-    teams: Array<SavedTeam>
+    teams: Array<SavedTeam>;
+    points: number
 };
 
 // number|string;

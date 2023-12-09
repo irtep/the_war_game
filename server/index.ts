@@ -3,6 +3,7 @@ import path from 'path';
 import apiTeamsRouter from './routes/apiTeams';
 import apiWeaponsRouter from './routes/apiWeapons';
 import apiTerrainsRouter from './routes/apiTerrains';
+import apiArmiesRouter from './routes/apiArmies';
 import errorhandler from './errors/errorhandler';
 //import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'; 
@@ -42,6 +43,7 @@ app.use(express.static(path.resolve(__dirname, "public")));
 app.use("/api/teams", apiTeamsRouter);
 app.use("/api/weapons", apiWeaponsRouter);
 app.use("/api/terrains", apiTerrainsRouter);
+app.use("/api/armies", apiArmiesRouter);
 
 app.use(errorhandler);
 

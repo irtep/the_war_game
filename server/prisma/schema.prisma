@@ -10,6 +10,16 @@ datasource db {
   url      = "file:./data.db"
 }
 
+model Army {
+  id          Int     @id @default(autoincrement())
+  user        String
+  name        String
+  faction     String
+  game        String
+  points      Int
+  units       String
+}
+
 model Terrain {
   id          Int     @id @default(autoincrement())
   name        String

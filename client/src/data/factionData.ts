@@ -9,7 +9,8 @@ export interface Faction {
     side: 'allies' | 'axis';
     game: 'mid war' | 'late war';
     crews: Array<Crews>,
-    desc: string
+    desc: string,
+    logo: string
 };
 
 export const games: Array<string> = [
@@ -39,7 +40,8 @@ export const factions: Array<Faction> = [
                 cost: 4
             }
         ],
-        desc: "The British Empire has rules most of the known world and it shows. Good training and fine equipment brings a solid base for North Africa battles. Also the receive lots of equipment and tanks from their ally the USA."
+        desc: "The British Empire has rules most of the known world and it shows. Good training and fine equipment brings a solid base for North Africa battles. Also the receive lots of equipment and tanks from their ally the USA.",
+        logo: "desertRats.png"
     },
     {
         name: "USA",
@@ -57,7 +59,8 @@ export const factions: Array<Faction> = [
                 cost: 3
             }
         ],
-        desc: "The huge industrial power of USA assure, that its troops are fighting with good equipments and material. However, at this point of the war they are still very inexperienced."
+        desc: "The huge industrial power of USA assure, that its troops are fighting with good equipments and material. However, at this point of the war they are still very inexperienced.",
+        logo: "fightingFirst.png"
     },
     {
         name: "Germany",
@@ -85,7 +88,8 @@ export const factions: Array<Faction> = [
                 cost: 4
             }
         ],
-        desc: "Germany has already few years of quite successful war under its belt, and has been almost invicibles. They have good equipments and weapons with the most experienced troops."
+        desc: "Germany has already few years of quite successful war under its belt, and has been almost invicibles. They have good equipments and weapons with the most experienced troops.",
+        logo: "DAK.png"
     },
     {
         name: "Italy",
@@ -108,6 +112,7 @@ export const factions: Array<Faction> = [
                 cost: 3
             }
         ],
-        desc: "Italy got an old school beatdown from British, when they tried to captured Egypt. However, now they are back with their friends the Germans and with more experience."
+        desc: "Italy got an old school beatdown from British, when they tried to captured Egypt. However, now they are back with their friends the Germans and with more experience.",
+        logo: "italy.png"
     }
 ];

@@ -112,11 +112,11 @@ const CreateMap: React.FC = () => {
         e.preventDefault();
 
         const formData = {
-            name: String(formRef.current?.name.value),
-            type: String(formRef.current?.typeOfMap.value),
-            houses: String(houses),
-            trees: String(trees),
-            waters: String(waters)
+            name: formRef.current?.name.value,
+            type: formRef.current?.typeOfMap.value,
+            houses: JSON.stringify(houses),
+            trees: JSON.stringify(trees),
+            waters: JSON.stringify(waters)
         };
 
         try {

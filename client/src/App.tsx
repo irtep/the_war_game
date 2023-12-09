@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import StartMenu from './components/StartMenu';
 import CreateStuff from './components/CreateStuff';
 import BuildArmy from './components/BuildArmy';
+import SetupGame from './components/SetupGame';
 
 const App: React.FC = (): React.ReactElement => {
 
@@ -30,6 +31,14 @@ const App: React.FC = (): React.ReactElement => {
           path="/buildarmy"
           element={
             <BuildArmy
+            />
+          }
+        />
+
+        <Route
+          path="/setupgame"
+          element={
+            <SetupGame
             />
           }
         />

@@ -3,7 +3,7 @@ import Header from './Header';
 import { Button, Container, Dialog, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import { games, factions, Faction, Crews } from '../data/factionData';
 import { FlamesContext } from '../context/FlamesContext';
-import { Team, Army, SavedTeam, SavedUnit } from '../data/sharedInterfaces';
+import { Team, Army, ArmyToSend, SavedTeam, SavedUnit } from '../data/sharedInterfaces';
 
 const container = {
     margin: "auto",
@@ -27,6 +27,7 @@ const BuildArmy: React.FC = (): React.ReactElement => {
     const [teamSelectors, setTeamSelectors] = useState<stringOrUndefined[]>(['']);
     const [crewSelectors, setCrewSelectors] = useState<stringOrUndefined[]>(['']);
     const [armyCreated, setArmyCreated] = useState<Army>({
+        user: '',
         name: '',
         faction: '',
         game: '',
@@ -34,7 +35,14 @@ const BuildArmy: React.FC = (): React.ReactElement => {
         units: []
     });
 
-    const createUnit = (e: React.FormEvent) => {
+    const deleteUnit = (id: number): void => {
+        setArmyCreated({
+            ...armyCreated,
+            units: armyCreated.units.filter(unit => unit.id !== id)
+        });
+    };
+
+    const createUnit = (e: React.FormEvent): void => {
         e.preventDefault();
 
         const newUnit: SavedUnit = {
@@ -44,19 +52,17 @@ const BuildArmy: React.FC = (): React.ReactElement => {
             points: 0
         };
 
-        for (let i = 0; i < teamSelectors.length; i++) {
-            let newTeam: SavedTeam = { team: '', crew: '' };
+        for (let i = 0; i < teamSelectors.length - 1; i++) {
+            let newTeam: SavedTeam = { team: '', crew: '', points: 0 };
             const teamStats = teams.filter((team: Faction) => team.name === teamSelectors[i]);
             const factionStats = factions
                 .filter((value: Faction) => value.game === nameOfGame)
                 .filter((value: Faction) => value.name === army);
-            const crewStats = factionStats[0].crews.filter( (crew: Crews) => crew.experience === crewSelectors[i]);
-
-            console.log('crew: ', crewStats[0]);
-            console.log('team: ', teamStats[0]);
+            const crewStats = factionStats[0].crews.filter((crew: Crews) => crew.experience === crewSelectors[i]);
 
             newTeam.team = teamSelectors[i];
             newTeam.crew = crewSelectors[i];
+            newTeam.points = crewStats[0].cost + teamStats[0].points;
 
             newUnit.teams.push(newTeam);
         };
@@ -67,7 +73,7 @@ const BuildArmy: React.FC = (): React.ReactElement => {
         });
     }
 
-    const handleTeamSelectorChange = (index: number, value: stringOrUndefined) => {
+    const handleTeamSelectorChange = (index: number, value: stringOrUndefined): void => {
         let oldValues = [...teamSelectors];
         oldValues[index] = value;
         setTeamSelectors([...oldValues, '']);
@@ -79,19 +85,51 @@ const BuildArmy: React.FC = (): React.ReactElement => {
         });
     };
 
-    const handleCrewSelectorChange = (index: number, value: stringOrUndefined) => {
+    const handleCrewSelectorChange = (index: number, value: stringOrUndefined): void => {
         let oldValues = [...crewSelectors];
         oldValues[index] = value;
         setCrewSelectors([...oldValues, '']);
-        //console.log('ac points: ', armyCreated.points);
+        
         const oldPointsValue = armyCreated.points;
         const factionStats = factions.filter((faction: Faction) => faction.name === army);
         const foundCrew = factionStats[0].crews.filter((crew: Crews) => crew.experience === value);
-        //console.log('cost:', foundCrew[0].cost);
+        
         setArmyCreated({
             ...armyCreated,
             points: Number(oldPointsValue) + Number(foundCrew[0].cost)
         });
+    };
+
+    const saveArmy = async (): Promise<void> => {
+        const armyToSend: ArmyToSend = {
+            user: 'default', // this maybe changes at some point, when multi users
+            name: armyCreated.name,
+            faction: army,
+            game: nameOfGame,
+            points: armyCreated.points,
+            units: JSON.stringify(armyCreated.units)           
+        };
+        console.log('army to send: ', armyToSend);
+        // API:
+        
+        try {
+            const response = await fetch('http://localhost:3111/api/armies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(armyToSend),
+            });
+
+            if (response.ok) {
+                console.log('Data saved successfully');
+            } else {
+                console.log('Error saving data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            console.log('An error occurred while saving data');
+        }        
     };
 
     useEffect(() => {
@@ -168,11 +206,29 @@ const BuildArmy: React.FC = (): React.ReactElement => {
             <Typography>{`points used: ${armyCreated.points}/${pointLimit}`}</Typography>
 
             <button
-                style={{ margin: 2 }}
+                style={{
+                    margin: 2,
+                    background: "navy",
+                    color: "white"
+                }}
                 onClick={() => { console.log('click'); setUnitDialog(true) }}
             >
                 create unit
             </button>
+
+            {
+                (armyCreated.units.length > 0) ?
+                <>
+                    <br/>
+                    <button 
+                        style={{marginTop: 5}}
+                        onClick={saveArmy}
+                    >
+                        Save army
+                    </button>
+                </>:
+                <></>
+            }
 
             <Dialog
                 maxWidth="lg"
@@ -297,7 +353,7 @@ const BuildArmy: React.FC = (): React.ReactElement => {
                     armyCreated.units.map((unit: SavedUnit, idx: number) => {
                         return (
                             <Container sx={{
-                                backgroundImage: "linear-gradient(rgb(70,70,70), rgb(80,80,80))",
+                                backgroundImage: "linear-gradient(rgb(0,42,16), rgb(80,80,80))",
                                 margin: 2,
                                 borderRadius: 3,
                                 padding: 2,
@@ -313,12 +369,18 @@ const BuildArmy: React.FC = (): React.ReactElement => {
                                     {
                                         unit.teams.map((team: SavedTeam, id: number) =>
                                             <span key={`teams ${id}`}>
-                                                {team.crew} {team.team} <br />
+                                                {`${team.crew} ${team.team} (${team.points} p.)`}<br />
                                             </span>
                                         )
                                     }
                                 </Typography>
-                                <button>delete unit</button>
+                                <button
+                                    style={{
+                                        margin: 4,
+                                        background: "darkred"
+                                    }}
+                                    onClick={() => deleteUnit(unit.id)}
+                                >delete unit</button>
                             </Container>
                         )
                     })

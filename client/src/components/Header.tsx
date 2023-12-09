@@ -45,6 +45,18 @@ const Header: React.FC = (): React.ReactElement => {
             >
                 build an army
             </button>
+
+            <button
+                style={{
+                    ...buttons,
+                    background: "navy",
+                    color: "white"
+                }}
+                value='/setupgame'
+                onClick={() => { navigate(`/setupgame`);}}
+            >
+                setup game
+            </button>
         </div>
     );
 }

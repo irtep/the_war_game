@@ -33,16 +33,27 @@ export interface Team {
 };
 
 export interface Army {
+    user: string;
     name: string;
     faction: string;
     game: string;
     points: number;
-    units: Array<any>
+    units: Array<any>;
+};
+
+export interface ArmyToSend {
+    user: string;
+    name: string;
+    faction: string;
+    game: string;
+    points: number;
+    units: string;
 };
 
 export interface SavedTeam {
-    team: string|undefined; // undefined needed for build army phase. for dropdowns
-    crew: string|undefined;
+    team: string | undefined; // undefined needed for build army phase. for dropdowns
+    crew: string | undefined;
+    points: number;
 };
 
 export interface SavedUnit {

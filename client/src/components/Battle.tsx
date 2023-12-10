@@ -3,7 +3,7 @@ import FirstBattleRow from './FirstBattleRow';
 import SecondBattleRow from './SecondBattleRow';
 import { FlamesContext } from '../context/FlamesContext';
 import { Army } from '../data/sharedInterfaces';
-import { createBattleUnit } from '../functions/setupFunctions';
+import { createBattleArmies, createBattleMap } from '../functions/setupFunctions';
 
 const Battle: React.FC = (): React.ReactElement => {
   const { terrains,
@@ -20,18 +20,25 @@ const Battle: React.FC = (): React.ReactElement => {
   };
 
   useEffect(() => {
-    console.log('battle: gO', gameObject);
+    
     // pregame setup
     if (gameObject.status === 'preBattle') {
-    // create battle units
 
-    // look up attackers units (from setupObject) and create them as battleUnits to gameObject
-    const attackersArmy = armies.filter( (army: Army, idx: number) => army.name === setupObject.attacker);
-    
-    console.log('attackersArmy: ', attackersArmy);
-    // change status to 'battle's
+      const attackersArmy = armies.filter((army: Army) => army.name === setupObject.attacker);
+      const defendersArmy = armies.filter((army: Army) => army.name === setupObject.defender);
+      const selectedMap = terrains.filter((terrain: any) => terrain.name === setupObject.terrain);
+
+      setGameObject({
+        ...gameObject,
+        attacker: createBattleArmies(attackersArmy[0], true),
+        defender: createBattleArmies(defendersArmy[0], false),
+        status: 'deploy',
+        terrain: createBattleMap(selectedMap[0])
+      });
+
     };
 
+    console.log(gameObject);
   }, [gameObject]);
 
   return (

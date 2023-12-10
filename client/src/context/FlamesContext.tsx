@@ -15,10 +15,18 @@ interface SetupObject {
     you: string;
 };
 
+interface Selected {
+    id: Array<string | number>;
+    type: string;
+};
+
 export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const fetched: React.MutableRefObject<boolean> = useRef(false);
-
+    const [selected, setSelected] = useState<Selected>({
+        id: [],
+        type: ''
+      });
     const [teams, setTeams] = useState<Array<any>>([]);
     const [terrains, setTerrains] = useState<Array<any>>([]);
     const [armies, setArmies] = useState<Array<any>>([]);
@@ -109,7 +117,9 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             setupObject,
             setSetupObject,
             gameObject,
-            setGameObject
+            setGameObject,
+            selected,
+            setSelected
         }}>
             {props.children}
         </FlamesContext.Provider>

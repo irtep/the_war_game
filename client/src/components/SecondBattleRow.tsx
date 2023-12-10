@@ -5,7 +5,7 @@ import RightBattleColumn from './RightBattleColumn';
 
 const SecondBattleRow: React.FC = (): React.ReactElement => {
   const secondRowStyle: React.CSSProperties = {
-    flex: '1 0 90%',
+    flex: '1 0 93%',
     display: 'flex',
   };
 

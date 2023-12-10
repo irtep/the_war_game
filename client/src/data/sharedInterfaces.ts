@@ -30,6 +30,14 @@ export interface Team {
     height: number;
     width: number;
     game: string;
+    // for gaming:
+    x?: number,
+    y?: number,
+    a?: number, // angle
+    disabled?: boolean,
+    tacticalNumber?: string,
+    kills?: Array<string>,
+    uuid?: string
 };
 
 export interface Army {
@@ -38,7 +46,16 @@ export interface Army {
     faction: string;
     game: string;
     points: number;
-    units: Array<any>;
+    units: any[]; // Adjust the type of 'units' array as needed
+    [key: string]: any; // Index signature allowing any string key
+
+};
+
+export interface GameObject {
+    status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
+    attacker: any,
+    defender: any,
+    terrain: any
 };
 
 export interface ArmyToSend {

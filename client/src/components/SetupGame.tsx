@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Header from './Header';
 import { Container, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { missions, Mission } from '../data/missionData';
@@ -15,7 +15,7 @@ const SetupGame: React.FC = (): React.ReactElement => {
     } = useContext(FlamesContext);
 
     useEffect(() => {
-        console.log('setupOBject ', setupObject);
+        //console.log('setupOBject ', setupObject);
     });
 
     return (
@@ -51,18 +51,18 @@ const SetupGame: React.FC = (): React.ReactElement => {
                         </FormControl>
 
                         <FormControl sx={{ margin: 2, width: "20%" }}>
-                            <InputLabel id="dropdown-map">
+                            <InputLabel id="dropdown-terrain">
                                 choose a map
                             </InputLabel>
                             <Select
-                                labelId="dropdown-map"
+                                labelId="dropdown-terrain"
                                 id="dropMap"
-                                value={setupObject.map}
+                                value={setupObject.terrain}
                                 label="choose a map"
                                 onChange={(e: any) => {
                                     setSetupObject({
                                         ...setupObject,
-                                        map: e.target.value
+                                        terrain: e.target.value
                                     });
                                 }}
                             >

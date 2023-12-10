@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
+import { GameObject } from '../data/sharedInterfaces';
 
 export const FlamesContext: React.Context<any> = createContext(undefined);
 
@@ -8,14 +9,10 @@ interface Props {
 
 interface SetupObject {
     mission: string;
-    map: string;
+    terrain: string;
     attacker: string;
     defender: string;
     you: string;
-};
-
-interface GameObject {
-    status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
 };
 
 export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElement => {
@@ -27,13 +24,16 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     const [armies, setArmies] = useState<Array<any>>([]);
     const [setupObject, setSetupObject] = useState<SetupObject>({
         mission: '',
-        map: '',
+        terrain: '',
         attacker: '',
         defender: '',
         you: '' // who is player, attacker or defender
     });
     const [gameObject, setGameObject] = useState<GameObject>({
-        status: 'setup'
+        status: 'setup',
+        attacker: '',
+        defender: '',
+        terrain: ''
     });
 
     const fetchTeams = async (): Promise<void> => {

@@ -2,7 +2,7 @@ import React from 'react';
 
 const FirstBattleRow: React.FC = (): React.ReactElement => {
   const firstBattleRowStyle: React.CSSProperties = {
-    flex: '1 0 10%',
+    flex: '1 0 7%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -15,7 +15,10 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
 
   return (
     <div style={firstBattleRowStyle}>
-      <div style={centeredColumnStyle}>Content of the first row</div>
+      <div style={centeredColumnStyle}>
+
+      </div>
+      
     </div>
   );
 };

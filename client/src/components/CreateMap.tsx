@@ -35,7 +35,7 @@ const CreateMap: React.FC = () => {
         tree: false,
         water: false
     });
-    const canvasSize = { w: 1300, h: 900 };
+    const canvasSize: Canvas = { w: 1300, h: 900 };
     const formRef: any = useRef<HTMLFormElement>();
 
     const addHouse = () => { setAdding({ house: true, tree: false, water: false }); };

@@ -6,14 +6,37 @@ interface Props {
     children: React.ReactNode;
 }
 
+interface SetupObject {
+    mission: string;
+    map: string;
+    attacker: string;
+    defender: string;
+    you: string;
+};
+
+interface GameObject {
+    status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
+};
+
 export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElement => {
 
     const fetched: React.MutableRefObject<boolean> = useRef(false);
 
     const [teams, setTeams] = useState<Array<any>>([]);
+    const [terrains, setTerrains] = useState<Array<any>>([]);
+    const [armies, setArmies] = useState<Array<any>>([]);
+    const [setupObject, setSetupObject] = useState<SetupObject>({
+        mission: '',
+        map: '',
+        attacker: '',
+        defender: '',
+        you: '' // who is player, attacker or defender
+    });
+    const [gameObject, setGameObject] = useState<GameObject>({
+        status: 'setup'
+    });
 
     const fetchTeams = async (): Promise<void> => {
-        console.log('fetching');
         try {
             const response = await fetch('http://localhost:3111/api/teams', {
                 method: 'GET'
@@ -31,10 +54,47 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         }
     }
 
+    const fetchArmies = async (): Promise<void> => {
+        try {
+            const response = await fetch('http://localhost:3111/api/armies', {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const resp = await response.json();
+                setArmies(resp);
+                console.log('resp: ', resp);
+            } else {
+                console.log('Error fetching data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const fetchTerrains = async (): Promise<void> => {
+        try {
+            const response = await fetch('http://localhost:3111/api/terrains', {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const resp = await response.json();
+                setTerrains(resp);
+                console.log('resp: ', resp);
+            } else {
+                console.log('Error fetching data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
     useEffect(() => {
-        console.log('context effect: ');
         if (!fetched.current) {
             fetchTeams();
+            fetchArmies();
+            fetchTerrains();
             fetched.current = true
         }
 
@@ -43,7 +103,13 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     return (
         <FlamesContext.Provider value={{
             teams,
-            fetchTeams
+            terrains,
+            armies,
+            fetchTeams,
+            setupObject,
+            setSetupObject,
+            gameObject,
+            setGameObject
         }}>
             {props.children}
         </FlamesContext.Provider>

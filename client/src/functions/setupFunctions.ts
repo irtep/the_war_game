@@ -1,4 +1,5 @@
 import { Army } from "../data/sharedInterfaces";
+import { useContext } from "react";
 
 export const createBattleMap = (input: any): any => {
 

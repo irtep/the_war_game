@@ -8,7 +8,7 @@ interface Canvas {
 }
 
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
-  const { gameObject, setGameObject } = useContext(FlamesContext);
+  const { gameObject, setGameObject, selected } = useContext(FlamesContext);
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -21,18 +21,61 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-
-
-    console.log(
-      'clicked: ', x, y
-    );
+  
+    if (selected.id.length > 0) {
+      selected.id.forEach((id: string) => {
+        if (id[0] === 'a') { // attackers id
+          setGameObject({
+            ...gameObject,
+            attacker: {
+              ...gameObject.attacker,
+              units: gameObject.attacker.units.map((unit: any) => ({
+                ...unit,
+                teams: unit.teams.map((team: any) => 
+                  team.uuid === id ? { ...team, x: x, y: y } : team
+                ),
+              })),
+            },
+          });
+        } else {
+          setGameObject({
+            ...gameObject,
+            defender: {
+              ...gameObject.defender,
+              units: gameObject.defender.units.map((unit: any) => ({
+                ...unit,
+                teams: unit.teams.map((team: any) =>
+                  team.uuid === id ? { ...team, x: x, y: y } : team
+                ),
+              })),
+            },
+          });
+        }
+      });
+    }
   };
+
+  useEffect( () => {
+    if (gameObject.status === 'deploy') {
+      draw(canvas, canvasSize, gameObject);
+    } else {
+     // console.log('gO ', gameObject);
+    }
+  }, [gameObject]);
 
   return (
     <div style={centerBattleColumnStyle}>
         <button 
           onClick={ () => { draw(canvas, canvasSize, gameObject); }}>
             draw
+          </button>
+          <button 
+          onClick={ () => { draw(canvas, canvasSize, gameObject); }}>
+            quickdepo A
+          </button>
+          <button 
+          onClick={ () => { draw(canvas, canvasSize, gameObject); }}>
+            quickdepo B
           </button>
           <br/>
       <canvas

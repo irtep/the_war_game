@@ -81,7 +81,9 @@ apiTeamsRouter.put("/:id", async (req : express.Request, res : express.Response,
                         points  : req.body.points,
                         height  : req.body.height,
                         width   : req.body.width,
-                        game    : req.body.game
+                        game    : req.body.game,
+                        horsepowers: req.body.horsepowers,
+                        weight  : req.body.weight
                     }
                 });
                         // palautetaan taas vastauksena kaikki
@@ -137,7 +139,9 @@ apiTeamsRouter.post("/", async (req : express.Request, res : express.Response, n
                     points  : req.body.points,
                     height  : req.body.height,
                     width   : req.body.width,
-                    game    : req.body.game
+                    game    : req.body.game,
+                    horsepowers: req.body.horsepowers,
+                    weight  : req.body.weight
                 }
             });
     

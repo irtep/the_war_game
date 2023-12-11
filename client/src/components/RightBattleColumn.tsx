@@ -29,10 +29,10 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
             {
               gameObject.attacker.units.map((unit: any, i: number) => {
                 return (
-                  <>
+                  <div key={`a ${i}`}>
                     <button
-                      key={i}
-                      value={`a${unit.id}`}
+                      key={`f ${i}`}
+                      value={`u${unit.id}`}
                       style={{
                         background: 'blue',
                         color: 'rgb(180,180,180)',
@@ -55,9 +55,9 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                     {
                       unit.teams.map((team: any, h: number) => {
                         return (
-                          <>
+                          <div key={`yy ${i} ${Math.random()}`}>
                             <button
-                              key={i}
+                              key={`x ${i}`}
                               value={team.uuid}
                               style={{
                                 background: 'rgb(0,42,16)',
@@ -75,11 +75,11 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                               {`${team.crew} ${team.team} "${team.tacticalNumber}"`}
                             </button>
                             <br />
-                          </>
+                          </div>
                         )
                       })
                     }
-                  </>
+                  </div>
                 )
               })
             }
@@ -92,7 +92,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                   <>
                     <button
                       key={i}
-                      value={`d${unit.id}`}
+                      value={`e${unit.id}`}
                       style={{
                         background: 'darkred',
                         color: 'rgb(180,180,180)',

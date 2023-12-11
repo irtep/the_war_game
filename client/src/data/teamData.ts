@@ -35,5 +35,7 @@ export const teamProps : Array<TeamProps> = [
     {value: "points", type: "number"},
     {value: "height", type: "number"},
     {value: "width", type: "number"},
-    {value: "game", type: "string"}
+    {value: "game", type: "string"},
+    {value: "horsepowers", type: "number"},
+    {value: "weight", type: "number"}
 ];

@@ -73,4 +73,6 @@ model Team {
   height      Int
   width       Int
   game        String
+  horsepowers Int @default(100)
+  weight      Int @default(10000)
 }

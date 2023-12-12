@@ -13,7 +13,7 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'lightblue', // Optional: Add background color for visualization
+    backgroundColor: 'gray', // Optional: Add background color for visualization
   };
 
   const centeredColumnStyle: React.CSSProperties = {

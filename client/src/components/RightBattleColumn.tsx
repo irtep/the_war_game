@@ -6,17 +6,14 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
 
   const {
     gameObject,
+    setGameObject,
     selected,
     setSelected
   } = useContext(FlamesContext);
   const rightBattleColumnStyle: React.CSSProperties = {
     flex: '1 0 20%',
-    backgroundColor: 'lightgreen', // Optional: Add background color for visualization
+    backgroundColor: 'darkgreen', // Optional: Add background color for visualization
   };
-
-  useEffect(() => {
-    console.log('selected: ', selected);
-  }, [selected]);
 
   return (
     <div style={rightBattleColumnStyle}>
@@ -41,11 +38,11 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                       onClick={() => {
                         let all: Array<string> = [];
                         unit.teams.forEach((tea: any) => {
+                            setSelected({
+                              id: all,
+                              type: 'unit'
+                            });
                           all.push(tea.uuid);
-                        });
-                        setSelected({
-                          id: all,
-                          type: 'unit'
                         });
                       }}
                     >
@@ -55,7 +52,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                     {
                       unit.teams.map((team: any, h: number) => {
                         return (
-                          <div key={`yy ${i} ${Math.random()}`}>
+                          <div key={`yy ${team.uuid}`}>
                             <button
                               key={`x ${i}`}
                               value={team.uuid}
@@ -65,9 +62,34 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                                 margin: 2
                               }}
                               onClick={() => {
-                                setSelected({
-                                  id: [team.uuid],
-                                  type: 'team'
+                                unit.teams.forEach((tea: any) => {
+                                  if (selected.id[0] === tea.uuid) {
+                                    // if already selected, turn it
+                                    setSelected({
+                                      id: [],
+                                      type: ''
+                                    });    
+                                    
+                                    setGameObject({
+                                      ...gameObject,
+                                      attacker: {
+                                        ...gameObject.attacker,
+                                        units: gameObject.attacker.units.map((unit: any) => ({
+                                          ...unit,
+                                          teams: unit.teams.map((team: any) =>
+                                            team.uuid === tea.uuid ? { ...team, a: tea.a + 45 } : team
+                                          ),
+                                        })),
+                                      },
+                                    });       
+                                                 
+                                  } else {
+                                    console.log('one click')
+                                    setSelected({
+                                      id: [team.uuid],
+                                      type: 'unit'
+                                    });
+                                  }
                                 });
                               }}
                               disabled={team.disabled}
@@ -91,7 +113,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                 return (
                   <>
                     <button
-                      key={i}
+                      key={`x ${i} eee ${unit.id}`}
                       value={`e${unit.id}`}
                       style={{
                         background: 'darkred',
@@ -115,9 +137,9 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                     {
                       unit.teams.map((team: any, h: number) => {
                         return (
-                          <>
+                          <div key={`yyd ${team.uuid}`}>
                             <button
-                              key={i}
+                              key={`x ${i}`}
                               value={team.uuid}
                               style={{
                                 background: 'rgb(0,42,16)',
@@ -125,16 +147,40 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                                 margin: 2
                               }}
                               onClick={() => {
-                                setSelected({
-                                  id: [team.uuid],
-                                  type: 'team'
+                                unit.teams.forEach((tea: any) => {
+                                  if (selected.id[0] === tea.uuid) {
+                                    // if already selected, turn it
+                                    setGameObject({
+                                      ...gameObject,
+                                      defender: {
+                                        ...gameObject.defender,
+                                        units: gameObject.defender.units.map((unit: any) => ({
+                                          ...unit,
+                                          teams: unit.teams.map((team: any) =>
+                                            team.uuid === tea.uuid ? { ...team, a: tea.a + 45 } : team
+                                          ),
+                                        })),
+                                      },
+                                    });
+                                    setSelected({
+                                      id: [],
+                                      type: ''
+                                    });           
+                                                  
+                                  } else {
+                                    setSelected({
+                                      id: [team.uuid],
+                                      type: 'unit'
+                                    });
+                                  }
                                 });
                               }}
+                              disabled={team.disabled}
                             >
                               {`${team.crew} ${team.team} "${team.tacticalNumber}"`}
                             </button>
                             <br />
-                          </>
+                          </div>
                         )
                       })
                     }

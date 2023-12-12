@@ -16,10 +16,10 @@ interface Circles {
 interface Canvas {
     w: number;
     h: number;
-  }
+}
 
 export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject): void => {
-    const scale = 20;
+    const scale = 15;
     const ctx = canvas.getContext("2d");
 
     if (ctx) {
@@ -49,51 +49,62 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
         });
         //console.log('game at drw', gameObject);
         // draw attackers units: 
-        gameObject.attacker.units.forEach( (unit: any) => {
-            unit.teams.forEach( (team: any) => {
-                ctx.beginPath();
-                ctx.fillStyle = "grey";
-                ctx.rect(team.x, team.y, team.width/scale, team.height/scale);
-                ctx.fill();
-                ctx.font='10px Arial';
-                ctx.fillStyle = 'white';
-                ctx.fillText('unit '+ unit.name, team.x - 20, team.y - 15);
-                ctx.fillStyle='white';
-                ctx.fillText(team.name + ' ' + team.tacticalNumber, team.x - 20, team.y - 5);
-                ctx.closePath();
-                
-                ctx.save(); // save coords system
-                //ctx.translate(partsToPaint.hull.x, partsToPaint.hull.y);} // go here
-                ctx.translate(unit.x, unit.y); // go here
-                ctx.rotate(unit.a * Math.PI / 180);
-                
-               //console.log('drawing: ', team.x, team.y, team.width, team.height);
+        gameObject.attacker.units.forEach((unit: any) => {
+            unit.teams.forEach((team: any) => {
+                const img = new Image();
+                img.src = process.env.PUBLIC_URL + `/img/units/${team.imgTop}.png`;
+                img.onload = () => {
+                    
+                    // Draw the image here
+                    ctx.save(); // Save the current context state
+
+                    // Move the coordinate system to the team's position
+                    ctx.translate(team.x, team.y);
+                    ctx.rotate(team.a * (Math.PI / 180));
+
+                    // Draw the rotated image
+                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
+
+                    // Draw text or other things related to the team
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
+
+                    ctx.restore(); // Restore the original context state
+                };
             });
         });
 
-        gameObject.defender.units.forEach( (unit: any) => {
-            unit.teams.forEach( (team: any) => {
-                ctx.beginPath();
-                ctx.fillStyle = "darkgreen";
-                ctx.rect(team.x, team.y, team.width/scale, team.height/scale);
-                ctx.fill();
-                ctx.font='10px Arial';
-                ctx.fillStyle = 'white';
-                ctx.fillText('unit '+ unit.name, team.x - 20, team.y - 15);
-                ctx.fillStyle='white';
-                ctx.fillText(team.name + ' ' + team.tacticalNumber, team.x - 20, team.y - 5);
-                ctx.closePath();
-                /*
-                ctx.save(); // save coords system
-                if (unit.leftTopCorner !== undefined) {
-                  ctx.translate(unit.leftTopCorner.x, unit.leftTopCorner.y);}
-                else {
-                  //ctx.translate(partsToPaint.hull.x, partsToPaint.hull.y);} // go here
-                  ctx.translate(unit.x, unit.y);} // go here
-                ctx.rotate(degrees * Math.PI / 180);
-                */
-               //console.log('drawing: ', team.x, team.y, team.w, team.h);
+        gameObject.defender.units.forEach((unit: any) => {
+            unit.teams.forEach((team: any) => {
+                const img = new Image();
+                img.src = process.env.PUBLIC_URL + `/img/units/${team.imgTop}.png`;
+                img.onload = () => {
+                    
+                    // Draw the image here
+                    ctx.save(); // Save the current context state
+
+                    // Move the coordinate system to the team's position
+                    ctx.translate(team.x, team.y);
+                    ctx.rotate(team.a * (Math.PI / 180));
+
+                    // Draw the rotated image
+                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
+
+                    // Draw text or other things related to the team
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
+
+                    ctx.restore(); // Restore the original context state
+                };
             });
         });
     }
 }
+
+// https://github.com/irtep/TheRockRally/blob/master/public/race/draw.js

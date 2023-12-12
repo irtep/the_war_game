@@ -8,12 +8,21 @@ interface Canvas {
 }
 
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
-  const { gameObject, 
-          setGameObject, 
-          selected,
-          setSelected } = useContext(FlamesContext);
+  const { gameObject,
+    setGameObject,
+    selected,
+    setSelected,
+    setHovered } = useContext(FlamesContext);
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
+
+  const handleTeamHover = (teamUuid: string) => {
+    setHovered(teamUuid);
+  };
+
+  const handleTeamHoverOut = () => {
+    setHovered(null);
+  };
 
   const centerBattleColumnStyle: React.CSSProperties = {
     flex: '1 0 70%',
@@ -24,7 +33,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    console.log('click');
 
     if (gameObject.status = 'deploy') {
 
@@ -58,7 +66,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             });
           }
         });
-        setSelected({id: [], type: ''});
+        setSelected({ id: [], type: '' });
       }
     }
 
@@ -67,6 +75,31 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   useEffect(() => {
     if (gameObject.status === 'deploy') {
       draw(canvas, canvasSize, gameObject);
+      
+      // Add event listeners for mouseover and mouseout
+      canvas.addEventListener('mouseover', (e) => {
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+        // Check if the mouse is over any team
+        gameObject.attacker.units.forEach((unit: any) => {
+          unit.teams.forEach((team: any) => {
+            if (
+              mouseX >= team.x &&
+              mouseX <= team.x + team.width / 15 &&
+              mouseY >= team.y &&
+              mouseY <= team.y + team.height / 15
+            ) {
+              handleTeamHover(team.uuid);
+            }
+          });
+        });
+      });
+      canvas.addEventListener('mouseout', () => {
+        handleTeamHoverOut();
+      });
+
+
     } else {
       // console.log('gO ', gameObject);
     }
@@ -91,9 +124,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   let newY = 50;
                   if (unit.id > 3) {
                     newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 55
+                    newY = 130
                   }
-                  return { ...team, x: newX, y: newY };
+                  return { ...team, x: newX, y: newY, a: 180 };
                 }),
               })),
             },
@@ -112,7 +145,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 ...unit,
                 teams: unit.teams.map((team: any, teamIndex: number) => {
                   let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
-                  let newY = 800;
+                  let newY = 780;
                   if (unit.id > 3) {
                     newX = 100 + unitIndex * 100 + teamIndex * 50;
                     newY = 850
@@ -125,6 +158,16 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         }}
       >
         quickdepo D
+      </button>
+      <button
+        onClick={() => {
+          setGameObject({
+            ...gameObject,
+            status: 'battle'
+          });
+        }}
+      >
+        deployment ready
       </button>
       <br />
       <canvas

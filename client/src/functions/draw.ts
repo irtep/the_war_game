@@ -55,15 +55,18 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                 ctx.fillStyle = "grey";
                 ctx.rect(team.x, team.y, team.width/scale, team.height/scale);
                 ctx.fill();
-                /*
+                ctx.font='10px Arial';
+                ctx.fillStyle = 'white';
+                ctx.fillText('unit '+ unit.name, team.x - 20, team.y - 15);
+                ctx.fillStyle='white';
+                ctx.fillText(team.name + ' ' + team.tacticalNumber, team.x - 20, team.y - 5);
+                ctx.closePath();
+                
                 ctx.save(); // save coords system
-                if (unit.leftTopCorner !== undefined) {
-                  ctx.translate(unit.leftTopCorner.x, unit.leftTopCorner.y);}
-                else {
-                  //ctx.translate(partsToPaint.hull.x, partsToPaint.hull.y);} // go here
-                  ctx.translate(unit.x, unit.y);} // go here
-                ctx.rotate(degrees * Math.PI / 180);
-                */
+                //ctx.translate(partsToPaint.hull.x, partsToPaint.hull.y);} // go here
+                ctx.translate(unit.x, unit.y); // go here
+                ctx.rotate(unit.a * Math.PI / 180);
+                
                //console.log('drawing: ', team.x, team.y, team.width, team.height);
             });
         });
@@ -74,6 +77,12 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                 ctx.fillStyle = "darkgreen";
                 ctx.rect(team.x, team.y, team.width/scale, team.height/scale);
                 ctx.fill();
+                ctx.font='10px Arial';
+                ctx.fillStyle = 'white';
+                ctx.fillText('unit '+ unit.name, team.x - 20, team.y - 15);
+                ctx.fillStyle='white';
+                ctx.fillText(team.name + ' ' + team.tacticalNumber, team.x - 20, team.y - 5);
+                ctx.closePath();
                 /*
                 ctx.save(); // save coords system
                 if (unit.leftTopCorner !== undefined) {

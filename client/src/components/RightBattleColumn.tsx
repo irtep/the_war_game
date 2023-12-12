@@ -55,7 +55,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                     {
                       unit.teams.map((team: any, h: number) => {
                         return (
-                          <div key={`yy ${i} ${Math.random()}`}>
+                          <div key={`yy ${team.uuid}`}>
                             <button
                               key={`x ${i}`}
                               value={team.uuid}
@@ -91,7 +91,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                 return (
                   <>
                     <button
-                      key={i}
+                      key={`x ${i} eee ${unit.id}`}
                       value={`e${unit.id}`}
                       style={{
                         background: 'darkred',
@@ -117,7 +117,7 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                         return (
                           <>
                             <button
-                              key={i}
+                              key={`okok ${i} ${team.uuid}`}
                               value={team.uuid}
                               style={{
                                 background: 'rgb(0,42,16)',

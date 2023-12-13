@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
 
@@ -8,6 +8,9 @@ interface Canvas {
 }
 
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
+  const [intervalId, setIntervalId] = useState<any>(null);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const scale: number = 15;
   const { gameObject,
     setGameObject,
     selected,
@@ -16,18 +19,41 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
-  const handleTeamHover = (teamUuid: string) => {
-    setHovered(teamUuid);
-  };
-
-  const handleTeamHoverOut = () => {
-    setHovered(null);
-  };
-
   const centerBattleColumnStyle: React.CSSProperties = {
     flex: '1 0 70%',
     //backgroundColor: 'lightcoral', // Optional: Add background color for visualization
   };
+
+  const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    gameObject.attacker.units.forEach((unit: any) => {
+      unit.teams.forEach((team: any) => {
+        if (
+          x >= team.x - team.width / (2 * scale) &&
+          x <= team.x + team.width / (2 * scale) &&
+          y >= team.y - team.width / (2 * scale) &&
+          y <= team.y + team.width / (2 * scale)
+        ) {
+          setHovered(team.uuid);
+        }
+      });
+    });
+    gameObject.defender.units.forEach((unit: any) => {
+      unit.teams.forEach((team: any) => {
+        if (
+          x >= team.x - team.width / (2 * scale) &&
+          x <= team.x + team.width / (2 * scale) &&
+          y >= team.y - team.width / (2 * scale) &&
+          y <= team.y + team.width / (2 * scale)
+        ) {
+          setHovered(team.uuid);
+        }
+      });
+    });
+  }
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -35,7 +61,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     const y = event.clientY - rect.top;
 
     if (gameObject.status = 'deploy') {
-
+      // if selected
       if (selected.id.length > 0) {
         selected.id.forEach((id: string) => {
           if (id[0] === 'a') {
@@ -67,44 +93,88 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           }
         });
         setSelected({ id: [], type: '' });
+      } else {
+        // if not selected yet
+        gameObject.attacker.units.forEach((unit: any) => {
+          unit.teams.forEach((team: any) => {
+            if (
+              x >= team.x - team.width / (2 * scale) &&
+              x <= team.x + team.width / (2 * scale) &&
+              y >= team.y - team.width / (2 * scale) &&
+              y <= team.y + team.width / (2 * scale)
+            ) {
+              setSelected({ id: [team.uuid], type: 'team' });
+            }
+          });
+        });
+        gameObject.defender.units.forEach((unit: any) => {
+          unit.teams.forEach((team: any) => {
+            if (
+              x >= team.x - team.width / (2 * scale) &&
+              x <= team.x + team.width / (2 * scale) &&
+              y >= team.y - team.width / (2 * scale) &&
+              y <= team.y + team.width / (2 * scale)
+            ) {
+              setSelected({ id: [team.uuid], type: 'team' });
+            }
+          });
+        });
       }
     }
 
   };
 
   useEffect(() => {
-    if (gameObject.status === 'deploy') {
+    if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
+
+      console.log('status: ', gameObject.status);
       draw(canvas, canvasSize, gameObject);
       
-      // Add event listeners for mouseover and mouseout
-      canvas.addEventListener('mouseover', (e) => {
-        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-
-        // Check if the mouse is over any team
-        gameObject.attacker.units.forEach((unit: any) => {
-          unit.teams.forEach((team: any) => {
-            if (
-              mouseX >= team.x &&
-              mouseX <= team.x + team.width / 15 &&
-              mouseY >= team.y &&
-              mouseY <= team.y + team.height / 15
-            ) {
-              handleTeamHover(team.uuid);
-            }
-          });
-        });
-      });
-      canvas.addEventListener('mouseout', () => {
-        handleTeamHoverOut();
-      });
-
-
-    } else {
-      // console.log('gO ', gameObject);
+    } else if (gameObject.status === 'startBattle' && !intervalId) {
+      // Only start the interval if it hasn't been started yet
+      const id = window.setInterval(() => {
+        console.log('interval: ');
+      }, 250);
+      setIntervalId(id);
+      setGameObject({ ...gameObject, status: 'battle' });
     }
-  }, [gameObject]);
 
+    // Cleanup function to clear the interval when component unmounts or dependencies change
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [gameObject, intervalId]);
+
+  // Event listener for spacebar
+  useEffect(() => {
+    const handleKeyDown = (event: { key: string; }) => {
+      if (event.key === ' ') {
+        if (isPaused) {
+          // Clear the existing interval when pausing
+          clearInterval(intervalId);
+        } else {
+          // Start a new interval when resuming
+          const id = window.setInterval(() => {
+            console.log('interval: ');
+          }, 250);
+          setIntervalId(id);
+        }
+
+        // Toggle the pause state
+        setIsPaused((prevState) => !prevState);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup function to remove the event listener when component unmounts or dependencies change
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isPaused, intervalId]);
+  
   return (
     <div style={centerBattleColumnStyle}>
       <button
@@ -148,7 +218,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   let newY = 780;
                   if (unit.id > 3) {
                     newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 850
+                    newY = 830
                   }
                   return { ...team, x: newX, y: newY };
                 }),
@@ -163,7 +233,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         onClick={() => {
           setGameObject({
             ...gameObject,
-            status: 'battle'
+            status: 'startBattle'
           });
         }}
       >
@@ -182,6 +252,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           marginRight: 0
         }}
         onClick={handleCanvasClick}
+        onMouseMove={handleHover}
       >
       </canvas>
 

@@ -29,6 +29,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
       });
     const [teams, setTeams] = useState<Array<any>>([]);
     const [terrains, setTerrains] = useState<Array<any>>([]);
+    const [weapons, setWeapons] = useState<Array<any>>([]);
     const [armies, setArmies] = useState<Array<any>>([]);
     const [setupObject, setSetupObject] = useState<SetupObject>({
         mission: '',
@@ -99,11 +100,30 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         }
     }
 
+    const fetchWeapons = async (): Promise<void> => {
+        try {
+            const response = await fetch('http://localhost:3111/api/weapons', {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const resp = await response.json();
+                setWeapons(resp);
+                console.log('resp: ', resp);
+            } else {
+                console.log('Error fetching data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }    
+
     useEffect(() => {
         if (!fetched.current) {
             fetchTeams();
             fetchArmies();
             fetchTerrains();
+            fetchWeapons();
             fetched.current = true
         }
 
@@ -122,7 +142,8 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             selected,
             setSelected,
             hovered,
-            setHovered
+            setHovered,
+            weapons
         }}>
             {props.children}
         </FlamesContext.Provider>

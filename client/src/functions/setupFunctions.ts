@@ -25,6 +25,30 @@ export const createBattleMap = (input: any): any => {
     return parsedMap;
 }
 
+interface Weapon {
+    name: string,
+
+};
+
+export function prepareWeapons(inputString: string, weapons: Array<any>) {
+    // Use the split method to separate the string into an array
+    let resultArray = inputString.split(', ');
+    const preparedWeapons: any[] = [];
+
+    // Trim any leading or trailing spaces from each element in the array
+    resultArray = resultArray.map(function(item) {
+        return item.trim();
+    });
+
+    resultArray.forEach( (w: string) => {
+        const found = weapons.filter( (we: any) => we.name === w);
+        found[0].reload = found[0].firerate;
+        preparedWeapons.push(found[0]);
+    });
+
+    return preparedWeapons;
+}
+/*
 export const createBattleArmies = (input: Army, attacker: boolean): Army => {
 
     let parsedArmy: Army = {
@@ -59,6 +83,34 @@ export const createBattleArmies = (input: Army, attacker: boolean): Army => {
                         team.unit = 'd' + String(i);
                         team.uuid = 'd' + String(i) + String(i) + String(h);
                     }
+                    // experience bonuses
+                    switch (team.crew) {
+                        case 'veteran':
+                            team.rat = team.rat + 1;
+                            team.mat = team.mat + 1;
+                            break;
+                        case 'elite':
+                            team.rat = team.rat + 1;
+                            team.mat = team.mat + 1;
+                            team.def = team.def + 1;
+                            team.reactions = team.reactions + 1;
+                            team.skill = team.skill + 1;
+                            break;
+                        case 'ace':
+                            team.rat = team.rat + 2;
+                            team.mat = team.mat + 2;
+                            team.def = team.def + 2;
+                            team.reactions = team.reactions + 2;
+                            team.skill = team.skill + 2;
+                            if (team.save > 0) {
+                                team.save = team.save + 1;
+                            }
+                            break;
+                    };
+                    // weapons and reloads
+                    team.combatWeapons = prepareWeapons(team.weapons, weapons);
+                    // power/weight ratio
+                    team.motorPower = team.horsepowers/team.weight;
                 });
             });
 
@@ -69,3 +121,4 @@ export const createBattleArmies = (input: Army, attacker: boolean): Army => {
 
     return parsedArmy;
 };
+*/

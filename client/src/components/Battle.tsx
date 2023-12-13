@@ -3,7 +3,7 @@ import FirstBattleRow from './FirstBattleRow';
 import SecondBattleRow from './SecondBattleRow';
 import { FlamesContext } from '../context/FlamesContext';
 import { Army, Team } from '../data/sharedInterfaces';
-import { createBattleMap } from '../functions/setupFunctions';
+import { createBattleMap, prepareWeapons } from '../functions/setupFunctions';
 
 const Battle: React.FC = (): React.ReactElement => {
   const { terrains,
@@ -11,7 +11,8 @@ const Battle: React.FC = (): React.ReactElement => {
     gameObject,
     setGameObject,
     armies,
-    teams
+    teams,
+    weapons
   } = useContext(FlamesContext);
 
   const containerStyle: React.CSSProperties = {
@@ -42,8 +43,8 @@ const Battle: React.FC = (): React.ReactElement => {
           unit.teams.forEach((team: any, h: number) => {
 
             // find team that has same name
-            const foundFromDB: Team[] = teams.filter( (t: Team) => t.name === team.team);
-            
+            const foundFromDB: Team[] = teams.filter((t: Team) => t.name === team.team);
+
             for (let [tkey, tvalue] of Object.entries(foundFromDB[0])) {
               if (tvalue !== '') {
                 team[tkey] = tvalue;
@@ -66,6 +67,34 @@ const Battle: React.FC = (): React.ReactElement => {
               team.unit = 'd' + String(i);
               team.uuid = 'd' + String(i) + String(i) + String(h);
             }
+            // experience bonuses
+            switch (team.crew) {
+              case 'veteran':
+                team.rat = team.rat + 1;
+                team.mat = team.mat + 1;
+                break;
+              case 'elite':
+                team.rat = team.rat + 1;
+                team.mat = team.mat + 1;
+                team.def = team.def + 1;
+                team.reactions = team.reactions + 1;
+                team.skill = team.skill + 1;
+                break;
+              case 'ace':
+                team.rat = team.rat + 2;
+                team.mat = team.mat + 2;
+                team.def = team.def + 2;
+                team.reactions = team.reactions + 2;
+                team.skill = team.skill + 2;
+                if (team.save > 0) {
+                  team.save = team.save + 1;
+                }
+                break;
+            };
+            // weapons and reloads
+            team.combatWeapons = prepareWeapons(team.weapons, weapons);
+            // power/weight ratio
+            team.motorPower = team.horsepowers / team.weight;
           });
         });
 

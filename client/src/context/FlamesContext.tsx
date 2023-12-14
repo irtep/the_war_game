@@ -18,6 +18,7 @@ interface SetupObject {
 interface Selected {
     id: Array<string | number>;
     type: string;
+    all?: any;
 };
 
 export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElement => {
@@ -25,7 +26,8 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
     const fetched: React.MutableRefObject<boolean> = useRef(false);
     const [selected, setSelected] = useState<Selected>({
         id: [],
-        type: ''
+        type: '',
+        all: {}
       });
     const [teams, setTeams] = useState<Array<any>>([]);
     const [terrains, setTerrains] = useState<Array<any>>([]);

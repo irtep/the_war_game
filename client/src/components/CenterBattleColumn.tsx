@@ -129,6 +129,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         });
       }
     }
+    //          Battle phase
     else if (gameObject.status === 'battle') {
       const playersUnit: FoundData = checkIfFromHere(gameObject[gameObject.player].units, x, y, scale);
       console.log('pU ', playersUnit);
@@ -138,6 +139,19 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       if (playersUnit.found) {
         // order: listening, everyone else who was listening goes waiting
         console.log('player unit!');
+        setGameObject({
+          ...gameObject,
+          [gameObject.player]: {
+            ...gameObject[gameObject.player],
+            units: gameObject[gameObject.player].units.map((unit: any) => ({
+              ...unit,
+              teams: unit.teams.map((team: any) =>
+                team.uuid === playersUnit.id ? { ...team, order: 'listening' } : team.order === 'listening' ? { ...team, order: 'waiting' } : team
+              ),
+            })),
+          },
+        });
+        setSelected({id: playersUnit.id, type: 'team', all: playersUnit.all});
         // show order buttons
       }
 

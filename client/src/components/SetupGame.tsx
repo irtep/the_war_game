@@ -169,7 +169,6 @@ const SetupGame: React.FC = (): React.ReactElement => {
                                 <></>
                         }
 
-
                     </Container> :
                     <Battle />
             }

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
+import { checkIfFromHere, FoundData } from '../functions/battleFunctions';
 
 interface Canvas {
   w: number;
@@ -9,13 +10,15 @@ interface Canvas {
 
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
   const [intervalId, setIntervalId] = useState<any>(null);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
   const scale: number = 15;
   const { gameObject,
     setGameObject,
     selected,
     setSelected,
-    setHovered } = useContext(FlamesContext);
+    setHovered,
+    isPaused, 
+    setIsPaused
+   } = useContext(FlamesContext);
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -25,34 +28,38 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   };
 
   const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
 
-    gameObject.attacker.units.forEach((unit: any) => {
-      unit.teams.forEach((team: any) => {
-        if (
-          x >= team.x - team.width / (2 * scale) &&
-          x <= team.x + team.width / (2 * scale) &&
-          y >= team.y - team.width / (2 * scale) &&
-          y <= team.y + team.width / (2 * scale)
-        ) {
-          setHovered(team.uuid);
-        }
+    if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      gameObject.attacker.units.forEach((unit: any) => {
+        unit.teams.forEach((team: any) => {
+          if (
+            x >= team.x - team.width / (2 * scale) &&
+            x <= team.x + team.width / (2 * scale) &&
+            y >= team.y - team.width / (2 * scale) &&
+            y <= team.y + team.width / (2 * scale)
+          ) {
+            setHovered(team.uuid);
+          }
+        });
       });
-    });
-    gameObject.defender.units.forEach((unit: any) => {
-      unit.teams.forEach((team: any) => {
-        if (
-          x >= team.x - team.width / (2 * scale) &&
-          x <= team.x + team.width / (2 * scale) &&
-          y >= team.y - team.width / (2 * scale) &&
-          y <= team.y + team.width / (2 * scale)
-        ) {
-          setHovered(team.uuid);
-        }
+      gameObject.defender.units.forEach((unit: any) => {
+        unit.teams.forEach((team: any) => {
+          if (
+            x >= team.x - team.width / (2 * scale) &&
+            x <= team.x + team.width / (2 * scale) &&
+            y >= team.y - team.width / (2 * scale) &&
+            y <= team.y + team.width / (2 * scale)
+          ) {
+            setHovered(team.uuid);
+          }
+        });
       });
-    });
+    }
+
   }
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -60,7 +67,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    if (gameObject.status = 'deploy') {
+    // Deploy phase
+    if (gameObject.status === 'deploy') {
       // if selected
       if (selected.id.length > 0) {
         selected.id.forEach((id: string) => {
@@ -121,6 +129,33 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         });
       }
     }
+    else if (gameObject.status === 'battle') {
+      const playersUnit: FoundData = checkIfFromHere(gameObject[gameObject.player].units, x, y, scale);
+      console.log('pU ', playersUnit);
+      const opponentsUnit: FoundData = checkIfFromHere(gameObject[gameObject.opponent].units, x, y, scale);
+      console.log('oU ', opponentsUnit);
+      // if clicked is from your team
+      if (playersUnit.found) {
+        // order: listening, everyone else who was listening goes waiting
+        console.log('player unit!');
+        // show order buttons
+      }
+
+      // if clicked is from opponent team and order is selected
+      else if (opponentsUnit.found) {
+        // who ever had listening gets selected order and target is uuid of that clicked opponent
+        console.log('opponents unit!');
+        // hide order buttons
+      }
+
+      // if clicked was not any team,
+      else {
+        // that location comes as target and selected order as order
+        console.log('no unit');
+        // hide order buttons
+      }
+
+    }
 
   };
 
@@ -129,52 +164,56 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
       console.log('status: ', gameObject.status);
       draw(canvas, canvasSize, gameObject);
-      
+
     } else if (gameObject.status === 'startBattle' && !intervalId) {
       // Only start the interval if it hasn't been started yet
+      //console.log('starting interval, 1st effect');
       const id = window.setInterval(() => {
-        console.log('interval: ');
-      }, 250);
+        //console.log('interval: ');
+      }, 1000);
       setIntervalId(id);
       setGameObject({ ...gameObject, status: 'battle' });
     }
 
     // Cleanup function to clear the interval when component unmounts or dependencies change
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
+
   }, [gameObject, intervalId]);
 
   // Event listener for spacebar
   useEffect(() => {
     const handleKeyDown = (event: { key: string; }) => {
+      
       if (event.key === ' ') {
+        //console.log('key down, space');
         if (isPaused) {
           // Clear the existing interval when pausing
+          //console.log('is paused, clearing interval');
           clearInterval(intervalId);
         } else {
           // Start a new interval when resuming
+          //console.log('starting interval')
           const id = window.setInterval(() => {
-            console.log('interval: ');
-          }, 250);
+            //console.log('interval: ');
+          }, 1000);
           setIntervalId(id);
         }
 
         // Toggle the pause state
-        setIsPaused((prevState) => !prevState);
+        console.log('pause toggle');
+        setIsPaused((prevState: any) => !prevState);
       }
     };
-
+    console.log('adding keydown listener');
     window.addEventListener('keydown', handleKeyDown);
 
     // Cleanup function to remove the event listener when component unmounts or dependencies change
+ 
     return () => {
+      console.log('removing keydown listener');
       window.removeEventListener('keydown', handleKeyDown);
-    };
+    }; 
   }, [isPaused, intervalId]);
-  
+
   return (
     <div style={centerBattleColumnStyle}>
       <button

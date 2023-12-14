@@ -45,6 +45,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         terrain: ''
     });
     const [hovered, setHovered] = useState(null);
+    const [isPaused, setIsPaused] = useState<boolean>(false);
 
     const fetchTeams = async (): Promise<void> => {
         try {
@@ -143,7 +144,9 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             setSelected,
             hovered,
             setHovered,
-            weapons
+            weapons,
+            isPaused,
+            setIsPaused
         }}>
             {props.children}
         </FlamesContext.Provider>

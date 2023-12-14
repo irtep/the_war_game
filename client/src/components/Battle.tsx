@@ -33,7 +33,7 @@ const Battle: React.FC = (): React.ReactElement => {
     };
 
     for (let [key, value] of Object.entries(input)) {
-      console.log('teams: ', teams);
+      
       if (key === 'units') {
 
         parsedArmy.units = JSON.parse(value as string);
@@ -52,7 +52,7 @@ const Battle: React.FC = (): React.ReactElement => {
             }
 
             //console.log('fdb: ', foundFromDB);
-
+            team.order = 'wait'
             team.x = 1000;
             team.y = 1000;
             team.a = 0;

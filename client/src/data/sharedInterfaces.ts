@@ -55,7 +55,10 @@ export interface GameObject {
     status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
     attacker: any,
     defender: any,
-    terrain: any
+    terrain: any,
+    player?: '' | 'attacker' | 'defender';
+    opponent?: '' | 'attacker' | 'defender';
+    mission?: string
 };
 
 export interface ArmyToSend {

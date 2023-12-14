@@ -1,11 +1,12 @@
 import React, { useContext } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
+import { Typography } from '@mui/material';
 
 const FirstBattleRow: React.FC = (): React.ReactElement => {
   const {
     gameObject,
     selected,
-    setSelected
+    isPaused
   } = useContext(FlamesContext);
 
   const firstBattleRowStyle: React.CSSProperties = {
@@ -22,7 +23,9 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
 
   return (
     <div style={firstBattleRowStyle}>
+      1
       <div style={centeredColumnStyle}>
+        2
         {selected.id[0]}
         {
           (selected.id[1]) ?
@@ -32,6 +35,13 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
             <></>
         }
             </div>
+
+        {
+          (gameObject.status === 'battle' && isPaused === true)?
+          <Typography>
+            GAME PAUSED
+          </Typography>: <></>
+        }
 
       </div>
       );

@@ -1,5 +1,3 @@
-import { Army } from "../data/sharedInterfaces";
-import { useContext } from "react";
 
 export const createBattleMap = (input: any): any => {
 
@@ -25,47 +23,26 @@ export const createBattleMap = (input: any): any => {
     return parsedMap;
 }
 
-export const createBattleArmies = (input: Army, attacker: boolean): Army => {
+interface Weapon {
+    name: string,
 
-    let parsedArmy: Army = {
-        user: '',
-        name: '',
-        faction: '',
-        game: '',
-        points: 0,
-        units: []
-    };
-
-    for (let [key, value] of Object.entries(input)) {
-
-        if (key === 'units') {
-
-            parsedArmy.units = JSON.parse(value as string);
-
-            parsedArmy.units.forEach((unit: any, i: number) => {
-
-                unit.teams.forEach((team: any, h: number) => {
-                    team.x = 1000;
-                    team.y = 1000;
-                    team.a = 0;
-                    team.disabled = false;
-                    team.kills = [];
-                    team.tacticalNumber = String(i) + String(h);
-                    team.unit = '';
-                    if (attacker) {
-                        team.unit = 'a' + String(i);
-                        team.uuid = 'a' + String(i) + String(i) + String(h);
-                    } else {
-                        team.unit = 'd' + String(i);
-                        team.uuid = 'd' + String(i) + String(i) + String(h);
-                    }
-                });
-            });
-
-        } else {
-            parsedArmy[key] = value;
-        }
-    }
-
-    return parsedArmy;
 };
+
+export function prepareWeapons(inputString: string, weapons: Array<any>) {
+    // Use the split method to separate the string into an array
+    let resultArray = inputString.split(', ');
+    const preparedWeapons: any[] = [];
+
+    // Trim any leading or trailing spaces from each element in the array
+    resultArray = resultArray.map(function(item) {
+        return item.trim();
+    });
+
+    resultArray.forEach( (w: string) => {
+        const found = weapons.filter( (we: any) => we.name === w);
+        found[0].reload = found[0].firerate;
+        preparedWeapons.push(found[0]);
+    });
+
+    return preparedWeapons;
+}

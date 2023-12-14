@@ -159,13 +159,15 @@ const SetupGame: React.FC = (): React.ReactElement => {
                                     onClick={ () => {
                                         setGameObject({
                                             ...gameObject,
-                                            status: 'preBattle'
+                                            status: 'preBattle',
+                                            player: setupObject.you,
+                                            opponent: (setupObject.you === 'attacker')? 'defender': 'attacker',
+                                            mission: setupObject.mission
                                         });
                                     }}
                                 >Start game</button> :
                                 <></>
                         }
-
 
                     </Container> :
                     <Battle />

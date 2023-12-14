@@ -32,6 +32,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             ctx.fillStyle = "rgb(180,180,180)";
             ctx.rect(house.x, house.y, house.w, house.h);
             ctx.fill();
+            ctx.closePath();
         });
 
         gameObject.terrain.trees.forEach((tree: Circles) => {
@@ -39,6 +40,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             ctx.fillStyle = "darkgreen";
             ctx.arc(tree.x, tree.y, tree.s, 0, Math.PI * 2, true);
             ctx.fill();
+            ctx.closePath();
         });
 
         gameObject.terrain.waters.forEach((water: Circles) => {
@@ -46,6 +48,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             ctx.fillStyle = "darkblue";
             ctx.arc(water.x, water.y, water.s, 0, Math.PI * 2, true);
             ctx.fill();
+            ctx.closePath();
         });
         //console.log('game at drw', gameObject);
         // draw attackers units: 
@@ -73,6 +76,14 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
 
                     ctx.restore(); // Restore the original context state
+
+                    if (team.order === 'listening') {
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'green';
+                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
                 };
             });
         });
@@ -99,6 +110,15 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
                     ctx.fillStyle = 'black';
                     ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
+
+                    if (team.order === 'listening') {
+                        
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'green';
+                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
 
                     ctx.restore(); // Restore the original context state
                 };

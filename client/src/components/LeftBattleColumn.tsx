@@ -10,32 +10,35 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
   };
 
   useEffect(() => {
-    console.log('selected: ', selected);
+    console.log('s: ', selected.all);
   }, [selected]);
 
   return <div style={column10StyleSecondRow}>
     {
-      (selected.type === 'unit' && 
+      (selected.type === 'team' && 
       gameObject.status === 'battle' &&
       (selected.all.name)) ?
         <>
+          <img 
+            src={`/img/units/${selected.all.imgSide}.png`}
+            width={150}
+            />
           <Typography padding={1}>
             {`${selected.all.name} "${selected.all.tacticalNumber}"`}
           </Typography>
           <Typography padding={1}>
             weapons:
             {
-              selected.all.weapons.map( (wep: any, i: number) => {
+              selected.all.combatWeapons.map( (wep: any, i: number) => {
+                
                 return(
-                  <Typography key={`wep: ${i}`}>
-                    {`AT: ${wep.AT} FP: ${wep.FP} range: ${wep.range} rate: ${wep.firerate}`}
-                    {wep.specials.map( (specs: string, ii: number) => {
-                      return(
-                        <Typography key={`spe: ${ii}`}>
-                          {specs}
-                        </Typography>
-                      )
-                    })}
+                  <Typography 
+                    marginBottom={2}
+                    marginTop={2}
+                    key={`wep: ${i}`}
+                    >
+                    {`${wep.name} AT: ${wep.AT}, FP: ${wep.FP}, range: ${wep.range}, rate: ${wep.firerate}, specials: ${wep.specials}`}
+
                   </Typography>
                 )
               })

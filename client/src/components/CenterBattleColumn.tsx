@@ -16,9 +16,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     selected,
     setSelected,
     setHovered,
-    isPaused, 
+    isPaused,
     setIsPaused
-   } = useContext(FlamesContext);
+  } = useContext(FlamesContext);
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -151,7 +151,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             })),
           },
         });
-        setSelected({id: playersUnit.id, type: 'team', all: playersUnit.all});
+        setSelected({ id: playersUnit.id, type: 'team', all: playersUnit.all });
         // show order buttons
       }
 
@@ -196,7 +196,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   // Event listener for spacebar
   useEffect(() => {
     const handleKeyDown = (event: { key: string; }) => {
-      
+
       if (event.key === ' ') {
         //console.log('key down, space');
         if (isPaused) {
@@ -221,77 +221,132 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     window.addEventListener('keydown', handleKeyDown);
 
     // Cleanup function to remove the event listener when component unmounts or dependencies change
- 
+
     return () => {
       console.log('removing keydown listener');
       window.removeEventListener('keydown', handleKeyDown);
-    }; 
+    };
   }, [isPaused, intervalId]);
 
   return (
     <div style={centerBattleColumnStyle}>
-      <button
-        onClick={() => { draw(canvas, canvasSize, gameObject); }}>
-        draw
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            attacker: {
-              ...gameObject.attacker,
-              units: gameObject.attacker.units.map((unit: any, unitIndex: number) => ({
-                ...unit,
-                teams: unit.teams.map((team: any, teamIndex: number) => {
-                  let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
-                  let newY = 50;
-                  if (unit.id > 3) {
-                    newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 130
+
+      {
+        (gameObject.status === 'deploy') ?
+          <>
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  attacker: {
+                    ...gameObject.attacker,
+                    units: gameObject.attacker.units.map((unit: any, unitIndex: number) => ({
+                      ...unit,
+                      teams: unit.teams.map((team: any, teamIndex: number) => {
+                        let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
+                        let newY = 50;
+                        if (unit.id > 3) {
+                          newX = 100 + unitIndex * 100 + teamIndex * 50;
+                          newY = 130
+                        }
+                        return { ...team, x: newX, y: newY, a: 180 };
+                      }),
+                    })),
+                  },
+                });
+              }}
+            >
+              quickdepo A
+            </button>
+
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  defender: {
+                    ...gameObject.defender,
+                    units: gameObject.defender.units.map((unit: any, unitIndex: number) => ({
+                      ...unit,
+                      teams: unit.teams.map((team: any, teamIndex: number) => {
+                        let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
+                        let newY = 780;
+                        if (unit.id > 3) {
+                          newX = 100 + unitIndex * 100 + teamIndex * 50;
+                          newY = 830
+                        }
+                        return { ...team, x: newX, y: newY };
+                      }),
+                    })),
+                  },
+                });
+              }}
+            >
+              quickdepo D
+            </button>
+
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  status: 'startBattle'
+                });
+              }}
+            >
+              deployment ready
+            </button>
+          </> : <></>
+      }
+      {
+        (gameObject.status === 'battle' && selected.id.length > 0) ?
+          <>
+
+            <button>
+              move
+            </button>
+
+            <button>
+              attack
+            </button>
+
+            {
+              (selected.all.type !== 'gun') ?
+                <button>
+                  charge
+                </button> : <></>
+            }
+
+            {
+              (selected.all.type === 'infantry') ?
+                <button>
+                  dig foxholes
+                </button> : <></>
+            }
+
+            {
+              selected.all.combatWeapons.map( (wepo: any, ix: number) => {
+                return(
+                  <span key={`arti: ${ix}`}>
+                  {
+                    (wepo.specials.includes('artillery')) ?
+                    <>
+                     <button>
+                        bombard
+                     </button>
+                    </> : 
+                    <></>
                   }
-                  return { ...team, x: newX, y: newY, a: 180 };
-                }),
-              })),
-            },
-          });
-        }}
-      >
-        quickdepo A
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            defender: {
-              ...gameObject.defender,
-              units: gameObject.defender.units.map((unit: any, unitIndex: number) => ({
-                ...unit,
-                teams: unit.teams.map((team: any, teamIndex: number) => {
-                  let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
-                  let newY = 780;
-                  if (unit.id > 3) {
-                    newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 830
-                  }
-                  return { ...team, x: newX, y: newY };
-                }),
-              })),
-            },
-          });
-        }}
-      >
-        quickdepo D
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            status: 'startBattle'
-          });
-        }}
-      >
-        deployment ready
-      </button>
+                  </span>
+                )
+              }
+
+              )
+            }
+
+
+          </> : <></>
+      }
+
+
       <br />
       <canvas
         id="battleCanvas"

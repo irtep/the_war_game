@@ -18,7 +18,7 @@ interface Canvas {
     h: number;
 }
 
-export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject): void => {
+export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject, selected: any): void => {
     const scale = 15;
     const ctx = canvas.getContext("2d");
 
@@ -81,6 +81,14 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                         ctx.beginPath();
                         ctx.strokeStyle = 'green';
                         ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+
+                    if (team.uuid === selected.id[0]) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'navy';
+                        ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
                         ctx.stroke();
                         ctx.closePath();
                     }

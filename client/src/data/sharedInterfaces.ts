@@ -18,7 +18,7 @@ export interface Team {
     effects: number|string;
     specials: number|string;
     desc: string;
-    order: string;
+    order: any;
     weapons: Array<string>|string;
     unit: string;
     transport: number;
@@ -81,6 +81,12 @@ export interface SavedUnit {
     name: string;
     teams: Array<SavedTeam>;
     points: number
+};
+
+export interface Selected {
+    id: Array<string | number>;
+    type: string;
+    all?: any;
 };
 
 // number|string;

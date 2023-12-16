@@ -1,4 +1,5 @@
 import { GameObject } from "../data/sharedInterfaces";
+//import { draw } from "../functions/draw";
 
 export interface FoundData {
     found: boolean;
@@ -103,7 +104,7 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
     return defenderTeam;
   };
 
-  export const doOrders = (gameObject: GameObject, setGameObject: any, draw: any) => {
+  export const doOrders = (gameObject: GameObject, setGameObject: any) => {
     const newGameObject = { ...gameObject };
   
     const processOrdersForUnits = (units: any[]) => {
@@ -128,10 +129,12 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
     processOrdersForUnits(newGameObject.defender.units);
   
     // Update the game object with the modified teams
-    setGameObject(newGameObject);
+    //setGameObject(newGameObject);
   
     // Optionally, trigger a redraw or update the display
+    /*
     if (draw) {
-      draw(newGameObject);
+      draw(newGameObject, );
     }
+    */
   };

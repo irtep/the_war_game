@@ -9,6 +9,7 @@ import {
   findTeamById,
   doOrders
 } from '../functions/battleFunctions';
+import { GameObject } from '../data/sharedInterfaces';
 
 interface Canvas {
   w: number;
@@ -143,16 +144,16 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         const getSelected = findTeamById(selected.id[0], gameObject);
 
         // if move or bombards
-        if (getSelected.found) {
+        if (getSelected) {
 
-        }
-        if (getSelected.order === 'move' ||
-          getSelected.order === 'smoke bombard' ||
-          getSelected.order === 'bombard') {
+          if (getSelected.order === 'move' ||
+            getSelected.order === 'smoke bombard' ||
+            getSelected.order === 'bombard') {
 
-          changePropsOfTeam(selected.id[0], ['target'], [{ location: x, y }], gameObject, setGameObject);
+            changePropsOfTeam(selected.id[0], ['target'], [{ location: x, y }], gameObject, setGameObject);
+          }
+        } else { console.log('not found'); }
 
-        }
         // clear selected
         setSelected({ id: [], type: '', all: {} });
       }
@@ -162,63 +163,43 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   };
 
   useEffect(() => {
-    if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
+    if (gameObject.status === 'deploy') {
 
       draw(canvas, canvasSize, gameObject, selected);
 
-    } else if (gameObject.status === 'startBattle' && !intervalId) {
-      // Only start the interval if it hasn't been started yet
-      //console.log('starting interval, 1st effect');
-      const id = window.setInterval(() => {
-
-        //
-        //  GAME LOOP
-        //
-
-        // do orders
-        doOrders(gameObject, setGameObject, draw);
-
-      }, 250);
-      setIntervalId(id);
-      setGameObject({ ...gameObject, status: 'battle' });
     }
-
-    // Cleanup function to clear the interval when component unmounts or dependencies change
 
   }, [gameObject, intervalId]);
 
   // Event listener for spacebar
+  
   useEffect(() => {
-    const handleKeyDown = (event: { key: string; }) => {
+    if (isPaused) {
 
-      if (event.key === ' ') {
-        //console.log('key down, space');
-        if (isPaused) {
-          // Clear the existing interval when pausing
-          //console.log('is paused, clearing interval');
-          clearInterval(intervalId);
-        } else {
-          // Start a new interval when resuming
-          //console.log('starting interval')
-          const id = window.setInterval(() => {
-            //console.log('interval: ');
-          }, 1000);
-          setIntervalId(id);
-        }
-
-        // Toggle the pause state
-        console.log('pause toggle');
-        setIsPaused((prevState: any) => !prevState);
+      // Clear the existing interval when pausing
+      console.log('is paused');
+      if (intervalId !== null) {
+        console.log('clearing interval');
+        clearInterval(intervalId);
+        setIntervalId(null);
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
+      console.log('drawing');
+      draw(canvas, canvasSize, gameObject, selected);
 
-    // Cleanup function to remove the event listener when component unmounts or dependencies change
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isPaused, intervalId]);
+    } else if (isPaused === false && intervalId === null) {
+      // Start a new interval when resuming
+      console.log('starting interval');
+      
+      const id = window.setInterval(() => {
+        console.log('interval');
+        doOrders(gameObject, setGameObject);
+        draw(canvas, canvasSize, gameObject, selected);
+      }, 255);
+  
+      setIntervalId(id);
+    }
+  }, [isPaused, gameObject, selected]);
+  
 
   return (
     <div style={centerBattleColumnStyle}>
@@ -280,7 +261,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               onClick={() => {
                 setGameObject({
                   ...gameObject,
-                  status: 'startBattle'
+                  status: 'battle'
                 });
               }}
             >

@@ -41,10 +41,10 @@ const Battle: React.FC = (): React.ReactElement => {
         parsedArmy.units.forEach((unit: any, i: number) => {
 
           unit.teams.forEach((team: any, h: number) => {
-
+            console.log('team: ', team);
             // find team that has same name
             const foundFromDB: Team[] = teams.filter((t: Team) => t.name === team.team);
-
+            //console.log('team from db ', );
             for (let [tkey, tvalue] of Object.entries(foundFromDB[0])) {
               if (tvalue !== '') {
                 team[tkey] = tvalue;

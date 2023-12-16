@@ -38,7 +38,7 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
           }
 
 
-          <Typography padding={1}>
+          <div style={{padding:1}}>
             weapons:
             {
               hovered.all.combatWeapons.map((wep: any, i: number) => {
@@ -55,7 +55,7 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
                 )
               })
             }
-          </Typography>
+          </div>
           <Typography padding={1}>
             {hovered.all.desc}
           </Typography>

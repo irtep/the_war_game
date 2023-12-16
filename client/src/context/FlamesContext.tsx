@@ -45,7 +45,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         type: '',
         all: {}
       });
-    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [isPaused, setIsPaused] = useState<boolean>(true);
 //    const [selectedOrder, setSelectedOrder] = useState<string>('');
 
     const fetchTeams = async (): Promise<void> => {

@@ -6,7 +6,8 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
   const {
     gameObject,
     selected,
-    isPaused
+    isPaused,
+    setIsPaused
   } = useContext(FlamesContext);
 
   const firstBattleRowStyle: React.CSSProperties = {
@@ -34,17 +35,22 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
             </> :
             <></>
         }
-            </div>
+      </div>
 
-        {
-          (gameObject.status === 'battle' && isPaused === true)?
+      {
+        (gameObject.status === 'battle' && isPaused === true) ?
           <Typography>
             GAME PAUSED
-          </Typography>: <></>
-        }
-
-      </div>
-      );
+          </Typography> : <></>
+      }
+      {
+        (gameObject.status === 'battle') ?
+          <button onClick={ () => { setIsPaused(!isPaused)}}>
+            toggle pause
+          </button> : <></>
+      }
+ </div>
+  );
 };
 
-      export default FirstBattleRow;
+export default FirstBattleRow;

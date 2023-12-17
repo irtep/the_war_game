@@ -7,7 +7,8 @@ import {
   changePropsOfTeam,
   findTeamByLocation,
   findTeamById,
-//  doOrders
+  startMovement,
+  //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
 
@@ -16,8 +17,14 @@ interface Canvas {
   h: number;
 }
 
+type IntervalItem = {
+  teamId: string;
+  intervalId: NodeJS.Timer;
+};
+
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
-  const [intervalId, setIntervalId] = useState<any>(null);
+  const [intervals, setIntervals] = useState<IntervalItem[]>([]);
+  //const [intervalId, setIntervalId] = useState<any>(null);
   const scale: number = 15;
   const { gameObject,
     setGameObject,
@@ -26,6 +33,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     setHovered,
     isPaused,
     setIsPaused,
+    setMousePosition
     //   setSelectedOrder,
     //   selectedOrder
   } = useContext(FlamesContext);
@@ -37,12 +45,41 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     //backgroundColor: 'lightcoral', // Optional: Add background color for visualization
   };
 
+  const startIntervalForTeam = (team: any) => {
+    const intervalId = setInterval(() => {
+      team.moveToTarget();
+      console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
+
+      // Check if the tank has reached the target
+      if (team.order === 'waiting') {
+        console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
+        stopIntervalForTeam(team);
+      }
+    }, 250);
+
+    setIntervals((prevIntervals) => [...prevIntervals, { teamId: team.uuid, intervalId }]);
+  };
+
+  const stopIntervalForTeam = (team: any) => {
+
+    intervals.forEach( (inte: any, index: number) => {
+      console.log('checking for clear');
+      if (inte.teamId === team.uuid) {
+        console.log('found');
+        clearInterval(inte.intervalId);
+      } else {
+        console.log('not this: ', inte.teamId, team.uuid);
+      }
+    });
+
+  };
+
   const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
 
       const tryToFind = findTeamByLocation(x, y, gameObject, scale);
 
@@ -52,6 +89,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       }
 
     }
+
+    setMousePosition({ x: x, y: y });
 
   }
 
@@ -111,7 +150,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           },
         });
         setSelected({ id: [playersUnit.id], type: 'team', all: playersUnit.all });
-        // show order buttons
       }
 
       // if clicked is from opponent team and order is selected
@@ -131,9 +169,16 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           }
           else if (getSelected.order === 'move') {
-            changePropsOfTeam(selected.id[0], ['target'], [{ location: x, y }], gameObject, setGameObject);
-
-          }
+            //console.log('changing props to target');
+            changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+            //console.log('starting movement');
+            // Perform asynchronous state updates
+            setTimeout(() => {
+              if (selected.id.length > 0) {
+                startMovement(selected.id[0], setGameObject, startIntervalForTeam);
+              }
+            }, 0);
+          } else { console.log(' else, ', getSelected); }
           // clear selected
           setSelected({ id: [], type: '', all: {} });
         }
@@ -142,16 +187,26 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       // if clicked was not any team,
       else {
         const getSelected = findTeamById(selected.id[0], gameObject);
-
+        console.log('was not selected');
         // if move or bombards
         if (getSelected) {
-
+          console.log('found selected');
           if (getSelected.order === 'move' ||
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
-
-            changePropsOfTeam(selected.id[0], ['target'], [{ location: x, y }], gameObject, setGameObject);
+            console.log('move, smoke or bombard');
+            changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
           }
+
+          if (getSelected.order === 'move') {
+            // Perform asynchronous state updates
+            setTimeout(() => {
+              if (selected.id.length > 0) {
+                startMovement(selected.id[0], setGameObject, startIntervalForTeam);
+              }
+            }, 0);
+          }
+
         } else { console.log('not found'); }
 
         // clear selected
@@ -169,7 +224,11 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
     }
 
-  }, [gameObject, intervalId]);
+  }, [gameObject]);
+
+  useEffect(() => {
+    console.log('intervals: ', intervals);
+  }, [intervals]);
 
   // Event listener for spacebar
   /*

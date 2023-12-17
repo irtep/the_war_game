@@ -51,6 +51,11 @@ export interface Army {
 
 };
 
+export interface MousePos {
+    x: string | number,
+    y: string | number
+  }
+
 export interface GameObject {
     status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
     attacker: any,

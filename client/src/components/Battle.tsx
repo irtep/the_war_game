@@ -33,7 +33,7 @@ const Battle: React.FC = (): React.ReactElement => {
     };
 
     for (let [key, value] of Object.entries(input)) {
-      
+
       if (key === 'units') {
 
         parsedArmy.units = JSON.parse(value as string);
@@ -95,7 +95,48 @@ const Battle: React.FC = (): React.ReactElement => {
             team.combatWeapons = prepareWeapons(team.weapons, weapons);
             // power/weight ratio
             team.motorPower = team.horsepowers / team.weight;
+            team.currentSpeed = 0;
             // methods:
+            team.turningSpeed = 3; // maybe all 1... maybe later will modificate this...
+
+            team.moveToTarget = function () {
+              if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+                // Calculate angle to the target
+                const angleToTarget = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+
+                // Turn towards the target in discrete steps
+                const angleDiff = angleToTarget - this.a;
+                if (Math.abs(angleDiff) > this.turningSpeed) {
+                  this.a += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
+                } else {
+                  this.a = angleToTarget;
+                }
+
+                // Accelerate until reaching maxSpeed (that is team.speed)
+                if (this.currentSpeed < this.speed) {
+                  this.currentSpeed += this.motorPower * 7;
+                }
+
+                // Calculate movement towards the target
+                const deltaX = Math.cos(this.a) * this.currentSpeed;
+                const deltaY = Math.sin(this.a) * this.currentSpeed;
+
+                // Move towards the target
+                this.x += deltaX;
+                this.y += deltaY;
+
+
+                // Check if the tank has reached the target
+                const distanceToTarget = Math.sqrt((this.target.x - this.x) ** 2 + (this.target.y - this.y) ** 2);
+                if (distanceToTarget < this.currentSpeed) {
+                  this.order = 'waiting';
+                  this.currentSpeed = 0;
+                  console.log(`Tank reached the target.`);
+                }
+              } else {
+                console.log('Cannot move:', this.order, this.target);
+              }
+            };
             /**
              *     intervalId: null, // Store the interval ID
 
@@ -105,11 +146,11 @@ const Battle: React.FC = (): React.ReactElement => {
             const angleToTarget = Math.atan2(this.target.y - this.y, this.target.x - this.x);
 
             // Turn towards the target in discrete steps
-            const angleDiff = angleToTarget - this.heading;
+            const angleDiff = angleToTarget - this.a;
             if (Math.abs(angleDiff) > this.turningSpeed) {
-                this.heading += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
+                this.a += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
             } else {
-                this.heading = angleToTarget;
+                this.a = angleToTarget;
             }
 
             // Accelerate until reaching maxSpeed
@@ -118,8 +159,8 @@ const Battle: React.FC = (): React.ReactElement => {
             }
 
             // Calculate movement towards the target
-            const deltaX = Math.cos(this.heading) * this.currentSpeed;
-            const deltaY = Math.sin(this.heading) * this.currentSpeed;
+            const deltaX = Math.cos(this.a) * this.currentSpeed;
+            const deltaY = Math.sin(this.a) * this.currentSpeed;
 
             // Move towards the target
             this.x += deltaX;
@@ -143,7 +184,7 @@ team.target = { x: 300, y: 300 };
 // Start the interval and store the interval ID
 team.intervalId = setInterval(() => {
     team.moveToTarget();
-    console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.heading.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
+    console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
 }, 250);
              */
 

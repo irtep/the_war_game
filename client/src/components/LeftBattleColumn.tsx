@@ -64,6 +64,11 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
             {`order: ${hovered.all.order}
             target: ${hovered.all.target}`}
           </Typography>
+
+          <Typography padding={1}>
+            {`x: ${hovered.all.x}
+            y: ${hovered.all.y}`}
+          </Typography>
         </> : <></>
     }
   </div>;

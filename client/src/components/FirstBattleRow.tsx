@@ -7,7 +7,8 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
     gameObject,
     selected,
     isPaused,
-    setIsPaused
+    setIsPaused,
+    mousePosition
   } = useContext(FlamesContext);
 
   const firstBattleRowStyle: React.CSSProperties = {
@@ -24,17 +25,11 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
 
   return (
     <div style={firstBattleRowStyle}>
-      1
+      
       <div style={centeredColumnStyle}>
-        2
-        {selected.id[0]}
-        {
-          (selected.id[1]) ?
-            <>
-              {selected.id[1]}
-            </> :
-            <></>
-        }
+        <Typography>
+          {mousePosition.x} {mousePosition.y}
+        </Typography>
       </div>
 
       {

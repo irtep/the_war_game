@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
-import { GameObject, Selected } from '../data/sharedInterfaces';
+import { GameObject, MousePos, Selected } from '../data/sharedInterfaces';
 
 export const FlamesContext: React.Context<any> = createContext(undefined);
 
@@ -46,6 +46,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         all: {}
       });
     const [isPaused, setIsPaused] = useState<boolean>(true);
+    const [mousePosition, setMousePosition] = useState<MousePos>({x: '', y: ''});
 //    const [selectedOrder, setSelectedOrder] = useState<string>('');
 
     const fetchTeams = async (): Promise<void> => {
@@ -148,6 +149,8 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             weapons,
             isPaused,
             setIsPaused,
+            setMousePosition,
+            mousePosition
    //         selectedOrder,
    //         setSelectedOrder
         }}>

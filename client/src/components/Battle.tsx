@@ -97,44 +97,51 @@ const Battle: React.FC = (): React.ReactElement => {
             team.motorPower = team.horsepowers / team.weight;
             team.currentSpeed = 0;
             // methods:
-            team.turningSpeed = 3; // maybe all 1... maybe later will modificate this...
-
+            team.turningSpeed = 5; // maybe all 1... maybe later will modificate this...Copy code
             team.moveToTarget = function () {
               if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+                // Create a new object with the current values
+                const updatedTeam = { ...this };
+            
                 // Calculate angle to the target
                 const angleToTarget = Math.atan2(this.target.y - this.y, this.target.x - this.x);
-
+            
                 // Turn towards the target in discrete steps
                 const angleDiff = angleToTarget - this.a;
                 if (Math.abs(angleDiff) > this.turningSpeed) {
-                  this.a += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
+                  updatedTeam.a += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
                 } else {
-                  this.a = angleToTarget;
+                  updatedTeam.a = angleToTarget;
                 }
-
+            
                 // Accelerate until reaching maxSpeed (that is team.speed)
-                if (this.currentSpeed < this.speed) {
-                  this.currentSpeed += this.motorPower * 7;
+                if (updatedTeam.currentSpeed < this.speed) {
+                  updatedTeam.currentSpeed += this.motorPower * 20;
                 }
-
+            
                 // Calculate movement towards the target
-                const deltaX = Math.cos(this.a) * this.currentSpeed;
-                const deltaY = Math.sin(this.a) * this.currentSpeed;
-
+                const deltaX = Math.cos(updatedTeam.a) * updatedTeam.currentSpeed;
+                const deltaY = Math.sin(updatedTeam.a) * updatedTeam.currentSpeed;
+            
                 // Move towards the target
-                this.x += deltaX;
-                this.y += deltaY;
-
-
+                updatedTeam.x += deltaX;
+                updatedTeam.y += deltaY;
+            
                 // Check if the tank has reached the target
-                const distanceToTarget = Math.sqrt((this.target.x - this.x) ** 2 + (this.target.y - this.y) ** 2);
-                if (distanceToTarget < this.currentSpeed) {
-                  this.order = 'waiting';
-                  this.currentSpeed = 0;
+                const distanceToTarget = Math.sqrt((this.target.x - updatedTeam.x) ** 2 + (this.target.y - updatedTeam.y) ** 2);
+                if (distanceToTarget < updatedTeam.currentSpeed) {
+                  updatedTeam.order = 'waiting';
+                  updatedTeam.currentSpeed = 0;
                   console.log(`Tank reached the target.`);
                 }
+            
+                // Return the updated values without modifying the original object
+                return updatedTeam;
               } else {
                 console.log('Cannot move:', this.order, this.target);
+            
+                // If not moving, return the original values
+                return { ...this };
               }
             };
             /**

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
 import {
@@ -11,6 +11,7 @@ import {
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
+import { useStepContext } from '@mui/material';
 
 interface Canvas {
   w: number;
@@ -22,9 +23,15 @@ type IntervalItem = {
   intervalId: NodeJS.Timer;
 };
 
+interface ClickedObject {
+  action: string;
+  team: string;
+};
+
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
-  const [intervals, setIntervals] = useState<IntervalItem[]>([]);
-  //const [intervalId, setIntervalId] = useState<any>(null);
+  //const [intervals, setIntervals] = useState<IntervalItem[]>([]);
+  //const [clicked, setClicked] = useState<ClickedObject>({action: '', team: ''});
+  const [intervalId, setIntervalId] = useState<any>(null);
   const scale: number = 15;
   const { gameObject,
     setGameObject,
@@ -37,6 +44,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     //   setSelectedOrder,
     //   selectedOrder
   } = useContext(FlamesContext);
+  const mutableGameObject = useRef<GameObject>({ ...gameObject }); // Declare mutableGameObject using useRef
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -44,36 +52,36 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     flex: '1 0 70%',
     //backgroundColor: 'lightcoral', // Optional: Add background color for visualization
   };
-
-  const startIntervalForTeam = (team: any) => {
-    const intervalId = setInterval(() => {
-      team.moveToTarget();
-      console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
-
-      // Check if the tank has reached the target
-      if (team.order === 'waiting') {
-        console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
-        stopIntervalForTeam(team);
-      }
-    }, 250);
-
-    setIntervals((prevIntervals) => [...prevIntervals, { teamId: team.uuid, intervalId }]);
-  };
-
-  const stopIntervalForTeam = (team: any) => {
-
-    intervals.forEach( (inte: any, index: number) => {
-      console.log('checking for clear');
-      if (inte.teamId === team.uuid) {
-        console.log('found');
-        clearInterval(inte.intervalId);
-      } else {
-        console.log('not this: ', inte.teamId, team.uuid);
-      }
-    });
-
-  };
-
+  /*
+    const startIntervalForTeam = (team: any) => {
+      const intervalId = setInterval(() => {
+        team.moveToTarget();
+        console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
+  
+        // Check if the tank has reached the target
+        if (team.order === 'waiting') {
+          console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
+          stopIntervalForTeam(team);
+        }
+      }, 250);
+  
+      setIntervals((prevIntervals) => [...prevIntervals, { teamId: team.uuid, intervalId }]);
+    };
+  
+    const stopIntervalForTeam = (team: any) => {
+  
+      intervals.forEach( (inte: any, index: number) => {
+        console.log('checking for clear');
+        if (inte.teamId === team.uuid) {
+          console.log('found');
+          clearInterval(inte.intervalId);
+        } else {
+          console.log('not this: ', inte.teamId, team.uuid);
+        }
+      });
+  
+    };
+  */
   const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -172,12 +180,16 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             //console.log('changing props to target');
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
             //console.log('starting movement');
-            // Perform asynchronous state updates
+
+            startMovement(selected.id[0], setGameObject);
+            //setClicked({action: 'move', team: selected.id[0]});
+            /*
             setTimeout(() => {
               if (selected.id.length > 0) {
                 startMovement(selected.id[0], setGameObject, startIntervalForTeam);
               }
             }, 0);
+            */
           } else { console.log(' else, ', getSelected); }
           // clear selected
           setSelected({ id: [], type: '', all: {} });
@@ -198,14 +210,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
           }
 
-          if (getSelected.order === 'move') {
-            // Perform asynchronous state updates
-            setTimeout(() => {
-              if (selected.id.length > 0) {
-                startMovement(selected.id[0], setGameObject, startIntervalForTeam);
-              }
-            }, 0);
-          }
+          startMovement(selected.id[0], setGameObject);
+
 
         } else { console.log('not found'); }
 
@@ -217,6 +223,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   };
 
+  //useEffect( () => {
+  //             setClicked({action: 'move', team: selected.id[0]});
+  //if (clicked.action === 'move') {
+  // startMovement(clicked.team, setGameObject, startIntervalForTeam);
+  // }
+
+  //}, [clicked]);
+
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
 
@@ -226,39 +240,59 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   }, [gameObject]);
 
-  useEffect(() => {
-    console.log('intervals: ', intervals);
-  }, [intervals]);
+  // useEffect(() => {
+  //   console.log('intervals: ', intervals);
+  // }, [intervals]);
 
   // Event listener for spacebar
-  /*
   useEffect(() => {
-    if (isPaused) {
-
-      // Clear the existing interval when pausing
-      console.log('is paused');
+    let intervalId: NodeJS.Timeout | null = null;
+  
+    if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
+      intervalId = setInterval(() => {
+        setGameObject((prevGameObject: GameObject) => {
+          const updatedGameObject = { ...prevGameObject };
+  
+          if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
+            updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
+              ...unit,
+              teams: unit.teams.map((team: any) => {
+                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  return team.moveToTarget();
+                } else {
+                  return team;
+                }
+              }),
+            }));
+          }
+  
+          if (updatedGameObject.defender && updatedGameObject.defender.units) {
+            updatedGameObject.defender.units = updatedGameObject.defender.units.map((unit: any) => ({
+              ...unit,
+              teams: unit.teams.map((team: any) => {
+                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  return team.moveToTarget();
+                } else {
+                  return team;
+                }
+              }),
+            }));
+          }
+  
+          return updatedGameObject;
+        });
+  
+        draw(canvas, canvasSize, gameObject, selected);
+      }, 255);
+    }
+  
+    return () => {
       if (intervalId !== null) {
         console.log('clearing interval');
         clearInterval(intervalId);
-        setIntervalId(null);
       }
-      console.log('drawing');
-      draw(canvas, canvasSize, gameObject, selected);
-
-    } else if (isPaused === false && intervalId === null) {
-      // Start a new interval when resuming
-      console.log('starting interval');
-      
-      const id = window.setInterval(() => {
-        console.log('interval');
-        doOrders(gameObject, setGameObject);
-        draw(canvas, canvasSize, gameObject, selected);
-      }, 255);
-  
-      setIntervalId(id);
-    }
+    };
   }, [isPaused, gameObject, selected]);
-  */
 
   return (
     <div style={centerBattleColumnStyle}>

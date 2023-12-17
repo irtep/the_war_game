@@ -33,7 +33,7 @@ export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {
   return found;
 }
 
-export const startMovement = (id: string, setGameObject: any, startIntervalForTeam: any): void => {
+export const startMovement = (id: string, setGameObject: any): void => {
   console.log('startMovement', id);
 
   setGameObject((prevGameObject: GameObject) => ({
@@ -44,7 +44,7 @@ export const startMovement = (id: string, setGameObject: any, startIntervalForTe
         ...unit,
         teams: unit.teams.map((team: any) => {
           if (id === team.uuid) {
-            startIntervalForTeam(team);
+           team.moveToTarget()
           }
           return team;
         }),
@@ -56,7 +56,7 @@ export const startMovement = (id: string, setGameObject: any, startIntervalForTe
         ...unit,
         teams: unit.teams.map((team: any) => {
           if (id === team.uuid) {
-            startIntervalForTeam(team);
+            team.moveToTarget()
           }
           return team;
         }),

@@ -7,7 +7,7 @@ import {
   changePropsOfTeam,
   findTeamByLocation,
   findTeamById,
-  doOrders
+//  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
 
@@ -163,7 +163,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   };
 
   useEffect(() => {
-    if (gameObject.status === 'deploy') {
+    if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
 
       draw(canvas, canvasSize, gameObject, selected);
 
@@ -172,7 +172,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
   }, [gameObject, intervalId]);
 
   // Event listener for spacebar
-  
+  /*
   useEffect(() => {
     if (isPaused) {
 
@@ -199,7 +199,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       setIntervalId(id);
     }
   }, [isPaused, gameObject, selected]);
-  
+  */
 
   return (
     <div style={centerBattleColumnStyle}>

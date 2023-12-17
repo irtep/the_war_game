@@ -103,7 +103,7 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
     const defenderTeam = checkUnits(gameObject.defender.units);
     return defenderTeam;
   };
-
+/*
   export const doOrders = (gameObject: GameObject, setGameObject: any) => {
     const newGameObject = { ...gameObject };
   
@@ -137,4 +137,4 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
       draw(newGameObject, );
     }
     */
-  };
+ // };

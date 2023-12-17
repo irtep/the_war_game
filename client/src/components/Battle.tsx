@@ -95,6 +95,58 @@ const Battle: React.FC = (): React.ReactElement => {
             team.combatWeapons = prepareWeapons(team.weapons, weapons);
             // power/weight ratio
             team.motorPower = team.horsepowers / team.weight;
+            // methods:
+            /**
+             *     intervalId: null, // Store the interval ID
+
+    moveToTarget: function () {
+        if (this.order === 'move' && this.target) {
+            // Calculate angle to the target
+            const angleToTarget = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+
+            // Turn towards the target in discrete steps
+            const angleDiff = angleToTarget - this.heading;
+            if (Math.abs(angleDiff) > this.turningSpeed) {
+                this.heading += (angleDiff > 0) ? this.turningSpeed : -this.turningSpeed;
+            } else {
+                this.heading = angleToTarget;
+            }
+
+            // Accelerate until reaching maxSpeed
+            if (this.currentSpeed < this.maxSpeed) {
+                this.currentSpeed += this.acceleration;
+            }
+
+            // Calculate movement towards the target
+            const deltaX = Math.cos(this.heading) * this.currentSpeed;
+            const deltaY = Math.sin(this.heading) * this.currentSpeed;
+
+            // Move towards the target
+            this.x += deltaX;
+            this.y += deltaY;
+
+            // Check if the tank has reached the target
+            const distanceToTarget = Math.sqrt((this.target.x - this.x) ** 2 + (this.target.y - this.y) ** 2);
+            if (distanceToTarget < 1) { // You can adjust the threshold as needed
+                this.order = 'waiting';
+                console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
+                clearInterval(this.intervalId);
+            }
+        }
+    }
+};
+
+// Example usage
+team.order = 'move';
+team.target = { x: 300, y: 300 };
+
+// Start the interval and store the interval ID
+team.intervalId = setInterval(() => {
+    team.moveToTarget();
+    console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.heading.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
+}, 250);
+             */
+
           });
         });
 

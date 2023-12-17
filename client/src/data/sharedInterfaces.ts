@@ -1,7 +1,7 @@
 export interface Team {
     name: string;
     def: number;
-    speed: number;
+    speed: number; // this is max speed
     mat: number;
     rat: number;
     reactions: number;

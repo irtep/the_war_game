@@ -39,6 +39,7 @@ export function prepareWeapons(inputString: string, weapons: Array<any>) {
     });
 
     resultArray.forEach( (w: string) => {
+        console.log('w: ', w);
         const found = weapons.filter( (we: any) => we.name === w);
         found[0].reload = found[0].firerate;
         preparedWeapons.push(found[0]);

@@ -39,3 +39,4 @@ export const teamProps : Array<TeamProps> = [
     {value: "horsepowers", type: "number"},
     {value: "weight", type: "number"}
 ];
+

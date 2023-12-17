@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
-import { GameObject } from '../data/sharedInterfaces';
+import { GameObject, MousePos, Selected } from '../data/sharedInterfaces';
 
 export const FlamesContext: React.Context<any> = createContext(undefined);
 
@@ -13,12 +13,6 @@ interface SetupObject {
     attacker: string;
     defender: string;
     you: string;
-};
-
-interface Selected {
-    id: Array<string | number>;
-    type: string;
-    all?: any;
 };
 
 export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElement => {
@@ -46,8 +40,14 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         defender: '',
         terrain: ''
     });
-    const [hovered, setHovered] = useState(null);
-    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [hovered, setHovered] = useState<Selected>({
+        id: [],
+        type: '',
+        all: {}
+      });
+    const [isPaused, setIsPaused] = useState<boolean>(true);
+    const [mousePosition, setMousePosition] = useState<MousePos>({x: '', y: ''});
+//    const [selectedOrder, setSelectedOrder] = useState<string>('');
 
     const fetchTeams = async (): Promise<void> => {
         try {
@@ -148,7 +148,11 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             setHovered,
             weapons,
             isPaused,
-            setIsPaused
+            setIsPaused,
+            setMousePosition,
+            mousePosition
+   //         selectedOrder,
+   //         setSelectedOrder
         }}>
             {props.children}
         </FlamesContext.Provider>

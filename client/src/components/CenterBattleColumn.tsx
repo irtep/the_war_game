@@ -1,14 +1,36 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
-import { checkIfFromHere, FoundData } from '../functions/battleFunctions';
+import {
+  checkIfFromHere,
+  FoundData,
+  changePropsOfTeam,
+  findTeamByLocation,
+  findTeamById,
+  startMovement,
+  //  doOrders
+} from '../functions/battleFunctions';
+import { GameObject } from '../data/sharedInterfaces';
+import { useStepContext } from '@mui/material';
 
 interface Canvas {
   w: number;
   h: number;
 }
 
+type IntervalItem = {
+  teamId: string;
+  intervalId: NodeJS.Timer;
+};
+
+interface ClickedObject {
+  action: string;
+  team: string;
+};
+
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
+  //const [intervals, setIntervals] = useState<IntervalItem[]>([]);
+  //const [clicked, setClicked] = useState<ClickedObject>({action: '', team: ''});
   const [intervalId, setIntervalId] = useState<any>(null);
   const scale: number = 15;
   const { gameObject,
@@ -16,9 +38,13 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     selected,
     setSelected,
     setHovered,
-    isPaused, 
-    setIsPaused
-   } = useContext(FlamesContext);
+    isPaused,
+    setIsPaused,
+    setMousePosition
+    //   setSelectedOrder,
+    //   selectedOrder
+  } = useContext(FlamesContext);
+  const mutableGameObject = useRef<GameObject>({ ...gameObject }); // Declare mutableGameObject using useRef
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -26,39 +52,53 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     flex: '1 0 70%',
     //backgroundColor: 'lightcoral', // Optional: Add background color for visualization
   };
-
+  /*
+    const startIntervalForTeam = (team: any) => {
+      const intervalId = setInterval(() => {
+        team.moveToTarget();
+        console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
+  
+        // Check if the tank has reached the target
+        if (team.order === 'waiting') {
+          console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
+          stopIntervalForTeam(team);
+        }
+      }, 250);
+  
+      setIntervals((prevIntervals) => [...prevIntervals, { teamId: team.uuid, intervalId }]);
+    };
+  
+    const stopIntervalForTeam = (team: any) => {
+  
+      intervals.forEach( (inte: any, index: number) => {
+        console.log('checking for clear');
+        if (inte.teamId === team.uuid) {
+          console.log('found');
+          clearInterval(inte.intervalId);
+        } else {
+          console.log('not this: ', inte.teamId, team.uuid);
+        }
+      });
+  
+    };
+  */
   const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
 
-      gameObject.attacker.units.forEach((unit: any) => {
-        unit.teams.forEach((team: any) => {
-          if (
-            x >= team.x - team.width / (2 * scale) &&
-            x <= team.x + team.width / (2 * scale) &&
-            y >= team.y - team.width / (2 * scale) &&
-            y <= team.y + team.width / (2 * scale)
-          ) {
-            setHovered(team.uuid);
-          }
-        });
-      });
-      gameObject.defender.units.forEach((unit: any) => {
-        unit.teams.forEach((team: any) => {
-          if (
-            x >= team.x - team.width / (2 * scale) &&
-            x <= team.x + team.width / (2 * scale) &&
-            y >= team.y - team.width / (2 * scale) &&
-            y <= team.y + team.width / (2 * scale)
-          ) {
-            setHovered(team.uuid);
-          }
-        });
-      });
+      const tryToFind = findTeamByLocation(x, y, gameObject, scale);
+
+      if (tryToFind !== null) {
+        const whatTeam = findTeamById(tryToFind, gameObject);
+        setHovered({ id: [tryToFind], type: 'team', all: whatTeam });
+      }
+
     }
+
+    setMousePosition({ x: x, y: y });
 
   }
 
@@ -67,78 +107,44 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
+    //
     // Deploy phase
+    //
+
     if (gameObject.status === 'deploy') {
+
       // if selected
       if (selected.id.length > 0) {
+
         selected.id.forEach((id: string) => {
-          if (id[0] === 'a') {
-            setGameObject({
-              ...gameObject,
-              attacker: {
-                ...gameObject.attacker,
-                units: gameObject.attacker.units.map((unit: any) => ({
-                  ...unit,
-                  teams: unit.teams.map((team: any) =>
-                    team.uuid === id ? { ...team, x: x, y: y } : team
-                  ),
-                })),
-              },
-            });
-          } else {
-            setGameObject({
-              ...gameObject,
-              defender: {
-                ...gameObject.defender,
-                units: gameObject.defender.units.map((unit: any) => ({
-                  ...unit,
-                  teams: unit.teams.map((team: any) =>
-                    team.uuid === id ? { ...team, x: x, y: y } : team
-                  ),
-                })),
-              },
-            });
-          }
+          changePropsOfTeam(id, ['x', 'y'], [x, y], gameObject, setGameObject);
         });
+
         setSelected({ id: [], type: '' });
       } else {
         // if not selected yet
-        gameObject.attacker.units.forEach((unit: any) => {
-          unit.teams.forEach((team: any) => {
-            if (
-              x >= team.x - team.width / (2 * scale) &&
-              x <= team.x + team.width / (2 * scale) &&
-              y >= team.y - team.width / (2 * scale) &&
-              y <= team.y + team.width / (2 * scale)
-            ) {
-              setSelected({ id: [team.uuid], type: 'team' });
-            }
-          });
-        });
-        gameObject.defender.units.forEach((unit: any) => {
-          unit.teams.forEach((team: any) => {
-            if (
-              x >= team.x - team.width / (2 * scale) &&
-              x <= team.x + team.width / (2 * scale) &&
-              y >= team.y - team.width / (2 * scale) &&
-              y <= team.y + team.width / (2 * scale)
-            ) {
-              setSelected({ id: [team.uuid], type: 'team' });
-            }
-          });
-        });
+
+        const finding = findTeamByLocation(x, y, gameObject, scale);
+
+        if (findTeamByLocation !== null) {
+          setSelected({ id: [finding], type: 'team' });
+        }
+
       }
     }
+
+    //
     //          Battle phase
+    //
+
     else if (gameObject.status === 'battle') {
       const playersUnit: FoundData = checkIfFromHere(gameObject[gameObject.player].units, x, y, scale);
-      console.log('pU ', playersUnit);
       const opponentsUnit: FoundData = checkIfFromHere(gameObject[gameObject.opponent].units, x, y, scale);
-      console.log('oU ', opponentsUnit);
+
       // if clicked is from your team
       if (playersUnit.found) {
+
         // order: listening, everyone else who was listening goes waiting
-        console.log('player unit!');
         setGameObject({
           ...gameObject,
           [gameObject.player]: {
@@ -151,147 +157,261 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             })),
           },
         });
-        setSelected({id: playersUnit.id, type: 'team', all: playersUnit.all});
-        // show order buttons
+        setSelected({ id: [playersUnit.id], type: 'team', all: playersUnit.all });
       }
 
       // if clicked is from opponent team and order is selected
       else if (opponentsUnit.found) {
-        // who ever had listening gets selected order and target is uuid of that clicked opponent
-        console.log('opponents unit!');
-        // hide order buttons
+        // who ever had listening gets selected order and target is uuid of that clicked opponent, clear selected
+        const getSelected = findTeamById(selected.id[0], gameObject);
+
+        if (getSelected !== null) {
+          // if attack order, goes as target
+          if (getSelected.order === 'attack' ||
+            getSelected.order === 'charge' ||
+            getSelected.order === 'smoke attack' ||
+            getSelected.order === 'smoke bombard' ||
+            getSelected.order === 'bombard') {
+
+            changePropsOfTeam(selected.id[0], ['target'], [opponentsUnit.id], gameObject, setGameObject);
+
+          }
+          else if (getSelected.order === 'move') {
+            //console.log('changing props to target');
+            changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+            //console.log('starting movement');
+
+            startMovement(selected.id[0], setGameObject);
+            //setClicked({action: 'move', team: selected.id[0]});
+            /*
+            setTimeout(() => {
+              if (selected.id.length > 0) {
+                startMovement(selected.id[0], setGameObject, startIntervalForTeam);
+              }
+            }, 0);
+            */
+          } else { console.log(' else, ', getSelected); }
+          // clear selected
+          setSelected({ id: [], type: '', all: {} });
+        }
       }
 
       // if clicked was not any team,
       else {
-        // that location comes as target and selected order as order
-        console.log('no unit');
-        // hide order buttons
+        const getSelected = findTeamById(selected.id[0], gameObject);
+        console.log('was not selected');
+        // if move or bombards
+        if (getSelected) {
+          console.log('found selected');
+          if (getSelected.order === 'move' ||
+            getSelected.order === 'smoke bombard' ||
+            getSelected.order === 'bombard') {
+            console.log('move, smoke or bombard');
+            changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+          }
+
+          startMovement(selected.id[0], setGameObject);
+
+
+        } else { console.log('not found'); }
+
+        // clear selected
+        setSelected({ id: [], type: '', all: {} });
       }
 
     }
 
   };
 
+  //useEffect( () => {
+  //             setClicked({action: 'move', team: selected.id[0]});
+  //if (clicked.action === 'move') {
+  // startMovement(clicked.team, setGameObject, startIntervalForTeam);
+  // }
+
+  //}, [clicked]);
+
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
 
-      console.log('status: ', gameObject.status);
-      draw(canvas, canvasSize, gameObject);
+      draw(canvas, canvasSize, gameObject, selected);
 
-    } else if (gameObject.status === 'startBattle' && !intervalId) {
-      // Only start the interval if it hasn't been started yet
-      //console.log('starting interval, 1st effect');
-      const id = window.setInterval(() => {
-        //console.log('interval: ');
-      }, 1000);
-      setIntervalId(id);
-      setGameObject({ ...gameObject, status: 'battle' });
     }
 
-    // Cleanup function to clear the interval when component unmounts or dependencies change
+  }, [gameObject]);
 
-  }, [gameObject, intervalId]);
+  // useEffect(() => {
+  //   console.log('intervals: ', intervals);
+  // }, [intervals]);
 
   // Event listener for spacebar
   useEffect(() => {
-    const handleKeyDown = (event: { key: string; }) => {
-      
-      if (event.key === ' ') {
-        //console.log('key down, space');
-        if (isPaused) {
-          // Clear the existing interval when pausing
-          //console.log('is paused, clearing interval');
-          clearInterval(intervalId);
-        } else {
-          // Start a new interval when resuming
-          //console.log('starting interval')
-          const id = window.setInterval(() => {
-            //console.log('interval: ');
-          }, 1000);
-          setIntervalId(id);
-        }
-
-        // Toggle the pause state
-        console.log('pause toggle');
-        setIsPaused((prevState: any) => !prevState);
+    let intervalId: NodeJS.Timeout | null = null;
+  
+    if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
+      intervalId = setInterval(() => {
+        setGameObject((prevGameObject: GameObject) => {
+          const updatedGameObject = { ...prevGameObject };
+  
+          if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
+            updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
+              ...unit,
+              teams: unit.teams.map((team: any) => {
+                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  return team.moveToTarget();
+                } else {
+                  return team;
+                }
+              }),
+            }));
+          }
+  
+          if (updatedGameObject.defender && updatedGameObject.defender.units) {
+            updatedGameObject.defender.units = updatedGameObject.defender.units.map((unit: any) => ({
+              ...unit,
+              teams: unit.teams.map((team: any) => {
+                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  return team.moveToTarget();
+                } else {
+                  return team;
+                }
+              }),
+            }));
+          }
+  
+          return updatedGameObject;
+        });
+  
+        draw(canvas, canvasSize, gameObject, selected);
+      }, 255);
+    }
+  
+    return () => {
+      if (intervalId !== null) {
+        console.log('clearing interval');
+        clearInterval(intervalId);
       }
     };
-    console.log('adding keydown listener');
-    window.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup function to remove the event listener when component unmounts or dependencies change
- 
-    return () => {
-      console.log('removing keydown listener');
-      window.removeEventListener('keydown', handleKeyDown);
-    }; 
-  }, [isPaused, intervalId]);
+  }, [isPaused, gameObject, selected]);
 
   return (
     <div style={centerBattleColumnStyle}>
-      <button
-        onClick={() => { draw(canvas, canvasSize, gameObject); }}>
-        draw
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            attacker: {
-              ...gameObject.attacker,
-              units: gameObject.attacker.units.map((unit: any, unitIndex: number) => ({
-                ...unit,
-                teams: unit.teams.map((team: any, teamIndex: number) => {
-                  let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
-                  let newY = 50;
-                  if (unit.id > 3) {
-                    newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 130
-                  }
-                  return { ...team, x: newX, y: newY, a: 180 };
-                }),
-              })),
-            },
-          });
-        }}
-      >
-        quickdepo A
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            defender: {
-              ...gameObject.defender,
-              units: gameObject.defender.units.map((unit: any, unitIndex: number) => ({
-                ...unit,
-                teams: unit.teams.map((team: any, teamIndex: number) => {
-                  let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
-                  let newY = 780;
-                  if (unit.id > 3) {
-                    newX = 100 + unitIndex * 100 + teamIndex * 50;
-                    newY = 830
-                  }
-                  return { ...team, x: newX, y: newY };
-                }),
-              })),
-            },
-          });
-        }}
-      >
-        quickdepo D
-      </button>
-      <button
-        onClick={() => {
-          setGameObject({
-            ...gameObject,
-            status: 'startBattle'
-          });
-        }}
-      >
-        deployment ready
-      </button>
+
+      {
+        (gameObject.status === 'deploy') ?
+          <>
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  attacker: {
+                    ...gameObject.attacker,
+                    units: gameObject.attacker.units.map((unit: any, unitIndex: number) => ({
+                      ...unit,
+                      teams: unit.teams.map((team: any, teamIndex: number) => {
+                        let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
+                        let newY = 50;
+                        if (unit.id > 3) {
+                          newX = 100 + unitIndex * 100 + teamIndex * 50;
+                          newY = 130
+                        }
+                        return { ...team, x: newX, y: newY, a: 180 };
+                      }),
+                    })),
+                  },
+                });
+              }}
+            >
+              quickdepo A
+            </button>
+
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  defender: {
+                    ...gameObject.defender,
+                    units: gameObject.defender.units.map((unit: any, unitIndex: number) => ({
+                      ...unit,
+                      teams: unit.teams.map((team: any, teamIndex: number) => {
+                        let newX = 50 + unitIndex * 100 + teamIndex * 50 + unit.id * 170;
+                        let newY = 780;
+                        if (unit.id > 3) {
+                          newX = 100 + unitIndex * 100 + teamIndex * 50;
+                          newY = 830
+                        }
+                        return { ...team, x: newX, y: newY };
+                      }),
+                    })),
+                  },
+                });
+              }}
+            >
+              quickdepo D
+            </button>
+
+            <button
+              onClick={() => {
+                setGameObject({
+                  ...gameObject,
+                  status: 'battle'
+                });
+              }}
+            >
+              deployment ready
+            </button>
+          </> : <></>
+      }
+      {
+        (gameObject.status === 'battle' && selected.id.length > 0) ?
+          <>
+
+            <button onClick={() => {
+              changePropsOfTeam(selected.id[0], ['order'], ['move'], gameObject, setGameObject)
+            }}>
+              move
+            </button>
+
+            <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['attack'], gameObject, setGameObject) }}>
+              attack
+            </button>
+
+            {
+              (selected.all.type !== 'gun') ?
+                <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['charge'], gameObject, setGameObject) }}>
+                  charge
+                </button> : <></>
+            }
+
+            {
+              (selected.all.type === 'infantry') ?
+                <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['dig foxholes'], gameObject, setGameObject) }}>
+                  dig foxholes
+                </button> : <></>
+            }
+
+            {
+              selected.all.combatWeapons.map((wepo: any, ix: number) => {
+                return (
+                  <span key={`arti: ${ix}`}>
+                    {
+                      (wepo.specials.includes('artillery')) ?
+                        <>
+                          <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['bombard'], gameObject, setGameObject) }}>
+                            bombard
+                          </button>
+                        </> :
+                        <></>
+                    }
+                  </span>
+                )
+              }
+              )
+            }
+          </> : <></>
+      }
+
+
       <br />
       <canvas
         id="battleCanvas"

@@ -6,7 +6,9 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
   const {
     gameObject,
     selected,
-    isPaused
+    isPaused,
+    setIsPaused,
+    mousePosition
   } = useContext(FlamesContext);
 
   const firstBattleRowStyle: React.CSSProperties = {
@@ -23,28 +25,27 @@ const FirstBattleRow: React.FC = (): React.ReactElement => {
 
   return (
     <div style={firstBattleRowStyle}>
-      1
+      
       <div style={centeredColumnStyle}>
-        2
-        {selected.id[0]}
-        {
-          (selected.id[1]) ?
-            <>
-              {selected.id[1]}
-            </> :
-            <></>
-        }
-            </div>
+        <Typography>
+          {mousePosition.x} {mousePosition.y}
+        </Typography>
+      </div>
 
-        {
-          (gameObject.status === 'battle' && isPaused === true)?
+      {
+        (gameObject.status === 'battle' && isPaused === true) ?
           <Typography>
             GAME PAUSED
-          </Typography>: <></>
-        }
-
-      </div>
-      );
+          </Typography> : <></>
+      }
+      {
+        (gameObject.status === 'battle') ?
+          <button onClick={ () => { setIsPaused(!isPaused)}}>
+            toggle pause
+          </button> : <></>
+      }
+ </div>
+  );
 };
 
-      export default FirstBattleRow;
+export default FirstBattleRow;

@@ -1,7 +1,7 @@
 export interface Team {
     name: string;
     def: number;
-    speed: number;
+    speed: number; // this is max speed
     mat: number;
     rat: number;
     reactions: number;
@@ -18,7 +18,7 @@ export interface Team {
     effects: number|string;
     specials: number|string;
     desc: string;
-    order: string;
+    order: any;
     weapons: Array<string>|string;
     unit: string;
     transport: number;
@@ -51,6 +51,11 @@ export interface Army {
 
 };
 
+export interface MousePos {
+    x: string | number,
+    y: string | number
+  }
+
 export interface GameObject {
     status: 'setup'  | 'preBattle'  | 'battle'  | 'postBattle';
     attacker: any,
@@ -81,6 +86,12 @@ export interface SavedUnit {
     name: string;
     teams: Array<SavedTeam>;
     points: number
+};
+
+export interface Selected {
+    id: Array<string | number>;
+    type: string;
+    all?: any;
 };
 
 // number|string;

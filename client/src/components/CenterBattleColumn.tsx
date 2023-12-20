@@ -240,19 +240,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   }, [gameObject]);
 
-  // useEffect(() => {
-  //   console.log('intervals: ', intervals);
-  // }, [intervals]);
-
-  // Event listener for spacebar
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-  
+
     if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
       intervalId = setInterval(() => {
         setGameObject((prevGameObject: GameObject) => {
           const updatedGameObject = { ...prevGameObject };
-  
+
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
             updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
               ...unit,
@@ -265,7 +260,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }),
             }));
           }
-  
+
           if (updatedGameObject.defender && updatedGameObject.defender.units) {
             updatedGameObject.defender.units = updatedGameObject.defender.units.map((unit: any) => ({
               ...unit,
@@ -278,14 +273,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }),
             }));
           }
-  
+
           return updatedGameObject;
         });
-  
+
         draw(canvas, canvasSize, gameObject, selected);
-      }, 255);
+      }, 100);
     }
-  
+
     return () => {
       if (intervalId !== null) {
         console.log('clearing interval');
@@ -365,6 +360,12 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       {
         (gameObject.status === 'battle' && selected.id.length > 0) ?
           <>
+
+            <button onClick={() => {
+              changePropsOfTeam(selected.id[0], ['order'], ['wait'], gameObject, setGameObject)
+            }}>
+              wait
+            </button>
 
             <button onClick={() => {
               changePropsOfTeam(selected.id[0], ['order'], ['move'], gameObject, setGameObject)

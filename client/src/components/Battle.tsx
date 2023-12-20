@@ -105,108 +105,32 @@ const Battle: React.FC = (): React.ReactElement => {
             team.turningSpeed = 5; // maybe all 1... maybe later will modificate this...Copy code
             team.moveToTarget = function () {
               if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
-                // Create a new object with the current values
                 const updatedTeam = { ...this };
-                let bestResult = 'forward';
-
-                // returns next location
-                const getSpeeds = (rotation: any, speed: any) => {
-                  const to_angles = Math.PI / 360;
-
-                  return {
-                    y: Math.sin(rotation * to_angles) * speed,
-                    x: Math.cos(rotation * to_angles) * speed * -1,
-                  };
-                }
-
-                // radar checks, that checks what direction is the closest
-                const radarCheckForward = (centerOfCar: Location, heading: number, speed: number): Location => {
-                  const newSpeeds = getSpeeds(heading, speed);
-                  console.log('ff check: ', centerOfCar.x + -newSpeeds.x, centerOfCar.y + newSpeeds.y);
-                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
-                }
-
-                const radarCheckLeft = (centerOfCar: Location, heading: number, turnRate: number, speed: number): Location => {
-                  const newSpeeds = getSpeeds(heading -= turnRate, speed);
-                  console.log('l check: ', centerOfCar.x + -newSpeeds.x, centerOfCar.y + newSpeeds.y);
-                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
-                }
-
-                const radarCheckRight = (centerOfCar: Location, heading: number, turnRate: number, speed: number): Location => {
-                  const newSpeeds = getSpeeds(heading += turnRate, speed);
-                  console.log('r check: ', centerOfCar.x + -newSpeeds.x, centerOfCar.y + newSpeeds.y);
-                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
-                }
-
-                // Distance check
-                const distanceCheck = (fromWhere: Location, toWhere: Location) => {
-                  const a = fromWhere.x - toWhere.x // x1 - x2;
-                  const b = fromWhere.y - toWhere.y // y1 - y2;
-
-                  const c = Math.sqrt(a * a + b * b);
-                  return c;
-                }
-
-                // checks what would be the closest way to target
-                const forwardTest = radarCheckForward({ x: this.x, y: this.y }, this.a, 5);
-                const turnLeftTest = radarCheckLeft({ x: this.x, y: this.y }, this.a, this.turningSpeed, 5);
-                const turnRightTest = radarCheckRight({ x: this.x, y: this.y }, this.a, this.turningSpeed, 5);
-
-                const distanceIfForward = distanceCheck(forwardTest, this.target);
-                const distanceIfLeft = distanceCheck(turnLeftTest, this.target);
-                const distanceIfRight = distanceCheck(turnRightTest, this.target);
-
-                /*
-                console.log('tests for ', this.uuid);
-                console.log(`
-                ff: ${distanceIfForward}
-                left: ${distanceIfLeft}
-                right: ${distanceIfRight}
-                `);
-                */
-
-                // choose direction by checking where is the target
-                if (distanceIfForward > distanceIfLeft) {
-                  bestResult = 'turn left';
-                }
-                if (distanceIfForward > distanceIfRight) {
-                  bestResult = 'turn right';
-                }
-
-                // Accelerate until reaching maxSpeed (that is team.speed)
-                if (updatedTeam.currentSpeed < this.speed) {
-                  updatedTeam.currentSpeed += this.motorPower * 10;
-                }
-
-                // execute wheel turning.
-                switch (bestResult) {
-
-                  case 'turn left':
-                    updatedTeam.a = this.a - this.turningSpeed;
-                    break;
-                  case 'turn right':
-                    updatedTeam.a = this.a + this.turningSpeed;
-                    break;
-                }
-                
-                const speeds = getSpeeds(updatedTeam.a, updatedTeam.currentSpeed);
-                console.log('best result: ', bestResult);
-                // new location:
-                updatedTeam.x += -speeds.x;
-                updatedTeam.y += speeds.y;
-                
-                const distanceToTarget = distanceCheck({x: updatedTeam.x, y: updatedTeam.y}, {x: this.target.x, y: this.target.y});
-                console.log('distance to target: ', distanceToTarget);
-                if (distanceToTarget < 10) {
-                  updatedTeam.order = 'wait';
+            
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+            
+                // Calculate the angle based on the target position and add 90 degrees
+                updatedTeam.a = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
+            
+                const distance = Math.sqrt(dx * dx + dy * dy);
+            
+                if (distance > updatedTeam.speed) {
+                  updatedTeam.x += (dx / distance) * 1;
+                  updatedTeam.y += (dy / distance) * 1;
+                } else {
+                  // Arrived at the target
+                  updatedTeam.x = updatedTeam.target.x;
+                  updatedTeam.y = updatedTeam.target.y;
                   updatedTeam.target = '';
-                  updatedTeam.currentSpeed = 0;
+                  updatedTeam.order = 'waiting';
                 }
+            
+                console.log('returning: ', updatedTeam.name);
                 return updatedTeam;
               } else {
                 console.log('Cannot move:', this.order, this.target);
-
-                // If not moving, return the original values
+            
                 return { ...this };
               }
             };
@@ -305,4 +229,102 @@ export default Battle;
       
           });
         });
+*/
+
+/*
+            team.moveToTarget = function () {
+              if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+                // Create a new object with the current values
+                const updatedTeam = { ...this };
+                let bestResult = 'forward';
+
+                // returns next location
+                const getSpeeds = (rotation: any, speed: any) => {
+                  const to_angles = Math.PI / 360;
+
+                  return {
+                    y: Math.sin(rotation * to_angles) * speed,
+                    x: Math.cos(rotation * to_angles) * speed * -1,
+                  };
+                }
+
+                // radar checks, that checks what direction is the closest
+                const radarCheckForward = (centerOfCar: Location, heading: number, speed: number): Location => {
+                  const newSpeeds = getSpeeds(heading, speed);
+                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
+                }
+
+                const radarCheckLeft = (centerOfCar: Location, heading: number, turnRate: number, speed: number): Location => {
+                  const newSpeeds = getSpeeds(heading -= turnRate, speed);
+                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
+                }
+
+                const radarCheckRight = (centerOfCar: Location, heading: number, turnRate: number, speed: number): Location => {
+                  const newSpeeds = getSpeeds(heading += turnRate, speed);
+                  return { x: centerOfCar.x + -newSpeeds.x, y: centerOfCar.y + newSpeeds.y };
+                }
+
+                // Distance check
+                const distanceCheck = (fromWhere: Location, toWhere: Location) => {
+                  const a = fromWhere.x - toWhere.x // x1 - x2;
+                  const b = fromWhere.y - toWhere.y // y1 - y2;
+
+                  const c = Math.sqrt(a * a + b * b);
+                  return c;
+                }
+
+                // checks what would be the closest way to target
+                const forwardTest = radarCheckForward({ x: this.x, y: this.y }, this.a, 5);
+                const turnLeftTest = radarCheckLeft({ x: this.x, y: this.y }, this.a, this.turningSpeed, 5);
+                const turnRightTest = radarCheckRight({ x: this.x, y: this.y }, this.a, this.turningSpeed, 5);
+
+                const distanceIfForward = distanceCheck(forwardTest, this.target);
+                const distanceIfLeft = distanceCheck(turnLeftTest, this.target);
+                const distanceIfRight = distanceCheck(turnRightTest, this.target);
+
+                // choose direction by checking where is the target
+                if (distanceIfForward > distanceIfLeft) {
+                  bestResult = 'turn left';
+                }
+                if (distanceIfForward > distanceIfRight) {
+                  bestResult = 'turn right';
+                }
+
+                // Accelerate until reaching maxSpeed (that is team.speed)
+                if (updatedTeam.currentSpeed < this.speed) {
+                  updatedTeam.currentSpeed += this.motorPower * 10;
+                }
+
+                // execute wheel turning.
+                switch (bestResult) {
+                  case 'turn left':
+                    updatedTeam.a = (this.a - this.turningSpeed + 360) % 360;
+                    break;
+                
+                  case 'turn right':
+                    updatedTeam.a = (this.a + this.turningSpeed) % 360;
+                    break;
+                }
+                
+                const speeds = getSpeeds(updatedTeam.a, updatedTeam.currentSpeed);
+                console.log('best result: ', bestResult);
+                // new location:
+                updatedTeam.x += -speeds.x;
+                updatedTeam.y += speeds.y;
+                
+                const distanceToTarget = distanceCheck({x: updatedTeam.x, y: updatedTeam.y}, {x: this.target.x, y: this.target.y});
+                console.log('distance to target: ', distanceToTarget);
+                if (distanceToTarget < 10) {
+                  updatedTeam.order = 'wait';
+                  updatedTeam.target = '';
+                  updatedTeam.currentSpeed = 0;
+                }
+                return updatedTeam;
+              } else {
+                console.log('Cannot move:', this.order, this.target);
+
+                // If not moving, return the original values
+                return { ...this };
+              }
+            };
 */

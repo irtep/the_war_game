@@ -8,7 +8,7 @@ import {
   findTeamByLocation,
   findTeamById,
   startMovement,
-  collisionCheck,
+  getRotatedCorners,
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
@@ -129,6 +129,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           },
         });
         setSelected({ id: [playersUnit.id], type: 'team', all: playersUnit.all });
+        const rotated = getRotatedCorners(findTeamById(playersUnit.id, gameObject));
+        console.log('rotated: ', rotated);
       }
 
       // if clicked is from opponent team and order is selected
@@ -217,8 +219,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
                   // make collision check:
-                  const check = collisionCheck(gameObject, team);
-                  console.log('check: ', check);
+                  //const check = collisionCheck(gameObject, team);
+                  //console.log('check: ', check);
                   return team.moveToTarget();
                 } else {
                   return team;

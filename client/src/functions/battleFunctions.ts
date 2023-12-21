@@ -49,11 +49,11 @@ const checkCollisionWithRotatedRect = (team: any, otherTeam: any) => {
   const rotatedY = relativeY * cosA - relativeX * sinA;
 
   // Check collision in the original orientation
-  if (    rotatedX < team.width / 2 &&
-  rotatedX > -team.width / 2 &&
-  rotatedY < team.height / 2 &&
-  rotatedY > -team.height / 2) {
-    console.log('cc :', team.uuid, otherTeam.id, otherTeam.uuid, otherTeam);
+  if (rotatedX < team.width / 2 &&
+    rotatedX > -team.width / 2 &&
+    rotatedY < team.height / 2 &&
+    rotatedY > -team.height / 2) {
+    console.log('cc :', team.uuid, otherTeam.id, otherTeam.uuid);
   }
   return (
     rotatedX < team.width / 2 &&
@@ -79,35 +79,6 @@ const checkCollisionWithCircle = (team: any, circle: any) => {
     rotatedY < team.height / 2 + circle.radius &&
     rotatedY > -team.height / 2 - circle.radius
   );
-}
-
-export const collisionCheck = (gameObject: GameObject, driver: any) => {
-  // check collision
-  //console.log('go ', gameObject);
-  //console.log('go: a ', gameObject.attacker);
-  //console.log('go  a units', gameObject.attacker.units);
-  //console.log('go a units 0 teams', gameObject.attacker.units[0].teams);
-  //console.log('go a units 0 teams 0 ', gameObject.attacker.units[0].teams[0]);
-  const attackerTeams = gameObject.attacker.units
-    .flatMap((u: any) => u.teams.filter((t: any) => t.uuid !== driver.uuid));
-  //console.log('aT flatmap ok');
-  const defenderTeams = gameObject.defender.units
-    .flatMap((u: any) => u.teams.filter((t: any) => t.uuid !== driver.uuid));
-  //console.log('dT flatmap ok');
-  const allRectangles = attackerTeams.concat(
-    defenderTeams,
-    gameObject.terrain.houses);
-
-  const allCircles = gameObject.terrain.trees.concat(gameObject.terrain.waters);
-
-  // Check collision with rectangles and circles
-  const collidedWithRect = allRectangles.some((otherTeam: any) => checkCollisionWithRotatedRect(driver, otherTeam));
-  const collidedWithCircle = allCircles.some((circle: any) => checkCollisionWithCircle(driver, circle));
-  console.log(
-    collidedWithCircle,
-    collidedWithRect
-  );
-  return {circles: collidedWithCircle, rects: collidedWithRect}
 }
 
 export const startMovement = (id: string, setGameObject: any, gameObject: GameObject, selected: any): void => {
@@ -211,4 +182,31 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
 
   const defenderTeam = checkUnits(gameObject.defender.units);
   return defenderTeam;
+};
+
+export const getRotatedCorners = (team: any) => {
+  const cosA = Math.cos((team.a * Math.PI) / 180);
+  const sinA = Math.sin((team.a * Math.PI) / 180);
+  console.log('team.a ', team.a);
+  console.log('cosA sinA', cosA, sinA);
+  // Calculate half-width and half-height
+  console.log('team.w', team.w);
+  const halfWidth = team.width / 2;
+  const halfHeight = team.height / 2;
+  console.log('hw hh ', halfWidth, halfHeight);
+  // Calculate the coordinates of all corners in local coordinates
+  const localCorners = [
+    { x: -halfWidth, y: -halfHeight }, // Top-left corner
+    { x: halfWidth, y: -halfHeight },  // Top-right corner
+    { x: halfWidth, y: halfHeight },   // Bottom-right corner
+    { x: -halfWidth, y: halfHeight },  // Bottom-left corner
+  ];
+  console.log('locas: ', localCorners);
+  // Rotate each corner back to the original orientation
+  const rotatedCorners = localCorners.map(({ x, y }) => ({
+    x: team.x + x * cosA - y * sinA,
+    y: team.y + y * cosA + x * sinA,
+  }));
+
+  return rotatedCorners;
 };

@@ -109,7 +109,7 @@ const Battle: React.FC = (): React.ReactElement => {
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
+
                 // Calculate the angle based on the target position and add 90 degrees
                 updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
 
@@ -141,7 +141,6 @@ const Battle: React.FC = (): React.ReactElement => {
                 return { ...this };
               }
             };
-
           });
         });
 

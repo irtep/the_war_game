@@ -106,31 +106,49 @@ const Battle: React.FC = (): React.ReactElement => {
             team.moveToTarget = function () {
               if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
                 const updatedTeam = { ...this };
-            
+
+                // returns next location
+                const getSpeeds = (rotation: any, speed: any) => {
+                  const to_angles = Math.PI / 360;
+
+                  return {
+                    y: Math.sin(rotation * to_angles) * speed,
+                    x: Math.cos(rotation * to_angles) * speed * -1,
+                  };
+                }
+
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;
-            
-                // Calculate the angle based on the target position and add 90 degrees
-                updatedTeam.a = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
-            
                 const distance = Math.sqrt(dx * dx + dy * dy);
-            
-                if (distance > updatedTeam.speed) {
+
+                // Calculate the angle based on the target position and add 90 degrees
+                updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
+
+                const angleTolerance = 0.5; // Adjust this value based on your tolerance requirements
+
+                if (Math.abs(updatedTeam.targetAngle - updatedTeam.a) < angleTolerance) {
                   updatedTeam.x += (dx / distance) * 1;
                   updatedTeam.y += (dy / distance) * 1;
-                } else {
+                } else if (updatedTeam.targetAngle < updatedTeam.a) {
+                  updatedTeam.a--;
+                  updatedTeam.x += (dx / distance) * (1/3);
+                  updatedTeam.y += (dy / distance) * (1/3);
+                } else if (updatedTeam.targetAngle > updatedTeam.a) {
+                  updatedTeam.a++;
+                  updatedTeam.x += (dx / distance) * (1/3);
+                  updatedTeam.y += (dy / distance) * (1/3);
+                }
+
+                if (distance < updatedTeam.speed) {
                   // Arrived at the target
-                  updatedTeam.x = updatedTeam.target.x;
-                  updatedTeam.y = updatedTeam.target.y;
                   updatedTeam.target = '';
                   updatedTeam.order = 'waiting';
                 }
-            
-                console.log('returning: ', updatedTeam.name);
+
                 return updatedTeam;
               } else {
                 console.log('Cannot move:', this.order, this.target);
-            
+
                 return { ...this };
               }
             };

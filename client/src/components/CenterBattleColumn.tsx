@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
 import {
@@ -8,10 +8,10 @@ import {
   findTeamByLocation,
   findTeamById,
   startMovement,
+  collisionCheck,
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
-import { useStepContext } from '@mui/material';
 
 interface Canvas {
   w: number;
@@ -44,7 +44,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     //   setSelectedOrder,
     //   selectedOrder
   } = useContext(FlamesContext);
-  const mutableGameObject = useRef<GameObject>({ ...gameObject }); // Declare mutableGameObject using useRef
+  //const mutableGameObject = useRef<GameObject>({ ...gameObject }); // Declare mutableGameObject using useRef
   const canvasSize: Canvas = { w: 1300, h: 900 };
   const canvas = document.getElementById("battleCanvas") as HTMLCanvasElement;
 
@@ -52,36 +52,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     flex: '1 0 70%',
     //backgroundColor: 'lightcoral', // Optional: Add background color for visualization
   };
-  /*
-    const startIntervalForTeam = (team: any) => {
-      const intervalId = setInterval(() => {
-        team.moveToTarget();
-        console.log(`Tank position: (${team.x}, ${team.y}), Heading: ${team.a.toFixed(2)}, Speed: ${team.currentSpeed.toFixed(2)}, Order: ${team.order}`);
-  
-        // Check if the tank has reached the target
-        if (team.order === 'waiting') {
-          console.log(`Tank reached the target. Order changed to 'waiting'. Stopping the interval.`);
-          stopIntervalForTeam(team);
-        }
-      }, 250);
-  
-      setIntervals((prevIntervals) => [...prevIntervals, { teamId: team.uuid, intervalId }]);
-    };
-  
-    const stopIntervalForTeam = (team: any) => {
-  
-      intervals.forEach( (inte: any, index: number) => {
-        console.log('checking for clear');
-        if (inte.teamId === team.uuid) {
-          console.log('found');
-          clearInterval(inte.intervalId);
-        } else {
-          console.log('not this: ', inte.teamId, team.uuid);
-        }
-      });
-  
-    };
-  */
+
   const handleHover = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -181,7 +152,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
             //console.log('starting movement');
 
-            startMovement(selected.id[0], setGameObject);
+            startMovement(selected.id[0], setGameObject, gameObject, selected);
             //setClicked({action: 'move', team: selected.id[0]});
             /*
             setTimeout(() => {
@@ -210,7 +181,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
           }
 
-          startMovement(selected.id[0], setGameObject);
+          startMovement(selected.id[0], setGameObject, gameObject, selected);
 
 
         } else { console.log('not found'); }
@@ -222,14 +193,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     }
 
   };
-
-  //useEffect( () => {
-  //             setClicked({action: 'move', team: selected.id[0]});
-  //if (clicked.action === 'move') {
-  // startMovement(clicked.team, setGameObject, startIntervalForTeam);
-  // }
-
-  //}, [clicked]);
 
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
@@ -253,6 +216,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               ...unit,
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  // make collision check:
+                  const check = collisionCheck(gameObject, team);
+                  console.log('check: ', check);
                   return team.moveToTarget();
                 } else {
                   return team;

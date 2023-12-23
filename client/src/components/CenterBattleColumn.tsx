@@ -9,6 +9,7 @@ import {
   findTeamById,
   startMovement,
   getRotatedCorners,
+  collisionCheck
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
@@ -219,7 +220,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
                   // make collision check:
-                  //const check = collisionCheck(gameObject, team);
+                  const check = collisionCheck(gameObject, canvas, team);
                   //console.log('check: ', check);
                   return team.moveToTarget();
                 } else {
@@ -402,3 +403,4 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 };
 
 export default CenterBattleColumn;
+

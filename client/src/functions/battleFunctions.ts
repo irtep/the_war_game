@@ -7,6 +7,62 @@ export interface FoundData {
   all: any;
 };
 
+// https://stackoverflow.com/questions/41469794/html-canvas-and-javascript-rotating-objects-with-collision-detection
+export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any) => {
+  const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
+  // Get the inverse transformation matrix of the tank
+  //var tankInvMatrix = ctx?.getTransform().invertSelf();
+  let collision = false;
+
+  // Create a DOMPoint representing the position of the bullet
+  // tank who is checking is now the bullet
+  //var bullet = new DOMPoint(team.x, team.y);
+  //console.log('dom point bullet: ', bullet);
+  // Transform the bullet point using the inverse matrix to get the relative position
+  //var relBullet = tankInvMatrix?.transformPoint(bullet);
+  //console.log('relbullet ', relBullet);
+  // Check for collision between rectangles
+  //var tankRect = { x: tankX, y: tankY, width: tankWidth, height: tankHeight };
+  //var bulletRect = { x: relBullet.x, y: relBullet.y, width: bulletWidth, height: bulletHeight };
+
+  const checkRecVsRec = ((team2: any): void => {
+
+    ctx?.save(); // save old coords
+    ctx?.translate(team2.x, team2.y); // go to x and y of team2
+    ctx?.rotate(team2.a); // rotate to angle of team
+    var tankInvMatrix = ctx?.getTransform().invertSelf(); // get inverse transformation matris of this rotated tank
+    var bullet = new DOMPoint(team.x, team.y); // make dom point of team, that is now called a bullet
+    var relBullet = tankInvMatrix?.transformPoint(bullet); // Transform the bullet point using the inverse matrix to get the relative position
+
+    if (
+      relBullet &&
+      relBullet.x !== undefined &&
+      relBullet.y !== undefined &&
+      relBullet.x > -20 && relBullet.x < 20 &&
+      relBullet.y > -10 && relBullet.y < 10
+    ) {
+      // Collision detected
+      console.log(`${team.uuid} is at ${relBullet.x} ${relBullet.x}`);
+      console.log(`${team2.uuid} is at ${team2.x} ${team2.y}`);
+      console.log(`this is: ${team.uuid}, collision with ${team2.uuid}`);
+      collision = true;
+    }
+    ctx?.restore(); // restore old saved coords
+
+  });
+
+  gameObject.attacker.units.forEach((u: any) => {
+    u.teams.forEach((t: any) => {
+
+      if (team.uuid !== t.uuid) {
+        checkRecVsRec(t);
+      }
+
+    });
+  });
+
+};
+
 export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {
 
   let found: FoundData = {

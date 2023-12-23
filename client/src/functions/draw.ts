@@ -28,7 +28,7 @@ const imageCache: ImageCache = {};
 
 export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject, selected: any): void => {
     const scale = 15;
-    const ctx = canvas?.getContext("2d");
+    const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
 
     if (ctx) {
         ctx.clearRect(0, 0, canvasSize.w, canvasSize.h);

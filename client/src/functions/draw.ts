@@ -67,6 +67,9 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                 if (!imageCache[imgKey]) {
                     // If not, load the image and add it to the cache
                     const img = new Image();
+                    img.onerror = (error) => {
+                        console.error('Error loading image:', error);
+                    };
                     img.src = process.env.PUBLIC_URL + `/img/units/${imgKey}.png`;
                     imageCache[imgKey] = img;
                 }

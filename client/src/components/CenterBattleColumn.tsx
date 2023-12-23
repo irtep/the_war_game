@@ -13,6 +13,7 @@ import {
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
+import { chipClasses } from '@mui/material';
 
 interface Canvas {
   w: number;
@@ -199,7 +200,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-
+      console.log('calling draw as gameObject changed');
       draw(canvas, canvasSize, gameObject, selected);
 
     }
@@ -220,9 +221,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
                   // make collision check:
-                  const check = collisionCheck(gameObject, canvas, team);
+                  const check = collisionCheck(gameObject, canvas, team.moveToTarget());
+                  if (check) { return team; } else { return team.moveToTarget; } 
                   //console.log('check: ', check);
-                  return team.moveToTarget();
                 } else {
                   return team;
                 }
@@ -246,7 +247,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           return updatedGameObject;
         });
 
-        draw(canvas, canvasSize, gameObject, selected);
+       // draw(canvas, canvasSize, gameObject, selected);
       }, 100);
     }
 

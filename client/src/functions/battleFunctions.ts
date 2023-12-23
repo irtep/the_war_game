@@ -7,23 +7,11 @@ export interface FoundData {
   all: any;
 };
 
+// based on:
 // https://stackoverflow.com/questions/41469794/html-canvas-and-javascript-rotating-objects-with-collision-detection
-export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any) => {
+export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any): boolean => {
   const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
-  // Get the inverse transformation matrix of the tank
-  //var tankInvMatrix = ctx?.getTransform().invertSelf();
-  let collision = false;
-
-  // Create a DOMPoint representing the position of the bullet
-  // tank who is checking is now the bullet
-  //var bullet = new DOMPoint(team.x, team.y);
-  //console.log('dom point bullet: ', bullet);
-  // Transform the bullet point using the inverse matrix to get the relative position
-  //var relBullet = tankInvMatrix?.transformPoint(bullet);
-  //console.log('relbullet ', relBullet);
-  // Check for collision between rectangles
-  //var tankRect = { x: tankX, y: tankY, width: tankWidth, height: tankHeight };
-  //var bulletRect = { x: relBullet.x, y: relBullet.y, width: bulletWidth, height: bulletHeight };
+  let collision: boolean = false;
 
   const checkRecVsRec = ((team2: any): void => {
 
@@ -61,6 +49,7 @@ export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement
     });
   });
 
+  return collision;
 };
 
 export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {

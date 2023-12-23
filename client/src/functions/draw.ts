@@ -61,6 +61,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
 
         gameObject.attacker.units.forEach((unit: any) => {
             unit.teams.forEach((team: any) => {
+                //console.log('imagekey: ', team.imgTop);
                 const imgKey = team.imgTop;
 
                 // Check if the image is already in the cache

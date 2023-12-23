@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
 import { draw } from '../functions/draw';
 import {
@@ -8,18 +8,17 @@ import {
   findTeamByLocation,
   findTeamById,
   startMovement,
-  getRotatedCorners,
   collisionCheck
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject } from '../data/sharedInterfaces';
-import { chipClasses } from '@mui/material';
+//import { chipClasses } from '@mui/material';
 
 interface Canvas {
   w: number;
   h: number;
 }
-
+/*
 type IntervalItem = {
   teamId: string;
   intervalId: NodeJS.Timer;
@@ -29,11 +28,11 @@ interface ClickedObject {
   action: string;
   team: string;
 };
-
+*/
 const CenterBattleColumn: React.FC = (): React.ReactElement => {
   //const [intervals, setIntervals] = useState<IntervalItem[]>([]);
   //const [clicked, setClicked] = useState<ClickedObject>({action: '', team: ''});
-  const [intervalId, setIntervalId] = useState<any>(null);
+  //const [intervalId, setIntervalId] = useState<any>(null);
   const scale: number = 15;
   const { gameObject,
     setGameObject,
@@ -41,7 +40,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     setSelected,
     setHovered,
     isPaused,
-    setIsPaused,
     setMousePosition
     //   setSelectedOrder,
     //   selectedOrder
@@ -131,8 +129,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           },
         });
         setSelected({ id: [playersUnit.id], type: 'team', all: playersUnit.all });
-        const rotated = getRotatedCorners(findTeamById(playersUnit.id, gameObject));
-        console.log('rotated: ', rotated);
       }
 
       // if clicked is from opponent team and order is selected
@@ -152,19 +148,11 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           }
           else if (getSelected.order === 'move') {
-            //console.log('changing props to target');
+
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
-            //console.log('starting movement');
 
             startMovement(selected.id[0], setGameObject, gameObject, selected);
-            //setClicked({action: 'move', team: selected.id[0]});
-            /*
-            setTimeout(() => {
-              if (selected.id.length > 0) {
-                startMovement(selected.id[0], setGameObject, startIntervalForTeam);
-              }
-            }, 0);
-            */
+
           } else { console.log(' else, ', getSelected); }
           // clear selected
           setSelected({ id: [], type: '', all: {} });
@@ -186,7 +174,6 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           }
 
           startMovement(selected.id[0], setGameObject, gameObject, selected);
-
 
         } else { console.log('not found'); }
 
@@ -221,9 +208,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
                   // make collision check:
-                  const check = collisionCheck(gameObject, canvas, team.moveToTarget());
-                  if (check) { return team; } else { return team.moveToTarget; } 
-                  //console.log('check: ', check);
+                  const getMovement = team.moveToTarget();
+                  const check = collisionCheck(gameObject, canvas, getMovement);
+                  if (check) { return team; } else { return team.moveToTarget(); } 
                 } else {
                   return team;
                 }
@@ -236,7 +223,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               ...unit,
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
-                  return team.moveToTarget();
+                  // make collision check:
+                  const getMovement = team.moveToTarget();
+                  const check = collisionCheck(gameObject, canvas, getMovement);
+                  if (check) { return team; } else { return team.moveToTarget(); } 
                 } else {
                   return team;
                 }

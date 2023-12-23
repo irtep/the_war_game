@@ -37,7 +37,8 @@ export interface Team {
     disabled?: boolean,
     tacticalNumber?: string,
     kills?: Array<string>,
-    uuid?: string
+    uuid?: string,
+    targetAngle?: number
 };
 
 export interface Army {

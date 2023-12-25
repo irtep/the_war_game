@@ -13,82 +13,59 @@ export interface FoundData {
 export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any): boolean => {
   const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
   let collision: boolean = false;
+  // set corners of team:
+  team.setCorners(team.a);
 
-  const checkRecVsRec = ((team2: any): void => {
+  function pointInPoly(verties: any, testx: any, testy: any) {
+    //console.log('verties: ', verties);
+    //console.log('testx: ', testx);
+    //console.log('testy: ', testy);
+    var i;
+    var j;
+    var c: any = 0;
+    var nvert = verties.length;
 
-    ctx?.save(); // save old coords
-    ctx?.translate(team2.x, team2.y); // go to x and y of team2
-    ctx?.rotate(team2.a); // rotate to angle of team
-    var tankInvMatrix = ctx?.getTransform().invertSelf(); // get inverse transformation matris of this rotated tank
-    var bullet = new DOMPoint(team.x, team.y); // make dom point of team, that is now called a bullet
-    var relBullet = tankInvMatrix?.transformPoint(bullet); // Transform the bullet point using the inverse matrix to get the relative position
+    for (i = 0, j = nvert - 1; i < nvert; j = i++) {
 
-    if (
-      relBullet &&
-      relBullet.x !== undefined &&
-      relBullet.y !== undefined &&
-      relBullet.x > -20 && relBullet.x < 20 &&
-      relBullet.y > -10 && relBullet.y < 10
-    ) {
-      // Collision detected
-      collision = true;
+      if (((verties[i].y > testy) != (verties[j].y > testy)) && (testx < (verties[j].x - verties[i].x) * (testy - verties[i].y) / (verties[j].y - verties[i].y) + verties[i].x))
+        c = !c;
     }
+    return c;
+  }
 
-    ctx?.restore(); // restore old saved coords
+  function testCollision(rect1: any, rect2: any) {
+    var collision = false;
+    //console.log('rect1: ', rect1);
+    //console.log('rect2 ', rect2);
+    //console.log('rect1.getCorners: ', rect1.getCorners());
+    rect1.getCorners().forEach((corner: any) => {
+      var isCollided = pointInPoly(rect2.getCorners(), corner.x, corner.y);
 
+      if (isCollided) collision = true;
+    });
+    return collision;
+  }
+
+  // bring "full objects" like car or gameObject.race.track[0].obstacles[0]
+  // example: checkRectangleCollision(car, gameObject.race.track[0].obstacles[0]);
+  function checkRectangleCollision(rect: any, rect2: any) {
+    //console.log('cRC ', rect, rect2);
+    if (testCollision(rect, rect2)) return true;
+    else if (testCollision(rect2, rect)) return true;
+    return false;
+  }
+
+  gameObject.attacker.units.map( (u: any) => {
+    u.teams.map( (t: any) => {
+      if (team.uuid !== t.uuid) {
+        t.setCorners(t.a);
+        const colCheck = checkRectangleCollision(team, t);
+        if (colCheck === true) {
+          collision = true;
+        }
+      };
+    });
   });
-
-  const checkVsOtherTeams = (arr: any[]): void => {
-    arr.forEach((u: any) => {
-      u.teams.forEach((t: any) => {
-        // check vs center point of tank
-        if (team.uuid !== t.uuid) {
-          checkRecVsRec(t);
-        };
-        
-        // check vs all corners // ei toimi kunnolla...
-        if (team.uuid !== t.uuid) {
-          for (let i = -1; i <= 1; i += 2) {
-            for (let j = -1; j <= 1; j += 2) {
-              const cornerX = t.x + i * (t.width / 2);
-              const cornerY = t.y + j * (t.height / 2);
-  
-              const teamToCheck = {
-                ...t,
-                x: cornerX,
-                y: cornerY,
-                // Adjust other properties as needed
-              };
-  
-              checkRecVsRec(teamToCheck);
-            }
-          }
-        }
-      });
-    });
-  };
-
-  // makes 9 collision points to that building
-  const checkVsBuildings = (arr: any[]): void => {
-    arr.forEach((b: any) => {
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-          const buildingToCheck = {
-            ...b, // ei toimi kunnolla....
-            x: b.x + (i * b.w) / 2,
-            y: b.y + (j * b.h) / 2,
-            width: b.w,
-            height: b.h
-          };
-          checkRecVsRec(buildingToCheck);
-        }
-      }
-    });
-  };
-
-  checkVsOtherTeams(gameObject.attacker.units);
-  checkVsOtherTeams(gameObject.defender.units);
-  checkVsBuildings(gameObject.terrain.houses);
 
   return collision;
 };
@@ -220,3 +197,81 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
   const defenderTeam = checkUnits(gameObject.defender.units);
   return defenderTeam;
 };
+
+/*
+  const checkRecVsRec = ((team2: any): void => {
+
+    ctx?.save(); // save old coords
+    ctx?.translate(team2.x, team2.y); // go to x and y of team2
+    ctx?.rotate(team2.a); // rotate to angle of team
+    var tankInvMatrix = ctx?.getTransform().invertSelf(); // get inverse transformation matris of this rotated tank
+    var bullet = new DOMPoint(team.x, team.y); // make dom point of team, that is now called a bullet
+    var relBullet = tankInvMatrix?.transformPoint(bullet); // Transform the bullet point using the inverse matrix to get the relative position
+
+    //console.log(' stats: ', team2.width/2, team2.height/2);
+    if (
+      relBullet &&
+      relBullet.x !== undefined &&
+      relBullet.y !== undefined &&
+      relBullet.x > 0 - team2.width/2 && relBullet.x < team2.width/2 &&
+      relBullet.y > 0 - team2.height/2 && relBullet.y < team2.height/2
+    ) {
+      // Collision detected
+      collision = true;
+    }
+
+    ctx?.restore(); // restore old saved coords
+
+  });
+
+  const checkVsOtherTeams = (arr: any[]): void => {
+    arr.forEach((u: any) => {
+      u.teams.forEach((t: any) => {
+        // check vs center point of tank
+        if (team.uuid !== t.uuid) {
+          checkRecVsRec(t);
+        };
+
+        // check vs all corners // ei toimi kunnolla...
+        /*
+                if (team.uuid !== t.uuid) {
+                  for (let i = -1; i <= 1; i += 2) {
+                    for (let j = -1; j <= 1; j += 2) {
+                      const cornerX = t.x + i * (t.width / 2);
+                      const cornerY = t.y + j * (t.height / 2);
+          
+                      const teamToCheck = {
+                        ...t,
+                        x: cornerX,
+                        y: cornerY,
+                        // Adjust other properties as needed
+                      };
+          
+                      checkRecVsRec(teamToCheck);
+                    }
+                  }
+                }
+
+              });
+            });
+          };
+        
+          // makes 9 collision points to that building
+          const checkVsBuildings = (arr: any[]): void => {
+            arr.forEach((b: any) => {
+              const buildingToCheck = {
+                ...b,
+                a: 0,
+                x: b.x + (b.w/2),
+                y: b.y + (b.h/2),
+                width: b.w,
+                height: b.h
+              };
+              checkRecVsRec(buildingToCheck);
+            });
+          };
+        
+          checkVsOtherTeams(gameObject.attacker.units);
+          checkVsOtherTeams(gameObject.defender.units);
+          checkVsBuildings(gameObject.terrain.houses);
+*/

@@ -27,7 +27,7 @@ interface ImageCache {
 const imageCache: ImageCache = {};
 
 export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject, selected: any): void => {
-    const scale = 15;
+    const scale: number = 15;
     const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
 
     if (ctx) {
@@ -63,6 +63,9 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             unit.teams.forEach((team: any) => {
                 //console.log('imagekey: ', team.imgTop);
                 const imgKey = team.imgTop;
+                //team.setCorners(team.a); // for debug
+                //const corners = team.getCorners(); // for debug
+                //console.log('corners: ', corners);
 
                 // Check if the image is already in the cache
                 if (!imageCache[imgKey]) {
@@ -108,6 +111,18 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.stroke();
                     ctx.closePath();
                 }
+
+                // for debug:
+                /*
+                const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                corners.forEach( (corner: any, ix: number) => {
+                    ctx.beginPath();
+                    ctx.strokeStyle = colors[ix];
+                    ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+                */
             });
         });
 

@@ -44,7 +44,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
       if (isCollided) collision = true;
     });
 
-    return collisionResponse;
+    return collision;
   }
 
   function checkRectangleCollision(rect: any, rect2: any) {
@@ -67,8 +67,8 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
 
           if (colCheck === true) {
             const cornerit = team.getCorners();
-            console.log(`teams: ${team.uuid} vs ${t.uuid}`);
-            console.log(`corners 1: ${cornerit[0].x}`);
+            //console.log(`teams: ${team.uuid} vs ${t.uuid}`);
+            //console.log(`corners 1: ${cornerit[0].x}`);
             collisionResponse.collision = true;
             collisionResponse.withWhat = 'team';
           }
@@ -135,7 +135,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
     runArray(gameObject.terrain.trees, 'trees');
   }
 
-  console.log('responding: ', collisionResponse);
+  //console.log('responding: ', collisionResponse);
   return collisionResponse;
 };
 

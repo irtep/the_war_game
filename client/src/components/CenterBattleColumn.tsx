@@ -246,7 +246,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               ...unit,
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
-                  
+
                   // make collision check:
                   const getMovement = team.moveToTarget();
                   const check: CollisionResponse = collisionCheck(gameObject, getMovement);

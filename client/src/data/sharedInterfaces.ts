@@ -95,4 +95,8 @@ export interface Selected {
     all?: any;
 };
 
+export interface CollisionResponse {
+    collision: boolean;
+    withWhat: string;
+  };
 // number|string;

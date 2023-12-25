@@ -1,5 +1,5 @@
 //import { NodeBuilderFlags } from "typescript";
-import { GameObject } from "../data/sharedInterfaces";
+import { GameObject, CollisionResponse } from "../data/sharedInterfaces";
 //import { draw } from "../functions/draw";
 
 export interface FoundData {
@@ -8,16 +8,20 @@ export interface FoundData {
   all: any;
 };
 
-export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any): boolean => {
-  const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
-  let collision: boolean = false;
+export const callDice = (max: number): number => {
+  const result = 1 + Math.floor(Math.random() * max);
+  return result;
+}
+
+export const collisionCheck = (gameObject: GameObject, team: any): CollisionResponse => {
+  const collisionResponse: CollisionResponse = {
+    collision: false,
+    withWhat: ''
+  };
   // set corners of team:
   team.setCorners(team.a);
 
   function pointInPoly(verties: any, testx: any, testy: any) {
-    //console.log('verties: ', verties);
-    //console.log('testx: ', testx);
-    //console.log('testy: ', testy);
     var i;
     var j;
     var c: any = 0;
@@ -33,54 +37,106 @@ export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement
 
   function testCollision(rect1: any, rect2: any) {
     var collision = false;
-    //console.log('rect1: ', rect1);
-    //console.log('rect2 ', rect2);
-    //console.log('rect1.getCorners: ', rect1.getCorners());
+
     rect1.getCorners().forEach((corner: any) => {
       var isCollided = pointInPoly(rect2.getCorners(), corner.x, corner.y);
 
       if (isCollided) collision = true;
     });
-    return collision;
+
+    return collisionResponse;
   }
 
   function checkRectangleCollision(rect: any, rect2: any) {
-    //console.log('cRC ', rect, rect2);
+
     if (testCollision(rect, rect2)) return true;
+
     else if (testCollision(rect2, rect)) return true;
+
     return false;
   }
 
-  const runArray = (arr: any[]) => {
+  const runArray = (arr: any[], type: string) => {
     arr.map((t: any) => {
-      if (team.uuid !== t.uuid) {
-        t.setCorners(t.a);
+
+      if (type === 'teams') {
+        
+        if (team.uuid !== t.uuid) {
+          t.setCorners(t.a);
+          const colCheck = checkRectangleCollision(team, t);
+
+          if (colCheck === true) {
+            const cornerit = team.getCorners();
+            console.log(`teams: ${team.uuid} vs ${t.uuid}`);
+            console.log(`corners 1: ${cornerit[0].x}`);
+            collisionResponse.collision = true;
+            collisionResponse.withWhat = 'team';
+          }
+
+        };
+      }
+
+      else if (type === 'houses') {
+        t.setCorners(0); // houses always have 0 angle, maybe later need to change.
         const colCheck = checkRectangleCollision(team, t);
+
         if (colCheck === true) {
-          collision = true;
+          console.log('is house');
+          collisionResponse.collision = true;
+          collisionResponse.withWhat = 'house';
         }
-      };
+      }
+
+      else if (type === 'trees') {
+        t.setCorners(0); // trees always have 0 angle, maybe later need to change.
+        const colCheck = checkRectangleCollision(team, t);
+
+        if (colCheck === true) {
+          console.log('is tree');
+          collisionResponse.collision = true;
+          collisionResponse.withWhat = 'tree';
+        }
+      }
+
+      else if (type === 'waters') {
+        t.setCorners(0); // waters always have 0 angle, maybe later need to change.
+        const colCheck = checkRectangleCollision(team, t);
+
+        if (colCheck === true) {
+          console.log('is water');
+          collisionResponse.collision = true;
+          collisionResponse.withWhat = 'water';
+        }
+      }
+
     });
   }
 
   // check step by step, to be more efficent, first attackers
   gameObject.attacker.units.map((u: any) => {
-    runArray(u.teams);
+    runArray(u.teams, 'teams');
   });
 
-  if (collision === false) {
+  if (collisionResponse.collision === false) {
     gameObject.defender.units.map((u: any) => {
-      runArray(u.teams);
+      runArray(u.teams, 'teams');
     });
   };
 
-  if (collision === false) {
-    gameObject.terrain.houses.forEach((h: any) => {
-      // jatka tästä!
-    });
+  if (collisionResponse.collision === false) {
+    runArray(gameObject.terrain.houses, 'houses');
   }
 
-  return collision;
+  if (collisionResponse.collision === false) {
+    runArray(gameObject.terrain.waters, 'waters');
+  }
+
+  if (collisionResponse.collision === false) {
+    runArray(gameObject.terrain.trees, 'trees');
+  }
+
+  console.log('responding: ', collisionResponse);
+  return collisionResponse;
 };
 
 export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {

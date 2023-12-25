@@ -13,6 +13,8 @@ interface Circles {
     x: number;
     y: number;
     s: number;
+    getCorners?: any;
+    setCorners?: any;
 }
 
 interface Canvas {
@@ -38,11 +40,11 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
 
         // Draw terrain:
         gameObject.terrain.houses.forEach((house: House) => {
-/*
-            house.setCorners(0); // for debug
-            const corners = house.getCorners(); // for debug
-            console.log('corners: ', corners);
-*/
+            /*
+                        house.setCorners(0); // for debug
+                        const corners = house.getCorners(); // for debug
+                        console.log('corners: ', corners);
+            */
             ctx.beginPath();
             ctx.fillStyle = "rgb(180,180,180)";
             ctx.rect(house.x, house.y, house.w, house.h);
@@ -50,38 +52,67 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             ctx.closePath();
 
             // for debug:
-/*
-            const colors: string[] = ['orange', 'red', 'blue', 'green'];
-            corners.forEach((corner: any, ix: number) => {
-                ctx.beginPath();
-                ctx.strokeStyle = colors[ix];
-                ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
-                ctx.stroke();
-                ctx.closePath();
-            });
-*/
+            /*
+                        const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                        corners.forEach((corner: any, ix: number) => {
+                            ctx.beginPath();
+                            ctx.strokeStyle = colors[ix];
+                            ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                            ctx.stroke();
+                            ctx.closePath();
+                        });
+            */
         });
 
         gameObject.terrain.trees.forEach((tree: Circles) => {
+            /*
+                        tree.setCorners(0); // for debug
+                        const corners = tree.getCorners(); // for debug
+            */
             ctx.beginPath();
             ctx.fillStyle = "darkgreen";
             ctx.arc(tree.x, tree.y, tree.s, 0, Math.PI * 2, true);
             ctx.fill();
             ctx.closePath();
+            /*
+                        const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                        corners.forEach((corner: any, ix: number) => {
+                            ctx.beginPath();
+                            ctx.strokeStyle = colors[ix];
+                            ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                            ctx.stroke();
+                            ctx.closePath();
+                        });*/
         });
 
         gameObject.terrain.waters.forEach((water: Circles) => {
+
+            //           water.setCorners(0); // for debug
+            //           const corners = water.getCorners(); // for debug
+
             ctx.beginPath();
             ctx.fillStyle = "darkblue";
             ctx.arc(water.x, water.y, water.s, 0, Math.PI * 2, true);
             ctx.fill();
             ctx.closePath();
+            /*
+                        const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                        corners.forEach((corner: any, ix: number) => {
+                            ctx.beginPath();
+                            ctx.strokeStyle = colors[ix];
+                            ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                            ctx.stroke();
+                            ctx.closePath();
+                        });*/
         });
 
         gameObject.attacker.units.forEach((unit: any) => {
             unit.teams.forEach((team: any) => {
                 //console.log('imagekey: ', team.imgTop);
                 const imgKey = team.imgTop;
+
+                //          team.setCorners(0); // for debug
+                //         const corners = team.getCorners(); // for debug
 
                 // Check if the image is already in the cache
                 if (!imageCache[imgKey]) {
@@ -127,7 +158,16 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.stroke();
                     ctx.closePath();
                 }
-
+                /*
+                                const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                                corners.forEach((corner: any, ix: number) => {
+                                    ctx.beginPath();
+                                    ctx.strokeStyle = colors[ix];
+                                    ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                                    ctx.stroke();
+                                    ctx.closePath();
+                                });
+                */
             });
         });
 

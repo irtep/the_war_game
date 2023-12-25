@@ -8,10 +8,11 @@ import {
   findTeamByLocation,
   findTeamById,
   startMovement,
-  collisionCheck
+  collisionCheck,
+  callDice
   //  doOrders
 } from '../functions/battleFunctions';
-import { GameObject } from '../data/sharedInterfaces';
+import { GameObject, CollisionResponse } from '../data/sharedInterfaces';
 //import { chipClasses } from '@mui/material';
 
 interface Canvas {
@@ -209,8 +210,30 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
                   // make collision check:
                   const getMovement = team.moveToTarget();
-                  const check = collisionCheck(gameObject, canvas, getMovement);
-                  if (check) { return team; } else { return team.moveToTarget(); } 
+                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+
+                  if (check.collision) {
+
+                    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
+                      return team;
+                    }
+
+                    else if (check.withWhat === 'tree') {
+                      // need to make a cross check, if ok, can advance, if not does not advance
+                      const crossCheck: number = callDice(6);
+
+                      if (crossCheck >= team.cross) {
+                        console.log('cross ok', crossCheck, ' vs ', team.cross);
+                        return team.moveToTarget();
+                      } else {
+                        console.log('cross failed: ', crossCheck, ' vs ', team.cross);
+                        return team;
+                      }
+                    }
+                    
+                  } else {
+                    return team.moveToTarget();
+                  }
                 } else {
                   return team;
                 }
@@ -223,10 +246,33 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               ...unit,
               teams: unit.teams.map((team: any) => {
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                  
                   // make collision check:
                   const getMovement = team.moveToTarget();
-                  const check = collisionCheck(gameObject, canvas, getMovement);
-                  if (check) { return team; } else { return team.moveToTarget(); } 
+                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+
+                  if (check.collision) {
+
+                    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
+                      return team;
+                    }
+
+                    else if (check.withWhat === 'tree') {
+                      // need to make a cross check, if ok, can advance, if not does not advance
+                      const crossCheck: number = callDice(6);
+
+                      if (crossCheck >= team.cross) {
+                        console.log('cross ok', crossCheck, ' vs ', team.cross);
+                        return team.moveToTarget();
+                      } else {
+                        console.log('cross failed: ', crossCheck, ' vs ', team.cross);
+                        return team;
+                      }
+                    }
+                    
+                  } else {
+                    return team.moveToTarget();
+                  }
                 } else {
                   return team;
                 }
@@ -237,7 +283,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           return updatedGameObject;
         });
 
-       // draw(canvas, canvasSize, gameObject, selected);
+        // draw(canvas, canvasSize, gameObject, selected);
       }, 100);
     }
 

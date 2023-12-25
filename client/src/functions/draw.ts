@@ -5,6 +5,8 @@ interface House {
     y: number;
     w: number;
     h: number;
+    getCorners?: any;
+    setCorners?: any;
 }
 
 interface Circles {
@@ -36,11 +38,28 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
 
         // Draw terrain:
         gameObject.terrain.houses.forEach((house: House) => {
+/*
+            house.setCorners(0); // for debug
+            const corners = house.getCorners(); // for debug
+            console.log('corners: ', corners);
+*/
             ctx.beginPath();
             ctx.fillStyle = "rgb(180,180,180)";
             ctx.rect(house.x, house.y, house.w, house.h);
             ctx.fill();
             ctx.closePath();
+
+            // for debug:
+/*
+            const colors: string[] = ['orange', 'red', 'blue', 'green'];
+            corners.forEach((corner: any, ix: number) => {
+                ctx.beginPath();
+                ctx.strokeStyle = colors[ix];
+                ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                ctx.stroke();
+                ctx.closePath();
+            });
+*/
         });
 
         gameObject.terrain.trees.forEach((tree: Circles) => {
@@ -63,9 +82,6 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             unit.teams.forEach((team: any) => {
                 //console.log('imagekey: ', team.imgTop);
                 const imgKey = team.imgTop;
-                //team.setCorners(team.a); // for debug
-                //const corners = team.getCorners(); // for debug
-                //console.log('corners: ', corners);
 
                 // Check if the image is already in the cache
                 if (!imageCache[imgKey]) {
@@ -112,17 +128,6 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.closePath();
                 }
 
-                // for debug:
-                /*
-                const colors: string[] = ['orange', 'red', 'blue', 'green'];
-                corners.forEach( (corner: any, ix: number) => {
-                    ctx.beginPath();
-                    ctx.strokeStyle = colors[ix];
-                    ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
-                    ctx.stroke();
-                    ctx.closePath();
-                });
-                */
             });
         });
 
@@ -209,7 +214,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             ctx.closePath();
         });
         //console.log('game at drw', gameObject);
-        // draw attackers units: 
+        // draw attackers units:
         gameObject.attacker.units.forEach((unit: any) => {
             unit.teams.forEach((team: any) => {
                 const img = new Image();

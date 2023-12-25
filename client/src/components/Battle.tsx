@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import FirstBattleRow from './FirstBattleRow';
 import SecondBattleRow from './SecondBattleRow';
 import { FlamesContext } from '../context/FlamesContext';
-import { Army, GameObject, Team } from '../data/sharedInterfaces';
+import { Army, Team } from '../data/sharedInterfaces';
 import { createBattleMap, prepareWeapons } from '../functions/setupFunctions';
 
 const Battle: React.FC = (): React.ReactElement => {
@@ -19,11 +19,6 @@ const Battle: React.FC = (): React.ReactElement => {
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
-  };
-
-  interface Location {
-    x: number,
-    y: number
   };
 
   const createBattleArmies = (input: Army, attacker: boolean): Army => {
@@ -262,58 +257,3 @@ const Battle: React.FC = (): React.ReactElement => {
 };
 
 export default Battle;
-
-/*
-            team.moveToTarget = function () {
-              if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
-                const updatedTeam = { ...this };
-
-                // returns next location
-                const getSpeeds = (rotation: any, speed: any) => {
-                  const to_angles = Math.PI / 360;
-
-                  return {
-                    y: Math.sin(rotation * to_angles) * speed,
-                    x: Math.cos(rotation * to_angles) * speed * -1,
-                  };
-                }
-
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                // Calculate the angle based on the target position and add 90 degrees
-                updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
-
-                const angleTolerance = 0.5; // Adjust this value based on your tolerance requirements
-
-                if (Math.abs(updatedTeam.targetAngle - updatedTeam.a) < angleTolerance) {
-                  // check possible collision
-                  updatedTeam.x += (dx / distance) * 1;
-                  updatedTeam.y += (dy / distance) * 1;
-                } else if (updatedTeam.targetAngle < updatedTeam.a) {
-                  // check possible collision
-                  updatedTeam.a--;
-                  updatedTeam.x += (dx / distance) * (1/3);
-                  updatedTeam.y += (dy / distance) * (1/3);
-                } else if (updatedTeam.targetAngle > updatedTeam.a) {
-                  // check possible collision
-                  updatedTeam.a++;
-                  updatedTeam.x += (dx / distance) * (1/3);
-                  updatedTeam.y += (dy / distance) * (1/3);
-                }
-
-                if (distance < updatedTeam.speed) {
-                  // Arrived at the target
-                  updatedTeam.target = '';
-                  updatedTeam.order = 'waiting';
-                }
-
-                return updatedTeam;
-              } else {
-                console.log('Cannot move:', this.order, this.target);
-
-                return { ...this };
-              }
-            };
-*/

@@ -8,8 +8,6 @@ export interface FoundData {
   all: any;
 };
 
-// based on:
-// https://stackoverflow.com/questions/41469794/html-canvas-and-javascript-rotating-objects-with-collision-detection
 export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement, team: any): boolean => {
   const ctx: CanvasRenderingContext2D | null | undefined = canvas?.getContext("2d");
   let collision: boolean = false;
@@ -46,8 +44,6 @@ export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement
     return collision;
   }
 
-  // bring "full objects" like car or gameObject.race.track[0].obstacles[0]
-  // example: checkRectangleCollision(car, gameObject.race.track[0].obstacles[0]);
   function checkRectangleCollision(rect: any, rect2: any) {
     //console.log('cRC ', rect, rect2);
     if (testCollision(rect, rect2)) return true;
@@ -55,8 +51,8 @@ export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement
     return false;
   }
 
-  gameObject.attacker.units.map( (u: any) => {
-    u.teams.map( (t: any) => {
+  const runArray = (arr: any[]) => {
+    arr.map((t: any) => {
       if (team.uuid !== t.uuid) {
         t.setCorners(t.a);
         const colCheck = checkRectangleCollision(team, t);
@@ -65,7 +61,24 @@ export const collisionCheck = (gameObject: GameObject, canvas: HTMLCanvasElement
         }
       };
     });
+  }
+
+  // check step by step, to be more efficent, first attackers
+  gameObject.attacker.units.map((u: any) => {
+    runArray(u.teams);
   });
+
+  if (collision === false) {
+    gameObject.defender.units.map((u: any) => {
+      runArray(u.teams);
+    });
+  };
+
+  if (collision === false) {
+    gameObject.terrain.houses.forEach((h: any) => {
+      // jatka tästä!
+    });
+  }
 
   return collision;
 };
@@ -88,7 +101,6 @@ export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {
         found.found = true;
         found.id = team.uuid;
         found.all = team;
-        console.log('found: ', found);
       }
     });
   });
@@ -197,81 +209,3 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
   const defenderTeam = checkUnits(gameObject.defender.units);
   return defenderTeam;
 };
-
-/*
-  const checkRecVsRec = ((team2: any): void => {
-
-    ctx?.save(); // save old coords
-    ctx?.translate(team2.x, team2.y); // go to x and y of team2
-    ctx?.rotate(team2.a); // rotate to angle of team
-    var tankInvMatrix = ctx?.getTransform().invertSelf(); // get inverse transformation matris of this rotated tank
-    var bullet = new DOMPoint(team.x, team.y); // make dom point of team, that is now called a bullet
-    var relBullet = tankInvMatrix?.transformPoint(bullet); // Transform the bullet point using the inverse matrix to get the relative position
-
-    //console.log(' stats: ', team2.width/2, team2.height/2);
-    if (
-      relBullet &&
-      relBullet.x !== undefined &&
-      relBullet.y !== undefined &&
-      relBullet.x > 0 - team2.width/2 && relBullet.x < team2.width/2 &&
-      relBullet.y > 0 - team2.height/2 && relBullet.y < team2.height/2
-    ) {
-      // Collision detected
-      collision = true;
-    }
-
-    ctx?.restore(); // restore old saved coords
-
-  });
-
-  const checkVsOtherTeams = (arr: any[]): void => {
-    arr.forEach((u: any) => {
-      u.teams.forEach((t: any) => {
-        // check vs center point of tank
-        if (team.uuid !== t.uuid) {
-          checkRecVsRec(t);
-        };
-
-        // check vs all corners // ei toimi kunnolla...
-        /*
-                if (team.uuid !== t.uuid) {
-                  for (let i = -1; i <= 1; i += 2) {
-                    for (let j = -1; j <= 1; j += 2) {
-                      const cornerX = t.x + i * (t.width / 2);
-                      const cornerY = t.y + j * (t.height / 2);
-          
-                      const teamToCheck = {
-                        ...t,
-                        x: cornerX,
-                        y: cornerY,
-                        // Adjust other properties as needed
-                      };
-          
-                      checkRecVsRec(teamToCheck);
-                    }
-                  }
-                }
-
-              });
-            });
-          };
-        
-          // makes 9 collision points to that building
-          const checkVsBuildings = (arr: any[]): void => {
-            arr.forEach((b: any) => {
-              const buildingToCheck = {
-                ...b,
-                a: 0,
-                x: b.x + (b.w/2),
-                y: b.y + (b.h/2),
-                width: b.w,
-                height: b.h
-              };
-              checkRecVsRec(buildingToCheck);
-            });
-          };
-        
-          checkVsOtherTeams(gameObject.attacker.units);
-          checkVsOtherTeams(gameObject.defender.units);
-          checkVsBuildings(gameObject.terrain.houses);
-*/

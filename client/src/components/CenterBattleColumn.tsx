@@ -9,7 +9,8 @@ import {
   findTeamById,
   startMovement,
   collisionCheck,
-  callDice
+  callDice,
+  resolveCollision
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject, CollisionResponse } from '../data/sharedInterfaces';
@@ -124,7 +125,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             units: gameObject[gameObject.player].units.map((unit: any) => ({
               ...unit,
               teams: unit.teams.map((team: any) =>
-                team.uuid === playersUnit.id ? { ...team, order: 'listening' } : team.order === 'listening' ? { ...team, order: 'waiting' } : team
+                team.uuid === playersUnit.id ? { ...team, order: 'listening', currentSpeed: 0 } : team.order === 'listening' ? { ...team, order: 'hold' } : team
               ),
             })),
           },
@@ -148,7 +149,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             changePropsOfTeam(selected.id[0], ['target'], [opponentsUnit.id], gameObject, setGameObject);
 
           }
-          else if (getSelected.order === 'move') {
+          else if (getSelected.order === 'move' || getSelected.order === 'reverse') {
 
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
 
@@ -167,7 +168,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         // if move or bombards
         if (getSelected) {
           console.log('found selected');
-          if (getSelected.order === 'move' ||
+          if (getSelected.order === 'move' || 
+            getSelected.order === 'reverse' || 
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
             console.log('move, smoke or bombard');
@@ -207,34 +209,42 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
               ...unit,
               teams: unit.teams.map((team: any) => {
+
+                // Move order
+
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
-                  // make collision check:
+                  
                   const getMovement = team.moveToTarget();
                   const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+                  return resolveCollision(team, getMovement, check);
 
-                  if (check.collision) {
+                }
+                
+                else if (team && team.order === 'reverse') {
+                  const getMovement = team.reverse();
+                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+                  return resolveCollision(team, getMovement, check);
+                }
 
-                    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
-                      return team;
-                    }
+                else if (team && team.order === 'attack') {
+                  return team;
+                }
 
-                    else if (check.withWhat === 'tree') {
-                      // need to make a cross check, if ok, can advance, if not does not advance
-                      const crossCheck: number = callDice(6);
+                else if (team && team.order === 'bombard') {
+                  return team;
+                }
 
-                      if (crossCheck >= team.cross) {
-                        console.log('cross ok', crossCheck, ' vs ', team.cross);
-                        return team.moveToTarget();
-                      } else {
-                        console.log('cross failed: ', crossCheck, ' vs ', team.cross);
-                        return team;
-                      }
-                    }
-                    
-                  } else {
-                    return team.moveToTarget();
-                  }
-                } else {
+                else if (team && team.order === 'charge') {
+                  return team;
+                }
+                else if (team && team.order === 'hold') {
+                  return team;
+                }
+
+                else if (team && team.order === 'reverse') {
+                  return team;
+                }
+                else {
                   return team;
                 }
               }),
@@ -250,29 +260,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   // make collision check:
                   const getMovement = team.moveToTarget();
                   const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+                  return resolveCollision(team, getMovement, check);
 
-                  if (check.collision) {
-
-                    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
-                      return team;
-                    }
-
-                    else if (check.withWhat === 'tree') {
-                      // need to make a cross check, if ok, can advance, if not does not advance
-                      const crossCheck: number = callDice(6);
-
-                      if (crossCheck >= team.cross) {
-                        console.log('cross ok', crossCheck, ' vs ', team.cross);
-                        return team.moveToTarget();
-                      } else {
-                        console.log('cross failed: ', crossCheck, ' vs ', team.cross);
-                        return team;
-                      }
-                    }
-                    
-                  } else {
-                    return team.moveToTarget();
-                  }
                 } else {
                   return team;
                 }
@@ -368,15 +357,21 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           <>
 
             <button onClick={() => {
-              changePropsOfTeam(selected.id[0], ['order'], ['wait'], gameObject, setGameObject)
+              changePropsOfTeam(selected.id[0], ['order'], ['hold'], gameObject, setGameObject)
             }}>
-              wait
+              hold
             </button>
 
             <button onClick={() => {
               changePropsOfTeam(selected.id[0], ['order'], ['move'], gameObject, setGameObject)
             }}>
               move
+            </button>
+
+            <button onClick={() => {
+              changePropsOfTeam(selected.id[0], ['order'], ['reverse'], gameObject, setGameObject)
+            }}>
+              reverse
             </button>
 
             <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['attack'], gameObject, setGameObject) }}>

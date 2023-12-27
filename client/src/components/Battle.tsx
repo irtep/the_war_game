@@ -97,8 +97,79 @@ const Battle: React.FC = (): React.ReactElement => {
             team.motorPower = team.horsepowers / team.weight / 2;
             team.currentSpeed = 0;
             // methods:
-            team.turningSpeed = 5; // maybe all 1... maybe later will modificate this...Copy code
+            team.turningSpeed = team.motorPower * 1000; // 5 seems to ok... lets try this
+
+            //
+            team.stop = function () {
+              this.currentSpeed = 0;
+            };
+
+            // reverse
+            team.reverse = function () {
+              const normalizeAngle = (angle: number) => {
+                return (angle % 360 + 360) % 360;
+              };
+            
+              if (this.order === 'reverse' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+                const updatedTeam = { ...this };
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+            
+                // tää varmaan pitää reversee
+                updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
+            
+                // normalize the angle to not mess turning
+                if (updatedTeam.targetAngle < 0 || updatedTeam.targetAngle > 360) {
+                  updatedTeam.targetAngle = normalizeAngle(updatedTeam.a);
+                }
+            
+                const angleTolerance = 1;
+            
+                if (Math.abs(updatedTeam.targetAngle - updatedTeam.a) < angleTolerance) {
+                  if (updatedTeam.currentSpeed === 0) { updatedTeam.currentSpeed = team.motorPower; }
+                  updatedTeam.x -= (dx / distance) * updatedTeam.currentSpeed; // voi olla,
+                  updatedTeam.y -= (dy / distance) * updatedTeam.currentSpeed; // että pitää olla "-"
+                  updatedTeam.currentSpeed = updatedTeam.currentSpeed + team.motorPower * 5;
+                  if (updatedTeam.currentSpeed > updatedTeam.speed / 25) { updatedTeam.currentSpeed = updatedTeam.speed / 25; }
+                } else if (updatedTeam.targetAngle < updatedTeam.a) {
+                  // need to turn right (reverse)
+                  updatedTeam.a++;
+                  updatedTeam.x -= (dx / distance) * (1 / 3);
+                  updatedTeam.y -= (dy / distance) * (1 / 3);
+                } else if (updatedTeam.targetAngle > updatedTeam.a) {
+                  // need to turn left (reverse)
+                  updatedTeam.a--;
+                  updatedTeam.x -= (dx / distance) * (1 / 3);
+                  updatedTeam.y -= (dy / distance) * (1 / 3);
+                }
+            
+                if (distance < updatedTeam.currentSpeed) {
+                  updatedTeam.target = '';
+                  updatedTeam.order = 'hold';
+                  updatedTeam.currentSpeed = 0;
+                }
+            
+                // normalize the angle to not mess turning
+                if (updatedTeam.a < 0 || updatedTeam.a > 360) {
+                  updatedTeam.a = normalizeAngle(updatedTeam.a);
+                }
+            
+                return updatedTeam;
+              } else {
+                console.log('Cannot reverse:', this.order, this.target);
+                return { ...this };
+              }
+            };
+
+            // move
             team.moveToTarget = function () {
+              // Function to normalize an angle to be between 0 and 360 degrees
+              const normalizeAngle = (angle: number): number => {
+                // Calculate the modulo to wrap the angle within the range [0, 360)
+                return (angle % 360 + 360) % 360;
+              }
+
               if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
                 const updatedTeam = { ...this };
                 const dx = this.target.x - this.x;
@@ -108,25 +179,42 @@ const Battle: React.FC = (): React.ReactElement => {
                 // Calculate the angle based on the target position and add 90 degrees
                 updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
 
-                const angleTolerance = 0.5; // Adjust this value based on your tolerance requirements
+                // normalize the angle to not mess turning
+                if (updatedTeam.targetAngle < 0 || updatedTeam.targetAngle > 360) {
+                  updatedTeam.targetAngle = normalizeAngle(updatedTeam.a);
+                }
 
+                const angleTolerance = 1; // Adjust this value based on your tolerance requirements
+                                          // could be less too, for example 0,5
                 if (Math.abs(updatedTeam.targetAngle - updatedTeam.a) < angleTolerance) {
-                  updatedTeam.x += (dx / distance) * 1;
-                  updatedTeam.y += (dy / distance) * 1;
+                  // facing target
+                  if (updatedTeam.currentSpeed === 0) { updatedTeam.currentSpeed = team.motorPower }
+                  updatedTeam.x += (dx / distance) * updatedTeam.currentSpeed;
+                  updatedTeam.y += (dy / distance) * updatedTeam.currentSpeed;
+                  updatedTeam.currentSpeed = updatedTeam.currentSpeed + team.motorPower * 10;
+                  if (updatedTeam.currentSpeed > updatedTeam.speed / 15) { updatedTeam.currentSpeed = updatedTeam.speed / 15 }
                 } else if (updatedTeam.targetAngle < updatedTeam.a) {
+                  // need to turn left
                   updatedTeam.a--;
                   updatedTeam.x += (dx / distance) * (1 / 3);
                   updatedTeam.y += (dy / distance) * (1 / 3);
                 } else if (updatedTeam.targetAngle > updatedTeam.a) {
+                  // need to turn right
                   updatedTeam.a++;
                   updatedTeam.x += (dx / distance) * (1 / 3);
                   updatedTeam.y += (dy / distance) * (1 / 3);
                 }
 
-                if (distance < updatedTeam.speed) {
+                if (distance < updatedTeam.currentSpeed) {
                   // Arrived at the target
                   updatedTeam.target = '';
-                  updatedTeam.order = 'waiting';
+                  updatedTeam.order = 'hold';
+                  updatedTeam.currentSpeed = 0;
+                }
+
+                // normalize the angle to not mess turning
+                if (updatedTeam.a < 0 || updatedTeam.a > 360) {
+                  updatedTeam.a = normalizeAngle(updatedTeam.a);
                 }
 
                 return updatedTeam;
@@ -136,84 +224,88 @@ const Battle: React.FC = (): React.ReactElement => {
                 return { ...this };
               }
             };
+
+            // makes locations of corners
             team.setCorners = function (angle: number) {
               const scale = 15;
               const getRotatedTopLeftCornerOfRect = (x: number, y: number, width: number, height: number, angle: number) => {
                 //console.log('gRtLCOR ', x, y, width, height, angle);
-            
+
                 const sin = (x: number) => {
                   return Math.sin(x / 180 * Math.PI);
                 }
-          
-                const cos = (x: number) => { 
+
+                const cos = (x: number) => {
                   return Math.cos(x / 180 * Math.PI);
                 }
-                
+
                 var center = {
                   x: (x + width / 2),
                   y: (y + height / 2)
                 };
-                
+
                 var vector = {
                   x: (x - center.x),
                   y: (y - center.y)
                 };
-          
+
                 //console.log('vector: ',vector);
-                var rotationMatrix = [[cos(angle), -sin(angle)],[sin(angle), cos(angle)]];
-          
+                var rotationMatrix = [[cos(angle), -sin(angle)], [sin(angle), cos(angle)]];
+
                 var rotatedVector = {
                   x: vector.x * rotationMatrix[0][0] + vector.y * rotationMatrix[0][1],
                   y: vector.x * rotationMatrix[1][0] + vector.y * rotationMatrix[1][1]
                 };
-          
+
                 return {
                   x: (center.x + rotatedVector.x),
                   y: (center.y + rotatedVector.y)
                 };
               }
-          
-              const getAngleForNextCorner = (anc: any,vectorLength: any) => {
-                var alpha = Math.acos(anc/vectorLength)*(180 / Math.PI);
-                return 180 - alpha*2;
+
+              const getAngleForNextCorner = (anc: any, vectorLength: any) => {
+                var alpha = Math.acos(anc / vectorLength) * (180 / Math.PI);
+                return 180 - alpha * 2;
               }
-          
+
               const getVectorLength = (x: number, y: number, width: number, height: number) => {
-               var center = {
-                 x: x + width / 2,
-                 y: y + height / 2
-               };
-              
-              //console.log('center: ',center);
-               var vector = {
-                 x: (x - center.x),
-                y: (y - center.y)
-               };
-                 return Math.sqrt(vector.x*vector.x+vector.y*vector.y);
-              }  
-              
-              this.leftTopCorner = getRotatedTopLeftCornerOfRect(this.x-this.width/ (2 * scale), this.y-this.height/ (2 * scale), this.width/scale, this.height/scale, angle);
-          
-              var vecLength = getVectorLength(this.x-this.width/ (2 * scale), this.y-this.height/ (2 * scale), this.width/scale, this.height/scale);
+                var center = {
+                  x: x + width / 2,
+                  y: y + height / 2
+                };
+
+                //console.log('center: ',center);
+                var vector = {
+                  x: (x - center.x),
+                  y: (y - center.y)
+                };
+                return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+              }
+
+              this.leftTopCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
+
+              var vecLength = getVectorLength(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale);
               //console.log('vecLength: ',vecLength);
-          
-              angle = angle+getAngleForNextCorner(this.width/ (2 * scale), vecLength);
+
+              angle = angle + getAngleForNextCorner(this.width / (2 * scale), vecLength);
               //console.log('angle: ',angle);
-              this.rightTopCorner = getRotatedTopLeftCornerOfRect(this.x-this.width/ (2 * scale), this.y-this.height/ (2 * scale), this.width/scale, this.height/scale, angle);
-          
-              angle = angle+getAngleForNextCorner(this.height/ (2 * scale), vecLength);
+              this.rightTopCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
+
+              angle = angle + getAngleForNextCorner(this.height / (2 * scale), vecLength);
               //console.log('angle: ',angle);
-              this.rightBottomCorner = getRotatedTopLeftCornerOfRect(this.x-this.width/ (2 * scale), this.y-this.height/ (2 * scale), this.width/scale, this.height/scale, angle);
-          
-              angle = angle+getAngleForNextCorner(this.width/ (2 * scale), vecLength);
+              this.rightBottomCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
+
+              angle = angle + getAngleForNextCorner(this.width / (2 * scale), vecLength);
               //console.log('angle: ',angle);
-              this.leftBottomCorner = getRotatedTopLeftCornerOfRect(this.x-this.width/ (2 * scale), this.y-this.height/ (2 * scale), this.width/scale, this.height/scale, angle);
+              this.leftBottomCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
             };
+
+            // shows locations of corners
             team.getCorners = function () {
               return [this.leftTopCorner,
-                this.rightTopCorner,
-                this.rightBottomCorner,
-                this.leftBottomCorner];
+              this.rightTopCorner,
+              this.rightBottomCorner,
+              this.leftBottomCorner];
             };
           });
         });

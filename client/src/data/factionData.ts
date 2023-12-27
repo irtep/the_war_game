@@ -7,22 +7,22 @@ export type Crews = {
 export interface Faction {
     name: string;
     side: 'allies' | 'axis';
-    game: 'mid war' | 'late war';
+    game: 'North Africa' | 'late war';
     crews: Array<Crews>,
     desc: string,
     logo: string
 };
 
 export const games: Array<string> = [
-    'mid war',
+    'North Africa',
     'late war'
 ];
 
 export const factions: Array<Faction> = [
     {
-        name: "Great Britain",
+        name: "Desert Rats",
         side: "allies",
-        game: "mid war",
+        game: "North Africa",
         crews: [
             {
                 experience: 'rookie',
@@ -32,7 +32,7 @@ export const factions: Array<Faction> = [
             {
                 experience: 'veteran',
                 limit: 100,
-                cost: 2
+                cost: 1
             },
             {
                 experience: 'elite',
@@ -44,9 +44,9 @@ export const factions: Array<Faction> = [
         logo: "desertRats.png"
     },
     {
-        name: "USA",
+        name: "Old Ironsides",
         side: "allies",
-        game: "mid war",
+        game: "North Africa",
         crews: [
             {
                 experience: 'rookie',
@@ -56,16 +56,16 @@ export const factions: Array<Faction> = [
             {
                 experience: 'veteran',
                 limit: 1,
-                cost: 3
+                cost: 4
             }
         ],
         desc: "The huge industrial power of USA assure, that its troops are fighting with good equipments and material. However, at this point of the war they are still very inexperienced.",
         logo: "fightingFirst.png"
     },
     {
-        name: "Germany",
+        name: "Deutsches Afrikakorps",
         side: "axis",
-        game: "mid war",
+        game: "North Africa",
         crews: [
             {
                 experience: 'rookie',
@@ -75,7 +75,7 @@ export const factions: Array<Faction> = [
             {
                 experience: 'veteran',
                 limit: 100,
-                cost: 2
+                cost: 1
             },
             {
                 experience: 'elite',
@@ -88,13 +88,13 @@ export const factions: Array<Faction> = [
                 cost: 4
             }
         ],
-        desc: "Germany has already few years of quite successful war under its belt, and has been almost invicibles. They have good equipments and weapons with the most experienced troops.",
+        desc: "Germany has already few years of successful war under its belt, and has been almost invicibles. They have good equipment and weapons with the most experienced troops.",
         logo: "DAK.png"
     },
     {
-        name: "Italy",
+        name: "Regio Esercito Italiano",
         side: "axis",
-        game: "mid war",
+        game: "North Africa",
         crews: [
             {
                 experience: 'rookie',
@@ -104,7 +104,7 @@ export const factions: Array<Faction> = [
             {
                 experience: 'veteran',
                 limit: 100,
-                cost: 2
+                cost: 1
             },
             {
                 experience: 'elite',
@@ -112,7 +112,7 @@ export const factions: Array<Faction> = [
                 cost: 3
             }
         ],
-        desc: "Italy got an old school beatdown from British, when they tried to captured Egypt. However, now they are back with their friends the Germans and with more experience.",
+        desc: "Italy got an old school beatdown from British, when they tried to capture Egypt. However, now they are back with their friends the Germans and with more experience.",
         logo: "italy.png"
     }
 ];

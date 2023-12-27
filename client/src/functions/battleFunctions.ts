@@ -1,5 +1,5 @@
 //import { NodeBuilderFlags } from "typescript";
-import { GameObject, CollisionResponse } from "../data/sharedInterfaces";
+import { GameObject, CollisionResponse, Team } from "../data/sharedInterfaces";
 //import { draw } from "../functions/draw";
 
 export interface FoundData {
@@ -265,3 +265,32 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
   const defenderTeam = checkUnits(gameObject.defender.units);
   return defenderTeam;
 };
+
+export const resolveCollision = (
+  noMovement: Team,
+  withMovement: Team,
+  check: CollisionResponse
+) => {
+  if (check.collision) {
+
+    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
+      return noMovement;
+    }
+
+    else if (check.withWhat === 'tree') {
+      // need to make a cross check, if ok, can advance, if not does not advance
+      const crossCheck: number = callDice(6);
+
+      if (crossCheck >= noMovement.cross) {
+        console.log('cross ok', crossCheck, ' vs ', noMovement.cross);
+        return withMovement;
+      } else {
+        console.log('cross failed: ', crossCheck, ' vs ', noMovement.cross);
+        return noMovement;
+      }
+    }
+    
+  } else {
+    return withMovement;
+  }
+}

@@ -287,6 +287,7 @@ export function prepareWeapons(inputString: string, weapons: Array<any>) {
         console.log('w: ', w);
         const found = weapons.filter((we: any) => we.name === w);
         found[0].reload = found[0].firerate;
+        found[0].combatRange = found[0].range * 15;
         preparedWeapons.push(found[0]);
     });
 

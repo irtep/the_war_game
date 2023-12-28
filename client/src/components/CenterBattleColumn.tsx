@@ -10,7 +10,8 @@ import {
   startMovement,
   collisionCheck,
   callDice,
-  resolveCollision
+  resolveCollision,
+  hasLineOfSight
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject, CollisionResponse } from '../data/sharedInterfaces';
@@ -137,7 +138,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       else if (opponentsUnit.found) {
         // who ever had listening gets selected order and target is uuid of that clicked opponent, clear selected
         const getSelected = findTeamById(selected.id[0], gameObject);
-
+        console.log('found oppo: ', opponentsUnit);
         if (getSelected !== null) {
           // if attack order, goes as target
           if (getSelected.order === 'attack' ||
@@ -168,8 +169,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         // if move or bombards
         if (getSelected) {
           console.log('found selected');
-          if (getSelected.order === 'move' || 
-            getSelected.order === 'reverse' || 
+          if (getSelected.order === 'move' ||
+            getSelected.order === 'reverse' ||
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
             console.log('move, smoke or bombard');
@@ -213,20 +214,60 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 // Move order
 
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
-                  
+
                   const getMovement = team.moveToTarget();
                   const check: CollisionResponse = collisionCheck(gameObject, getMovement);
                   return resolveCollision(team, getMovement, check);
 
                 }
-                
+
+                /* not done yet, later maybe 
                 else if (team && team.order === 'reverse') {
                   const getMovement = team.reverse();
                   const check: CollisionResponse = collisionCheck(gameObject, getMovement);
                   return resolveCollision(team, getMovement, check);
                 }
+                */
 
                 else if (team && team.order === 'attack') {
+                  console.log('attack detected');
+                  if (typeof (team.target) === 'string') {
+                    let LOStoTarget = true;
+                    const target = findTeamById(team.target, gameObject);
+                    const attackerUnitsTeams = gameObject.attacker.units.map((u: any) => {
+                      return u.teams;
+                    }).filter((t: any) => team.uuid !== t.uuid);
+                    const defenderUnitsTeams = gameObject.defender.units.map((u: any) => {
+                      return u.teams;
+                    }).filter((t: any) => team.uuid !== t.uuid);
+
+                    
+                    const unitsAndBuildings = [
+                      ...attackerUnitsTeams,
+                      ...defenderUnitsTeams,
+                      ...gameObject.terrain.houses];
+
+                    // check if one of those blocks
+                    unitsAndBuildings.forEach( (obstacles: any) => {
+                      console.log('checking los for o: ', obstacles);
+                      const losCheck = hasLineOfSight(team, target, obstacles);
+                      if (losCheck === false) { LOStoTarget = false }
+                    });
+                    // Example usage:
+                    console.log('LOS: ', LOStoTarget);
+                    // check if line of sight
+                    // if line of sight
+
+                    // check if in range of any weapons
+
+                    // if in range, open fire
+
+                    // if not, move closer
+
+                    // if not in line of sight
+                  } else {
+                    console.log('target not string: ', typeof (team.target), team.target);
+                  }
                   return team;
                 }
 
@@ -367,13 +408,13 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             }}>
               move
             </button>
-
+            {/*
             <button onClick={() => {
               changePropsOfTeam(selected.id[0], ['order'], ['reverse'], gameObject, setGameObject)
             }}>
               reverse
             </button>
-
+ */}
             <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['attack'], gameObject, setGameObject) }}>
               attack
             </button>

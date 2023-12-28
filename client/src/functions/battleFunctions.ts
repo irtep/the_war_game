@@ -294,3 +294,39 @@ export const resolveCollision = (
     return withMovement;
   }
 }
+
+export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): boolean => {
+  // Bresenham's line algorithm
+  const x1 = point1.x;
+  const y1 = point1.y;
+  const x2 = point2.x;
+  const y2 = point2.y;
+
+  const dx = Math.abs(x2 - x1);
+  const dy = Math.abs(y2 - y1);
+  const sx = x1 < x2 ? 1 : -1;
+  const sy = y1 < y2 ? 1 : -1;
+
+  let x = x1;
+  let y = y1;
+  let err = dx - dy;
+
+  while (x !== x2 || y !== y2) {
+      // Check for obstacles at each pixel
+      if (obstacles.some(obstacle => obstacle.x === x && obstacle.y === y)) {
+          return false; // There is an obstacle in the path
+      }
+
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+          err -= dy;
+          x += sx;
+      }
+      if (e2 < dx) {
+          err += dx;
+          y += sy;
+      }
+  }
+
+  return true; // No obstacles in the path
+}

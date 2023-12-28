@@ -104,7 +104,7 @@ const Battle: React.FC = (): React.ReactElement => {
               this.currentSpeed = 0;
             };
 
-            // reverse
+            // reverse, not in use, gotta do later...
             team.reverse = function () {
               const normalizeAngle = (angle: number) => {
                 return (angle % 360 + 360) % 360;
@@ -116,7 +116,6 @@ const Battle: React.FC = (): React.ReactElement => {
                 const dy = this.target.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
             
-                // tää varmaan pitää reversee
                 updatedTeam.targetAngle = ((Math.atan2(dy, dx) * 180) / Math.PI) + 90;
             
                 // normalize the angle to not mess turning

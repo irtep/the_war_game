@@ -157,6 +157,16 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
                     ctx.stroke();
                     ctx.closePath();
+
+                    // weapon ranges
+                    team.combatWeapons.forEach((w: any) => {
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'black';
+                        ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    });
                 }
                 /*
                                 const colors: string[] = ['orange', 'red', 'blue', 'green'];
@@ -210,11 +220,22 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                 }
 
                 if (team.uuid === selected.id[0]) {
+
                     ctx.beginPath();
                     ctx.strokeStyle = 'navy';
                     ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
                     ctx.stroke();
                     ctx.closePath();
+
+                    // weapon ranges
+                    team.combatWeapons.forEach((w: any) => {
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'black';
+                        ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    });
                 }
             });
         });

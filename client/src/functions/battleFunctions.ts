@@ -60,7 +60,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
     arr.map((t: any) => {
 
       if (type === 'teams') {
-        
+
         if (team.uuid !== t.uuid) {
           t.setCorners(t.a);
           const colCheck = checkRectangleCollision(team, t);
@@ -289,14 +289,13 @@ export const resolveCollision = (
         return noMovement;
       }
     }
-    
+
   } else {
     return withMovement;
   }
 }
 
 export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): boolean => {
-  // Bresenham's line algorithm
   const x1 = point1.x;
   const y1 = point1.y;
   const x2 = point2.x;
@@ -311,22 +310,29 @@ export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): bool
   let y = y1;
   let err = dx - dy;
 
-  while (x !== x2 || y !== y2) {
-      // Check for obstacles at each pixel
-      if (obstacles.some(obstacle => obstacle.x === x && obstacle.y === y)) {
-          return false; // There is an obstacle in the path
+  while (Math.abs(x - x2) > 1 || Math.abs(y - y2) > 1) {
+    for (const obstacle of obstacles) {
+      // Check if the line intersects with the bounding box of the obstacle
+      if (
+        x >= obstacle.x && x <= obstacle.x + obstacle.width &&
+        y >= obstacle.y && y <= obstacle.y + obstacle.height
+      ) {
+        console.log('returning false: ', obstacle.x, obstacle.y);
+        return false; // There is an obstacle in the path
       }
+    }
 
-      const e2 = 2 * err;
-      if (e2 > -dy) {
-          err -= dy;
-          x += sx;
-      }
-      if (e2 < dx) {
-          err += dx;
-          y += sy;
-      }
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
   }
 
+  console.log('returning true');
   return true; // No obstacles in the path
-}
+};

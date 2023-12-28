@@ -14,7 +14,7 @@ import {
   hasLineOfSight
   //  doOrders
 } from '../functions/battleFunctions';
-import { GameObject, CollisionResponse } from '../data/sharedInterfaces';
+import { GameObject, CollisionResponse, Team } from '../data/sharedInterfaces';
 //import { chipClasses } from '@mui/material';
 
 interface Canvas {
@@ -165,15 +165,15 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       // if clicked was not any team,
       else {
         const getSelected = findTeamById(selected.id[0], gameObject);
-        console.log('was not selected');
+        //console.log('was not selected');
         // if move or bombards
         if (getSelected) {
-          console.log('found selected');
+          //console.log('found selected');
           if (getSelected.order === 'move' ||
             getSelected.order === 'reverse' ||
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
-            console.log('move, smoke or bombard');
+            //console.log('move, smoke or bombard');
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
           }
 
@@ -191,7 +191,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-      console.log('calling draw as gameObject changed');
+      //console.log('calling draw as gameObject changed');
       draw(canvas, canvasSize, gameObject, selected);
 
     }
@@ -209,7 +209,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
             updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
               ...unit,
-              teams: unit.teams.map((team: any) => {
+              teams: unit.teams.map((team: Team) => {
 
                 // Move order
 
@@ -229,27 +229,57 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 }
                 */
 
+                /**
+                 *  ATTACK
+                 */
+
                 else if (team && team.order === 'attack') {
                   console.log('attack detected');
                   if (typeof (team.target) === 'string') {
                     let LOStoTarget = true;
                     const target = findTeamById(team.target, gameObject);
+                    /*
                     const attackerUnitsTeams = gameObject.attacker.units.map((u: any) => {
                       return u.teams;
-                    }).filter((t: any) => team.uuid !== t.uuid);
-                    const defenderUnitsTeams = gameObject.defender.units.map((u: any) => {
-                      return u.teams;
-                    }).filter((t: any) => team.uuid !== t.uuid);
+                    })
+                    */
+                    const attackerUnitsTeams = gameObject.attacker.units
+                    .map((u: any) => u.teams)
+                    //.filter((team: any) => team.uuid !== team.uuid);
+                    const defenderUnitsTeams = gameObject.defender.units
+                    .map((u: any) => u.teams)
+                    //.filter((team: any) => team.uuid !== team.uuid);
+                    //console.log('uuids: ', team.uuid, target.uuid);
 
-                    
-                    const unitsAndBuildings = [
-                      ...attackerUnitsTeams,
-                      ...defenderUnitsTeams,
-                      ...gameObject.terrain.houses];
+                    // clean uuid of attacker and target
+                    let filteredUnits: any[] = [];
 
+                    for (let i = 0; i < attackerUnitsTeams.length; i++) {
+                      for (let j = 0; j < attackerUnitsTeams[i].length; j++) {
+                        if (attackerUnitsTeams[i][j].uuid !== team.uuid &&
+                            attackerUnitsTeams[i][j].uuid !== target.uuid) {
+                              filteredUnits.push(attackerUnitsTeams[i][j]);
+                        } else {
+                          console.log('not pushed: ', attackerUnitsTeams[i][j].uuid);
+                        }
+                      }
+                    }
+                    for (let i = 0; i < defenderUnitsTeams.length; i++) {
+                      for (let j = 0; j < defenderUnitsTeams[i].length; j++) {
+                        if (defenderUnitsTeams[i][j].uuid !== team.uuid && 
+                            defenderUnitsTeams[i][j].uuid !== target.uuid) {
+                              filteredUnits.push(defenderUnitsTeams[i][j]);
+                        }
+                      }
+                    }
+                    const unitsAndBuildings: any[] = [
+                      filteredUnits,
+                      gameObject.terrain.houses];
+
+                    // console.log('units and buildings: ', unitsAndBuildings);
                     // check if one of those blocks
                     unitsAndBuildings.forEach( (obstacles: any) => {
-                      console.log('checking los for o: ', obstacles);
+                      //console.log('checking los for o: ', obstacles);
                       const losCheck = hasLineOfSight(team, target, obstacles);
                       if (losCheck === false) { LOStoTarget = false }
                     });
@@ -268,7 +298,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   } else {
                     console.log('target not string: ', typeof (team.target), team.target);
                   }
-                  return team;
+                  return {...team, order: 'wait'};
                 }
 
                 else if (team && team.order === 'bombard') {

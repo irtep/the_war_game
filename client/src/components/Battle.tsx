@@ -336,7 +336,7 @@ const Battle: React.FC = (): React.ReactElement => {
 
     };
 
-    console.log(gameObject);
+    //console.log(gameObject);
   }, [gameObject]);
 
   return (

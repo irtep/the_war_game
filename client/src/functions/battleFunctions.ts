@@ -16,9 +16,11 @@ export const callDice = (max: number): number => {
 export const collisionCheck = (gameObject: GameObject, team: any): CollisionResponse => {
   const collisionResponse: CollisionResponse = {
     collision: false,
-    withWhat: ''
+    withWhat: '',
+    id: undefined
   };
   // set corners of team:
+  //console.log('getting corners for ', team);
   team.setCorners(team.a);
 
   function pointInPoly(verties: any, testx: any, testy: any) {
@@ -60,7 +62,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
     arr.map((t: any) => {
 
       if (type === 'teams') {
-        
+
         if (team.uuid !== t.uuid) {
           t.setCorners(t.a);
           const colCheck = checkRectangleCollision(team, t);
@@ -113,12 +115,12 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
   }
 
   // check step by step, to be more efficent, first attackers
-  gameObject.attacker.units.map((u: any) => {
+  gameObject.attacker.units.forEach((u: any) => {
     runArray(u.teams, 'teams');
   });
 
   if (collisionResponse.collision === false) {
-    gameObject.defender.units.map((u: any) => {
+    gameObject.defender.units.forEach((u: any) => {
       runArray(u.teams, 'teams');
     });
   };
@@ -265,7 +267,7 @@ export const findTeamById = (targetUuid: string, gameObject: GameObject): any | 
   const defenderTeam = checkUnits(gameObject.defender.units);
   return defenderTeam;
 };
-
+/*
 export const resolveCollision = (
   noMovement: Team,
   withMovement: Team,
@@ -289,14 +291,42 @@ export const resolveCollision = (
         return noMovement;
       }
     }
-    
+
+  } else {
+    return withMovement;
+  }
+}
+*/
+export const resolveCollision = (
+  noMovement: Team,
+  withMovement: Team,
+  check: CollisionResponse
+) => {
+  if (check.collision) {
+
+    if (check.withWhat === 'team' || check.withWhat === 'house' || check.withWhat === 'water') {
+      return noMovement;
+    }
+
+    else if (check.withWhat === 'tree') {
+      // need to make a cross check, if ok, can advance, if not does not advance
+      const crossCheck: number = callDice(6);
+
+      if (crossCheck >= noMovement.cross) {
+        console.log('cross ok', crossCheck, ' vs ', noMovement.cross);
+        return withMovement;
+      } else {
+        console.log('cross failed: ', crossCheck, ' vs ', noMovement.cross);
+        return noMovement;
+      }
+    }
+
   } else {
     return withMovement;
   }
 }
 
 export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): boolean => {
-  // Bresenham's line algorithm
   const x1 = point1.x;
   const y1 = point1.y;
   const x2 = point2.x;
@@ -311,22 +341,37 @@ export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): bool
   let y = y1;
   let err = dx - dy;
 
-  while (x !== x2 || y !== y2) {
-      // Check for obstacles at each pixel
-      if (obstacles.some(obstacle => obstacle.x === x && obstacle.y === y)) {
-          return false; // There is an obstacle in the path
+  while (Math.abs(x - x2) > 1 || Math.abs(y - y2) > 1) {
+    for (const obstacle of obstacles) {
+      // Check if the line intersects with the bounding box of the obstacle
+      if (
+        x >= obstacle.x && x <= obstacle.x + obstacle.width &&
+        y >= obstacle.y && y <= obstacle.y + obstacle.height
+      ) {
+        console.log('returning false: ', obstacle.x, obstacle.y);
+        return false; // There is an obstacle in the path
       }
+    }
 
-      const e2 = 2 * err;
-      if (e2 > -dy) {
-          err -= dy;
-          x += sx;
-      }
-      if (e2 < dx) {
-          err += dx;
-          y += sy;
-      }
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
   }
 
+  console.log('returning true');
   return true; // No obstacles in the path
-}
+};
+
+export const distanceCheck = (loca1: any, loca2: any): number => {
+  const dx = loca2.x - loca1.x;
+  const dy = loca2.y - loca1.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  return distance;
+};

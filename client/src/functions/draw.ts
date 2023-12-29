@@ -109,134 +109,145 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
         gameObject.attacker.units.forEach((unit: any) => {
             unit.teams.forEach((team: any) => {
                 //console.log('imagekey: ', team.imgTop);
-                const imgKey = team.imgTop;
+                if (team === undefined) {
+                    // for some reason can be undefined sometimes after LOS check.
+                    // need to investigate further
+                    console.log('error: ', unit, team);
+                } else {
+                    const imgKey = team.imgTop;
 
-                //          team.setCorners(0); // for debug
-                //         const corners = team.getCorners(); // for debug
+                    //          team.setCorners(0); // for debug
+                    //         const corners = team.getCorners(); // for debug
 
-                // Check if the image is already in the cache
-                if (!imageCache[imgKey]) {
-                    // If not, load the image and add it to the cache
-                    const img = new Image();
-                    img.onerror = (error) => {
-                        console.error('Error loading image:', error);
-                    };
-                    img.src = process.env.PUBLIC_URL + `/img/units/${imgKey}.png`;
-                    imageCache[imgKey] = img;
-                }
+                    // Check if the image is already in the cache
+                    if (!imageCache[imgKey]) {
+                        // If not, load the image and add it to the cache
+                        const img = new Image();
+                        img.onerror = (error) => {
+                            console.error('Error loading image:', error);
+                        };
+                        img.src = process.env.PUBLIC_URL + `/img/units/${imgKey}.png`;
+                        imageCache[imgKey] = img;
+                    }
 
-                const img = imageCache[imgKey];
+                    const img = imageCache[imgKey];
 
-                // Draw the image using the cached instance
-                ctx.save();
-                ctx.translate(team.x, team.y);
-                ctx.rotate(team.a * (Math.PI / 180));
-                ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
+                    // Draw the image using the cached instance
+                    ctx.save();
+                    ctx.translate(team.x, team.y);
+                    ctx.rotate(team.a * (Math.PI / 180));
+                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
 
-                // Draw text or other things related to the team
-                ctx.font = '10px Arial';
-                ctx.fillStyle = 'white';
-                ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
-                ctx.fillStyle = 'white';
-                ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
+                    // Draw text or other things related to the team
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
 
 
-                ctx.restore();
+                    ctx.restore();
 
-                if (team.order === 'listening') {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'green';
-                    ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
-                    ctx.stroke();
-                    ctx.closePath();
-                }
-
-                if (team.uuid === selected.id[0]) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'navy';
-                    ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
-                    ctx.stroke();
-                    ctx.closePath();
-
-                    // weapon ranges
-                    team.combatWeapons.forEach((w: any) => {
-
+                    if (team.order === 'listening') {
                         ctx.beginPath();
-                        ctx.strokeStyle = 'black';
-                        ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                        ctx.strokeStyle = 'green';
+                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
                         ctx.stroke();
                         ctx.closePath();
-                    });
+                    }
+
+                    if (team.uuid === selected.id[0]) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'navy';
+                        ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+
+                        // weapon ranges
+                        team.combatWeapons.forEach((w: any) => {
+
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'black';
+                            ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                            ctx.stroke();
+                            ctx.closePath();
+                        });
+                    }
+                    /*
+                                    const colors: string[] = ['orange', 'red', 'blue', 'green'];
+                                    corners.forEach((corner: any, ix: number) => {
+                                        ctx.beginPath();
+                                        ctx.strokeStyle = colors[ix];
+                                        ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
+                                        ctx.stroke();
+                                        ctx.closePath();
+                                    });
+                    */
                 }
-                /*
-                                const colors: string[] = ['orange', 'red', 'blue', 'green'];
-                                corners.forEach((corner: any, ix: number) => {
-                                    ctx.beginPath();
-                                    ctx.strokeStyle = colors[ix];
-                                    ctx.arc(corner.x, corner.y, 10, 0, Math.PI * 2, true);
-                                    ctx.stroke();
-                                    ctx.closePath();
-                                });
-                */
             });
         });
 
         gameObject.defender.units.forEach((unit: any) => {
             unit.teams.forEach((team: any) => {
-                const imgKey = team.imgTop;
+                if (team === undefined) {
+                    console.log('team undefined...', unit);
+                } else {
+                    const imgKey = team.imgTop;
 
-                // Check if the image is already in the cache
-                if (!imageCache[imgKey]) {
-                    // If not, load the image and add it to the cache
-                    const img = new Image();
-                    img.src = process.env.PUBLIC_URL + `/img/units/${imgKey}.png`;
-                    imageCache[imgKey] = img;
-                }
+                    // Check if the image is already in the cache
+                    if (!imageCache[imgKey]) {
+                        // If not, load the image and add it to the cache
+                        const img = new Image();
+                        img.src = process.env.PUBLIC_URL + `/img/units/${imgKey}.png`;
+                        imageCache[imgKey] = img;
+                    }
 
-                const img = imageCache[imgKey];
+                    const img = imageCache[imgKey];
 
-                // Draw the image using the cached instance
-                ctx.save();
-                ctx.translate(team.x, team.y);
-                ctx.rotate(team.a * (Math.PI / 180));
-                ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
+                    // Draw the image using the cached instance
+                    ctx.save();
+                    ctx.translate(team.x, team.y);
+                    ctx.rotate(team.a * (Math.PI / 180));
+                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
 
-                // Draw text or other things related to the team
-                ctx.font = '10px Arial';
-                ctx.fillStyle = 'white';
-                ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
-                ctx.fillStyle = 'white';
-                ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
+                    // Draw text or other things related to the team
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
 
 
-                ctx.restore();
+                    ctx.restore();
 
-                if (team.order === 'listening') {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'green';
-                    ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
-                    ctx.stroke();
-                    ctx.closePath();
-                }
-
-                if (team.uuid === selected.id[0]) {
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'navy';
-                    ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
-                    ctx.stroke();
-                    ctx.closePath();
-
-                    // weapon ranges
-                    team.combatWeapons.forEach((w: any) => {
-
+                    if (team.order === 'listening') {
                         ctx.beginPath();
-                        ctx.strokeStyle = 'black';
-                        ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                        ctx.strokeStyle = 'green';
+                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
                         ctx.stroke();
                         ctx.closePath();
-                    });
+                    }
+
+                    if (team.uuid === selected.id[0]) {
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'navy';
+                        ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+
+                        // weapon ranges
+                        team.combatWeapons.forEach((w: any) => {
+
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'black';
+                            ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
+                            ctx.stroke();
+                            ctx.closePath();
+                        });
+                    }
                 }
+
             });
         });
     }

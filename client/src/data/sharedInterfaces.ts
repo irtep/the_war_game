@@ -24,7 +24,7 @@ export interface Team {
     transport: number;
     transporting: Array<string>|string;
     nickname: string;
-    target: string;
+    target: any;
     cross: number;
     points: number;
     height: number;
@@ -38,7 +38,8 @@ export interface Team {
     tacticalNumber?: string,
     kills?: Array<string>,
     uuid?: string,
-    targetAngle?: number
+    targetAngle?: number,
+    moveToTarget?: any
 };
 
 export interface Army {
@@ -98,5 +99,6 @@ export interface Selected {
 export interface CollisionResponse {
     collision: boolean;
     withWhat: string;
+    id?: string | undefined;
   };
 // number|string;

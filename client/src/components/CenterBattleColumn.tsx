@@ -11,10 +11,12 @@ import {
   collisionCheck,
   callDice,
   resolveCollision,
-  hasLineOfSight
+  hasLineOfSight,
+  distanceCheck
   //  doOrders
 } from '../functions/battleFunctions';
-import { GameObject, CollisionResponse } from '../data/sharedInterfaces';
+import { GameObject, CollisionResponse, Team } from '../data/sharedInterfaces';
+import { losBullet } from '../data/classes';
 //import { chipClasses } from '@mui/material';
 
 interface Canvas {
@@ -165,15 +167,15 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       // if clicked was not any team,
       else {
         const getSelected = findTeamById(selected.id[0], gameObject);
-        console.log('was not selected');
+        //console.log('was not selected');
         // if move or bombards
         if (getSelected) {
-          console.log('found selected');
+          //console.log('found selected');
           if (getSelected.order === 'move' ||
             getSelected.order === 'reverse' ||
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
-            console.log('move, smoke or bombard');
+            //console.log('move, smoke or bombard');
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
           }
 
@@ -191,7 +193,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-      console.log('calling draw as gameObject changed');
+      //console.log('calling draw as gameObject changed');
       draw(canvas, canvasSize, gameObject, selected);
 
     }
@@ -209,7 +211,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
             updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
               ...unit,
-              teams: unit.teams.map((team: any) => {
+              teams: unit.teams.map((team: Team) => {
 
                 // Move order
 
@@ -229,46 +231,59 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 }
                 */
 
+                /**
+                 *  ATTACK
+                 */
+
                 else if (team && team.order === 'attack') {
                   console.log('attack detected');
                   if (typeof (team.target) === 'string') {
-                    let LOStoTarget = true;
+                    //let LOStoTarget = true;
                     const target = findTeamById(team.target, gameObject);
-                    const attackerUnitsTeams = gameObject.attacker.units.map((u: any) => {
-                      return u.teams;
-                    }).filter((t: any) => team.uuid !== t.uuid);
-                    const defenderUnitsTeams = gameObject.defender.units.map((u: any) => {
-                      return u.teams;
-                    }).filter((t: any) => team.uuid !== t.uuid);
-
-                    
-                    const unitsAndBuildings = [
-                      ...attackerUnitsTeams,
-                      ...defenderUnitsTeams,
-                      ...gameObject.terrain.houses];
-
                     // check if one of those blocks
-                    unitsAndBuildings.forEach( (obstacles: any) => {
-                      console.log('checking los for o: ', obstacles);
-                      const losCheck = hasLineOfSight(team, target, obstacles);
-                      if (losCheck === false) { LOStoTarget = false }
-                    });
-                    // Example usage:
-                    console.log('LOS: ', LOStoTarget);
-                    // check if line of sight
-                    // if line of sight
+                    losBullet.x = team.x; losBullet.y = team.y;
+                    losBullet.target = { x: target.x, y: target.y };
+                    losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+                    const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
+                    //console.log('distance: ', checkDistance);
 
-                    // check if in range of any weapons
+                    let collided = false;
+                    //let i = 0;
 
-                    // if in range, open fire
+                    for (let i = 0; i < checkDistance + 360; i++) {
+                      //console.log('checkD and i', checkDistance, i);
+                      const getMovement = losBullet.moveToTarget();
+                      //console.log('gO.a.u at i:', i, gameObject.attacker.units);
+                      const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet);
+                      if (check.collision) {
+                        // need to get id of collided returned...
+                        console.log('collision: ', check, losBullet.x, losBullet.y);
+                        collided = true;
+                        console.log('returning team');
+                        // check if line of sight
+                        // if line of sight
 
-                    // if not, move closer
+                        // check if in range of any weapons
 
-                    // if not in line of sight
+                        // if in range, open fire
+
+                        // if not, move closer
+
+                        // if not in line of sight
+                        return { ...team, order: 'wait' };
+                      } else {
+                        //console.log('los check: ', check, losBullet.x, losBullet.y);
+                      }
+                      losBullet.x = getMovement.updatedBullet.x;
+                      losBullet.y = getMovement.updatedBullet.y;
+                    }
+                    console.log('out of loop');
+
                   } else {
                     console.log('target not string: ', typeof (team.target), team.target);
+                    return team;
                   }
-                  return team;
+
                 }
 
                 else if (team && team.order === 'bombard') {

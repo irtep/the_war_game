@@ -99,5 +99,6 @@ export interface Selected {
 export interface CollisionResponse {
     collision: boolean;
     withWhat: string;
+    id?: string | undefined;
   };
 // number|string;

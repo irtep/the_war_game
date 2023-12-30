@@ -13,7 +13,7 @@ export const callDice = (max: number): number => {
   return result;
 }
 
-export const collisionCheck = (gameObject: GameObject, team: any): CollisionResponse => {
+export const collisionCheck = (gameObject: GameObject, team: any, action: string): CollisionResponse => {
   const collisionResponse: CollisionResponse = {
     collision: false,
     withWhat: '',
@@ -68,9 +68,10 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
           const colCheck = checkRectangleCollision(team, t);
 
           if (colCheck === true) {
-            const cornerit = team.getCorners();
+            //const cornerit = team.getCorners();
             //console.log(`teams: ${team.uuid} vs ${t.uuid}`);
             //console.log(`corners 1: ${cornerit[0].x}`);
+            collisionResponse.id = t.uuid;
             collisionResponse.collision = true;
             collisionResponse.withWhat = 'team';
           }
@@ -83,7 +84,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
         const colCheck = checkRectangleCollision(team, t);
 
         if (colCheck === true) {
-          console.log('is house');
+          //console.log('is house');
           collisionResponse.collision = true;
           collisionResponse.withWhat = 'house';
         }
@@ -105,7 +106,7 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
         const colCheck = checkRectangleCollision(team, t);
 
         if (colCheck === true) {
-          console.log('is water');
+          //console.log('is water');
           collisionResponse.collision = true;
           collisionResponse.withWhat = 'water';
         }
@@ -115,25 +116,27 @@ export const collisionCheck = (gameObject: GameObject, team: any): CollisionResp
   }
 
   // check step by step, to be more efficent, first attackers
-  gameObject.attacker.units.forEach((u: any) => {
-    runArray(u.teams, 'teams');
-  });
-
-  if (collisionResponse.collision === false) {
+  if (action !== 'cover') {
+    gameObject.attacker.units.forEach((u: any) => {
+      runArray(u.teams, 'teams');
+    });
+  }
+  // action === cover is not used at the moment..
+  if (collisionResponse.collision === false && action !== 'cover') {
     gameObject.defender.units.forEach((u: any) => {
       runArray(u.teams, 'teams');
     });
   };
 
-  if (collisionResponse.collision === false) {
+  if (collisionResponse.collision === false && action !== 'cover') {
     runArray(gameObject.terrain.houses, 'houses');
   }
 
-  if (collisionResponse.collision === false) {
+  if (collisionResponse.collision === false && action !== 'los' && action !== 'cover') {
     runArray(gameObject.terrain.waters, 'waters');
   }
 
-  if (collisionResponse.collision === false) {
+  if (collisionResponse.collision === false && action !== 'los') {
     runArray(gameObject.terrain.trees, 'trees');
   }
 

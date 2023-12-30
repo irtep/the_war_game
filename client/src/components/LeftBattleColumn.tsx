@@ -70,7 +70,11 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
             y: ${hovered.all.y}
             a: ${hovered.all.a}
             tA: ${hovered.all.targetAngle}`}
-
+          </Typography>
+          <Typography padding={1} sx={{color: "red"}}>
+            {`disabled: ${hovered.all.disabled}
+            shaken: ${hovered.all.shaken}
+            stunned: ${hovered.all.stunned}`}
           </Typography>
         </> : <></>
     }

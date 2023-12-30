@@ -52,7 +52,9 @@ const Battle: React.FC = (): React.ReactElement => {
             }
 
             //console.log('fdb: ', foundFromDB);
-            team.order = 'wait'
+            team.order = 'hold';
+            team.shaken = false;
+            team.stunned = false;
             team.x = 1000;
             team.y = 1000;
             team.a = 0;
@@ -72,19 +74,20 @@ const Battle: React.FC = (): React.ReactElement => {
               case 'veteran':
                 team.rat = team.rat + 1;
                 team.mat = team.mat + 1;
+                team.reactions = team.reactions + 1;
                 break;
               case 'elite':
                 team.rat = team.rat + 1;
                 team.mat = team.mat + 1;
                 team.def = team.def + 1;
-                team.reactions = team.reactions + 1;
+                team.reactions = team.reactions + 2;
                 team.skill = team.skill + 1;
                 break;
               case 'ace':
                 team.rat = team.rat + 2;
                 team.mat = team.mat + 2;
                 team.def = team.def + 2;
-                team.reactions = team.reactions + 2;
+                team.reactions = team.reactions + 3;
                 team.skill = team.skill + 2;
                 if (team.save > 0) {
                   team.save = team.save + 1;
@@ -104,7 +107,16 @@ const Battle: React.FC = (): React.ReactElement => {
               this.currentSpeed = 0;
             };
 
+            //
+            team.disable = function () {
+              this.disabled = true;
+              this.order = '';
+              this.currentSpeed = 0;
+              this.speed = 0;
+            };
+
             // reverse, not in use, gotta do later...
+            /*
             team.reverse = function () {
               const normalizeAngle = (angle: number) => {
                 return (angle % 360 + 360) % 360;
@@ -159,7 +171,7 @@ const Battle: React.FC = (): React.ReactElement => {
                 console.log('Cannot reverse:', this.order, this.target);
                 return { ...this };
               }
-            };
+            }; */
 
             // move
             team.moveToTarget = function () {
@@ -169,7 +181,9 @@ const Battle: React.FC = (): React.ReactElement => {
                 return (angle % 360 + 360) % 360;
               }
 
-              if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+              if (/*this.order === 'move' && */
+              typeof this.target.x === 'number' && typeof this.target.y === 'number' &&
+              this.speed > 0 && this.stunned === false && this.shaken == false) {
                 const updatedTeam = { ...this };
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;

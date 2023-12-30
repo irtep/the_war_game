@@ -23,6 +23,15 @@ interface Canvas {
   w: number;
   h: number;
 }
+
+interface AttacksBox {
+  inRange: boolean;
+  hasLOS: boolean;
+  attacks: any[];
+  inCover: boolean;
+  distance: number;
+}
+
 /*
 type IntervalItem = {
   teamId: string;
@@ -120,7 +129,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       // if clicked is from your team
       if (playersUnit.found) {
 
-        // order: listening, everyone else who was listening goes waiting
+        // order: listening, everyone else who was listening goes holding
         setGameObject({
           ...gameObject,
           [gameObject.player]: {
@@ -209,148 +218,447 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
      */
 
     if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
-
-      const attacksToResolve: any[] = []; // will be filled in interval
+      const refreshRate: number = 100;
+      let attacksToResolve: any[] = []; // will be filled in interval
 
       // interval when game is not paused
       intervalId = setInterval(() => {
+
         setGameObject((prevGameObject: GameObject) => {
           const updatedGameObject = { ...prevGameObject };
 
+          // resolve shooting
+          if (updatedGameObject.attacksToResolve) {
+            // sort by origin.reactions
+            updatedGameObject.attacksToResolve.sort((a, b) => a.origin.reactions - b.origin.reactions);
+
+            updatedGameObject.attacksToResolve.forEach((shooting: any) => {
+              if (shooting.object.disabled === true) {
+                shooting.origin.order = 'hold';
+              } else {
+                if (shooting.weapon.reload >= shooting.weapon.firerate &&
+                  shooting.origin.shaken === false && shooting.origin.stunned === false) {
+                  const attacker = shooting.origin;
+                  const target = shooting.object;
+                  let hitDice = callDice(12);
+                  let hitHelpers = 0;
+                  let defHelpers = 0;
+                  let armourSofteners = 0;
+                  let armourHardeners = 0;
+                  let concealed = false;
+
+                  // empty the gun
+                  shooting.weapon.reload = 0;
+
+                  // if far away or close
+                  if (shooting.distance < 100) {
+                    console.log('point blank');
+                    hitHelpers++;
+                    armourSofteners++;
+                  }
+                  if (shooting.distance > 241) {
+                    console.log('long distance');
+                    defHelpers++;
+                    if (!shooting.weapon.specials.includes('HEAT')) {
+                      console.log('does not have heat');
+                      armourHardeners++;
+                    } else { console.log('has HEAT') }
+                  }
+
+                  // if concealed
+                  updatedGameObject.terrain.trees.forEach((t: any) => {
+                    const distance = distanceCheck(
+                      { x: target.x, y: target.y },
+                      { x: t.x, y: t.y }
+                    );
+                    console.log('distance to tree: ', distance);
+                    if (distance < 5 + target.width + t.s) {
+                      console.log('concealed by trees');
+                      concealed = true;
+                    }
+                  });
+                  updatedGameObject.smokes?.forEach((t: any) => {
+                    const distance = distanceCheck(
+                      { x: target.x, y: target.y },
+                      { x: t.x, y: t.y }
+                    );
+                    console.log('distance to smoke: ', distance);
+                    if (distance < 5 + target.width + t.s) {
+                      console.log('concealed by smoke');
+                      concealed = true;
+                    }
+
+                  });
+
+                  // if aiming:
+                  if (attacker.order === 'hold') { hitHelpers++; }
+                  // if moving:
+                  if (target.order === 'move') { defHelpers++; }
+                  // if concealed:
+                  if (concealed) { defHelpers++; }
+
+                  const finalHitScore = hitDice + shooting.origin.rat + hitHelpers;
+                  const finalDefScore = shooting.object.def + defHelpers;
+                  console.log(`final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}`);
+                  console.log('def of object: ', shooting.object.def);
+
+                  if (finalHitScore >= finalDefScore) {
+                    console.log('target is hit!');
+
+                    if (shooting.object.type === 'tank') {
+                      console.log('target is tank');
+                      const armorDice = callDice(6);
+                      const finalArmour = armorDice + armourHardeners + shooting.object.armourFront;
+                      const finalPenetration = shooting.weapon.AT + armourSofteners;
+                      console.log(`armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${shooting.object.armourFront})`);
+                      console.log(`pene: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}`);
+
+                      if (finalArmour === finalPenetration) {
+                        console.log('glancing hit!');
+                        const firePowerDice = callDice(6);
+                        if (firePowerDice >= shooting.weapon.FP) {
+                          const randomDice = callDice(6);
+                          switch (randomDice) {
+                            case 1:
+                              console.log('track damage');
+                              shooting.object.speed = shooting.object.speed - 10;
+                              if (shooting.object.speed < 0) { shooting.object.speed = 0 }
+                              break;
+                            case 2:
+                              console.log('engine damage');
+                              shooting.object.motorPower = shooting.object.motorPower / 2;
+                              break;
+                            case 3:
+                              console.log('crew shaken');
+                              shooting.shaken = true;
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.reload = 0;
+                              });
+                              break;
+                            case 4:
+                              console.log('crew stunned');
+                              shooting.object.stunned = true;
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.reload = 0;
+                              });
+                              break;
+                            case 5:
+                              console.log('immobilized');
+                              shooting.object.speed = 0;
+                              shooting.object.currentSpeed = 0;
+                              break;
+                            case 6:
+                              console.log('weapons damaged');
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.firerate = wep.firerate * 2;
+                              });
+                              break;
+                            default: console.log('glancing dice not found!', randomDice);
+                          };
+                        } else {
+                          console.log('no damage!');
+                        }
+                      } else if (finalArmour < finalPenetration) {
+                        console.log('penetrating hit!');
+                        const firePowerDice = callDice(6);
+
+                        if (firePowerDice >= shooting.weapon.FP) {
+                          console.log('destroyed!');
+                          shooting.object.disable();
+                          shooting.origin.kills.push(shooting.object.name);
+                        } else {
+                          const randomDice = callDice(6);
+                          console.log('dice roll: ', randomDice);
+                          switch (randomDice) {
+                            case 1:
+                              console.log('track damage');
+                              shooting.object.speed = shooting.object.speed - 10;
+                              if (shooting.object.speed < 0) { shooting.object.speed = 0 }
+                              break;
+                            case 2:
+                              console.log('engine damage');
+                              shooting.object.motorPower = shooting.object.motorPower / 2;
+                              break;
+                            case 3:
+                              console.log('crew shaken');
+                              shooting.object.order = 'shaken';
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.reload = 0;
+                              });
+                              break;
+                            case 4:
+                              console.log('crew stunned');
+                              shooting.object.order = 'stunned';
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.reload = 0;
+                              });
+                              break;
+                            case 5:
+                              console.log('immobilized');
+                              shooting.object.speed = 0;
+                              shooting.object.currentSpeed = 0;
+                              break;
+                            case 6:
+                              console.log('weapons damaged');
+                              shooting.object.combatWeapons.forEach((wep: any) => {
+                                wep.firerate = wep.firerate * 2;
+                              });
+                              break;
+                            default: console.log('glancing dice not found!', randomDice);
+                          };
+                        }
+                      }
+                    } else {
+                      console.log('target is infantry or gun');
+                      const saveDice = callDice(6);
+
+                      if (saveDice >= shooting.object.save) {
+                        console.log('save ok, team saved!', saveDice);
+                      } else {
+                        console.log('save failed: ', saveDice);
+                        shooting.object.disable();
+                        shooting.origin.kills.push(shooting.object.name);
+                      }
+                    }
+
+                  } else {
+                    console.log('shooting missed!');
+                  }
+                } else {
+                  console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
+                }
+              }
+
+            });
+          }
+
+          // Reset attacksToResolve
+          attacksToResolve = [];
+
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
+
             updatedGameObject.attacker.units = updatedGameObject.attacker.units.map((unit: any) => ({
               ...unit,
               teams: unit.teams.map((team: Team) => {
 
-                /*
-                 *  MOVE
+                /**
+                 * HOLD
                  */
 
-                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+                if (team && team.order === 'hold' &&
+                  team.disabled === false &&
+                  team.stunned === false &&
+                  team.shaken == false) {
 
-                  const getMovement = team.moveToTarget();
-                  const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
-                  return resolveCollision(team, getMovement, check);
-
-                }
-
-                /*
-                 *  ATTACK
-                 */
-
-                else if (team && team.order === 'attack') {
-                  console.log('attack detected', team);
-                  if (typeof (team.target) === 'string') {
-
-                    const target: Team = findTeamById(team.target, gameObject);
-                    interface AttacksBox { inRange: boolean; hasLOS: boolean; attacks: any[]; }
-                    let attacksBox: AttacksBox = {
-                      inRange: false,
-                      hasLOS: false,
-                      attacks: []
-                    }
-
-                    // check if object is in weapon range
-                    const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
-
-                    team.combatWeapons?.forEach((w: any) => {
-                      console.log('comparing: ', w.combatRange, checkDistance);
-                      if (checkDistance <= w.combatRange) {
-                        console.log('on range of: ', w.name);
-                        const attack = {
-                          weapon: w,
-                          origin: team,
-                          object: target
-                        };
-                        attacksBox.attacks.push(attack);
-                        attacksBox.inRange = true;
-                      }
-                    });
-
-                    // check LOS to target if in range
-                    if (attacksBox.inRange) {
-                      losBullet.x = team.x; losBullet.y = team.y;
-                      losBullet.target = { x: target.x, y: target.y };
-                      losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
-
-                      let collided = false;
-                      // 360, because turning too "uses" i++
-                      for (let i = 0; i < checkDistance + 360; i++) {
-                          // nyt jää tekemään tätä, vaikka löytyy....
-                        const getMovement = losBullet.moveToTarget();
-                        if (getMovement === undefined) { console.log('gM und. at LOS check');}
-                        const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
-
-                        if (check.collision) {
-                          // need to get id of collided returned...
-                          console.log('collision: ', check, losBullet.x, losBullet.y);
-                          collided = true;
-                          i = checkDistance+361
-                          if (check.id === target.uuid) {
-                            console.log('is target');
-                            attacksBox.hasLOS = true;
-                          } else {
-                            console.log('collided with something else');
-                          }
-
-                          //return { ...team, order: 'wait' };
-                        }
-
-                        losBullet.x = getMovement.updatedBullet.x;
-                        losBullet.y = getMovement.updatedBullet.y;
-                      }
-                    }
-
-                    console.log('out of loop');
-                    // if in range and in LOS, push to attacksToResolve
-                    if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
-                      console.log('pushing to attacks to resolve');
-                      attacksBox.attacks.forEach( (a: any) => {
-                        console.log('pushing: ', a);
-                        attacksToResolve.push(a);
-                        console.log('aTr: ', attacksToResolve);
-                      });
-                      console.log('returning team');
-                      return { ...team, order: 'resolving attack' };
-                    } else {
-                      // if not in range (and LOS), move closer, if can
-                      console.log('moving closer');
-                      team.target = {x: target.x, y: target.y}
-                      const getMovement = team.moveToTarget();
-                      if (getMovement === undefined) { console.log('gM und. at moving when no los/range');}
-                      const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
-                      
-                      return resolveCollision(team, getMovement, check);
-                    }
-                    
-                  } else {
-                    console.log('target not string: ', typeof (team.target), team.target);
-                    const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
-                    console.log('returning back with original target: ', findingTarget);
-                    return { ...team, target: findingTarget};
+                  let attacksBox: AttacksBox = {
+                    inRange: false,
+                    hasLOS: false,
+                    attacks: [],
+                    inCover: false,
+                    distance: 0
                   }
 
+                  // check if any team is at weapons range
+                  updatedGameObject.defender.units.forEach((du: any) => {
+
+                    du.teams.forEach((dt: any) => {
+                      const checkDistance: number = distanceCheck(
+                        { x: team.x, y: team.y },
+                        { x: dt.x, y: dt.y }
+                      );
+                      team.combatWeapons?.forEach((weapon: any) => {
+                        if (weapon.range >= checkDistance) {
+
+                          console.log('holder ', team.name, ' on range! ');
+                          console.log('on range of: ', weapon.name);
+                          const attack = {
+                            weapon: weapon,
+                            origin: team,
+                            object: dt
+                          };
+                          attacksBox.attacks.push(attack);
+                          attacksBox.inRange = true;
+                          // if in range, shoot
+                          // check LOS to target if in range
+                          if (attacksBox.inRange) {
+                            losBullet.x = team.x; losBullet.y = team.y;
+                            losBullet.target = { x: dt.x, y: dt.y };
+                            losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+
+                            // 360, because turning too "uses" i++
+                            for (let i = 0; i < checkDistance + 360; i++) {
+                              const getMovement = losBullet.moveToTarget();
+                              if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                              const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                              if (check.collision) {
+                                // need to get id of collided returned...
+                                console.log('collision: ', check, losBullet.x, losBullet.y);
+                                i = checkDistance + 361
+                                if (check.id === dt.uuid) {
+                                  console.log('is target');
+                                  attacksBox.hasLOS = true;
+                                  attacksBox.distance = checkDistance;
+                                } else {
+                                  console.log('collided with something else');
+                                }
+                              }
+                              losBullet.x = getMovement.updatedBullet.x;
+                              losBullet.y = getMovement.updatedBullet.y;
+                            }
+                          }
+                          console.log('out of loop');
+                          // if in range and in LOS, push to attacksToResolve
+                          if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                            console.log('pushing to attacks to resolve');
+                            attacksBox.attacks.forEach((a: any) => {
+                              console.log('pushing: ', a);
+                              attacksToResolve.push(a);
+                              console.log('aTr: ', attacksToResolve);
+                            });
+                          }
+                        }
+                      })
+                    });
+                  });
+
+                  // else, return team.
                 }
 
-                else if (team && team.order === 'bombard') {
-                  return team;
-                }
+                if (team.disabled === false &&
+                  team.stunned === false &&
+                  team.shaken === false &&
+                  team.speed > 0) {
+                  /*
+                   *  MOVE
+                   */
 
-                else if (team && team.order === 'reverse') {
-                  return team;
-                }
+                  if (team && team.order === 'move' && team.target &&
+                    (team.x !== team.target.x || team.y !== team.target.y)) {
 
-                else if (team && team.order === 'charge') {
-                  return team;
-                }
-                else if (team && team.order === 'hold') {
-                  return team;
-                }
+                    const getMovement = team.moveToTarget();
+                    const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+                    return resolveCollision(team, getMovement, check);
 
-                else if (team && team.order === 'reverse') {
-                  return team;
-                }
-                else {
+                  }
+
+                  /*
+                   *  ATTACK
+                   */
+
+                  else if (team && team.order === 'attack') {
+                    console.log('attack detected', team);
+                    if (typeof (team.target) === 'string') {
+
+                      const target: Team = findTeamById(team.target, gameObject);
+
+                      let attacksBox: AttacksBox = {
+                        inRange: false,
+                        hasLOS: false,
+                        attacks: [],
+                        inCover: false,
+                        distance: 0
+                      }
+
+                      // check if object is in weapon range
+                      const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
+
+                      team.combatWeapons?.forEach((w: any) => {
+                        console.log('comparing: ', w.combatRange, checkDistance);
+                        if (checkDistance <= w.combatRange) {
+                          console.log('on range of: ', w.name);
+                          const attack = {
+                            weapon: w,
+                            origin: team,
+                            object: target
+                          };
+                          attacksBox.attacks.push(attack);
+                          attacksBox.inRange = true;
+                        }
+                      });
+
+                      // check LOS to target if in range
+                      if (attacksBox.inRange) {
+                        losBullet.x = team.x; losBullet.y = team.y;
+                        losBullet.target = { x: target.x, y: target.y };
+                        losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+
+                        // 360, because turning too "uses" i++
+                        for (let i = 0; i < checkDistance + 360; i++) {
+                          const getMovement = losBullet.moveToTarget();
+                          if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                          const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                          if (check.collision) {
+                            // need to get id of collided returned...
+                            console.log('collision: ', check, losBullet.x, losBullet.y);
+                            i = checkDistance + 361
+                            if (check.id === target.uuid) {
+                              console.log('is target');
+                              attacksBox.hasLOS = true;
+                              attacksBox.distance = checkDistance;
+                            } else {
+                              console.log('collided with something else');
+                            }
+
+                          }
+
+                          losBullet.x = getMovement.updatedBullet.x;
+                          losBullet.y = getMovement.updatedBullet.y;
+                        }
+                      }
+
+                      console.log('out of loop');
+                      // if in range and in LOS, push to attacksToResolve
+                      if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                        console.log('pushing to attacks to resolve');
+                        attacksBox.attacks.forEach((a: any) => {
+                          console.log('pushing: ', a);
+                          attacksToResolve.push(a);
+                          console.log('aTr: ', attacksToResolve);
+                        });
+                        console.log('returning team');
+                        return team;
+                      } else {
+                        // if not in range (and LOS), move closer, if can
+                        console.log('moving closer');
+                        team.target = { x: target.x, y: target.y }
+                        const getMovement = team.moveToTarget();
+                        if (getMovement === undefined) { console.log('gM und. at moving when no los/range'); }
+                        const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+
+                        return resolveCollision(team, getMovement, check);
+                      }
+
+                    } else {
+                      console.log('target not string: ', typeof (team.target), team.target);
+                      const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
+                      console.log('returning back with original target: ', findingTarget);
+                      return { ...team, target: findingTarget };
+                    }
+
+                  }
+
+                  else if (team && team.order === 'bombard') {
+                    return team;
+                  }
+
+                  else if (team && team.order === 'reverse') {
+                    return team;
+                  }
+
+                  else if (team && team.order === 'charge') {
+                    return team;
+                  }
+                  else if (team && team.order === 'hold') {
+                    return team;
+                  }
+
+                  else {
+                    return team;
+                  }
+                } else {
+                  // disabled, but could still return it, so it does change to undefined.
                   return team;
                 }
               }),
@@ -360,30 +668,322 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           if (updatedGameObject.defender && updatedGameObject.defender.units) {
             updatedGameObject.defender.units = updatedGameObject.defender.units.map((unit: any) => ({
               ...unit,
-              teams: unit.teams.map((team: any) => {
-                if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
+              teams: unit.teams.map((team: Team) => {
 
-                  // make collision check:
-                  const getMovement = team.moveToTarget();
-                  const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
-                  return resolveCollision(team, getMovement, check);
+                /**
+                 * HOLD
+                 */
 
+                if (team && team.order === 'hold' &&
+                  team.disabled === false &&
+                  team.stunned === false &&
+                  team.shaken == false) {
+
+                  let attacksBox: AttacksBox = {
+                    inRange: false,
+                    hasLOS: false,
+                    attacks: [],
+                    inCover: false,
+                    distance: 0
+                  }
+
+                  // check if any team is at weapons range
+                  updatedGameObject.attacker.units.forEach((du: any) => {
+
+                    du.teams.forEach((dt: any) => {
+                      const checkDistance: number = distanceCheck(
+                        { x: team.x, y: team.y },
+                        { x: dt.x, y: dt.y }
+                      );
+                      team.combatWeapons?.forEach((weapon: any) => {
+                        if (weapon.range >= checkDistance) {
+
+                          console.log('holder ', team.name, ' on range! ');
+                          console.log('on range of: ', weapon.name);
+                          const attack = {
+                            weapon: weapon,
+                            origin: team,
+                            object: dt
+                          };
+                          attacksBox.attacks.push(attack);
+                          attacksBox.inRange = true;
+                          // if in range, shoot
+                          // check LOS to target if in range
+                          if (attacksBox.inRange) {
+                            losBullet.x = team.x; losBullet.y = team.y;
+                            losBullet.target = { x: dt.x, y: dt.y };
+                            losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+
+                            // 360, because turning too "uses" i++
+                            for (let i = 0; i < checkDistance + 360; i++) {
+                              const getMovement = losBullet.moveToTarget();
+                              if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                              const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                              if (check.collision) {
+                                // need to get id of collided returned...
+                                console.log('collision: ', check, losBullet.x, losBullet.y);
+                                i = checkDistance + 361
+                                if (check.id === dt.uuid) {
+                                  console.log('is target');
+                                  attacksBox.hasLOS = true;
+                                  attacksBox.distance = checkDistance;
+                                } else {
+                                  console.log('collided with something else');
+                                }
+                              }
+                              losBullet.x = getMovement.updatedBullet.x;
+                              losBullet.y = getMovement.updatedBullet.y;
+                            }
+                          }
+                          console.log('out of loop');
+                          // if in range and in LOS, push to attacksToResolve
+                          if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                            console.log('pushing to attacks to resolve');
+                            attacksBox.attacks.forEach((a: any) => {
+                              console.log('pushing: ', a);
+                              attacksToResolve.push(a);
+                              console.log('aTr: ', attacksToResolve);
+                            });
+                          }
+                        }
+                      })
+                    });
+                  });
+
+                  // else, return team.
+                }
+
+                if (team.disabled === false &&
+                  team.stunned === false &&
+                  team.shaken === false &&
+                  team.speed > 0) {
+                  /*
+                   *  MOVE
+                   */
+
+                  if (team && team.order === 'move' && team.target &&
+                    (team.x !== team.target.x || team.y !== team.target.y)) {
+
+                    const getMovement = team.moveToTarget();
+                    const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+                    return resolveCollision(team, getMovement, check);
+
+                  }
+
+                  /*
+                   *  ATTACK
+                   */
+
+                  else if (team && team.order === 'attack') {
+                    console.log('attack detected', team);
+                    if (typeof (team.target) === 'string') {
+
+                      const target: Team = findTeamById(team.target, gameObject);
+
+                      let attacksBox: AttacksBox = {
+                        inRange: false,
+                        hasLOS: false,
+                        attacks: [],
+                        inCover: false,
+                        distance: 0
+                      }
+
+                      // check if object is in weapon range
+                      const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
+
+                      team.combatWeapons?.forEach((w: any) => {
+                        console.log('comparing: ', w.combatRange, checkDistance);
+                        if (checkDistance <= w.combatRange) {
+                          console.log('on range of: ', w.name);
+                          const attack = {
+                            weapon: w,
+                            origin: team,
+                            object: target
+                          };
+                          attacksBox.attacks.push(attack);
+                          attacksBox.inRange = true;
+                        }
+                      });
+
+                      // check LOS to target if in range
+                      if (attacksBox.inRange) {
+                        losBullet.x = team.x; losBullet.y = team.y;
+                        losBullet.target = { x: target.x, y: target.y };
+                        losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+
+                        // 360, because turning too "uses" i++
+                        for (let i = 0; i < checkDistance + 360; i++) {
+                          const getMovement = losBullet.moveToTarget();
+                          if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                          const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                          if (check.collision) {
+                            // need to get id of collided returned...
+                            console.log('collision: ', check, losBullet.x, losBullet.y);
+                            i = checkDistance + 361
+                            if (check.id === target.uuid) {
+                              console.log('is target');
+                              attacksBox.hasLOS = true;
+                              attacksBox.distance = checkDistance;
+                            } else {
+                              console.log('collided with something else');
+                            }
+
+                          }
+
+                          losBullet.x = getMovement.updatedBullet.x;
+                          losBullet.y = getMovement.updatedBullet.y;
+                        }
+                      }
+
+                      console.log('out of loop');
+                      // if in range and in LOS, push to attacksToResolve
+                      if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                        console.log('pushing to attacks to resolve');
+                        attacksBox.attacks.forEach((a: any) => {
+                          console.log('pushing: ', a);
+                          attacksToResolve.push(a);
+                          console.log('aTr: ', attacksToResolve);
+                        });
+                        console.log('returning team');
+                        return team;
+                      } else {
+                        // if not in range (and LOS), move closer, if can
+                        console.log('moving closer');
+                        team.target = { x: target.x, y: target.y }
+                        const getMovement = team.moveToTarget();
+                        if (getMovement === undefined) { console.log('gM und. at moving when no los/range'); }
+                        const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+
+                        return resolveCollision(team, getMovement, check);
+                      }
+
+                    } else {
+                      console.log('target not string: ', typeof (team.target), team.target);
+                      const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
+                      console.log('returning back with original target: ', findingTarget);
+                      return { ...team, target: findingTarget };
+                    }
+
+                  }
+
+                  else if (team && team.order === 'bombard') {
+                    return team;
+                  }
+
+                  else if (team && team.order === 'reverse') {
+                    return team;
+                  }
+
+                  else if (team && team.order === 'charge') {
+                    return team;
+                  }
+                  else if (team && team.order === 'hold') {
+                    return team;
+                  }
+
+                  else {
+                    return team;
+                  }
                 } else {
+                  // disabled, but could still return it, so it does change to undefined.
                   return team;
                 }
               }),
             }));
           }
-          // maybe here resolve attacks, because does not seem to work after
+
+          // reload guns, shakes, stuns etc.
+          updatedGameObject.attacker.units.forEach((u: any) => {
+            u.teams.forEach((t: Team) => {
+
+              if (t.disabled === false) {
+
+                // reload
+                t.combatWeapons?.forEach((w: any) => {
+                  if (w.reload < w.firerate && t.disabled === false &&
+                    t.shaken === false && t.stunned === false) {
+                    w.reload = w.reload + refreshRate;
+                    if (w.reload > w.firerate) {
+                      w.reload = w.firerate;
+                    }
+                  }
+                });
+
+                // shake of shakes
+                if (t.shaken) {
+                  const motivationTest = callDice(12);
+                  const skillTest = callDice(6);
+                  if (motivationTest < t.motivation && skillTest < t.skill) {
+                    console.log('out of shake. dices: ', motivationTest, skillTest, 'vs: ', t.motivation, t.skill);
+                    t.shaken = false;
+                  }
+                }
+
+                // shake of stuns
+                if (t.stunned) {
+                  const motivationTest = callDice(12);
+                  const skillTest = callDice(6);
+                  if (motivationTest < t.motivation && skillTest < t.skill) {
+                    console.log('out of stun, still shaken. dices: ', motivationTest, skillTest, 'vs: ', t.motivation, t.skill);
+                    t.shaken = true;
+                    t.stunned = false;
+                  }
+                }
+              }
+            });
+          });
+          updatedGameObject.defender.units.forEach((u: any) => {
+            u.teams.forEach((t: Team) => {
+
+              if (t.disabled === false) {
+
+                // reload
+                t.combatWeapons?.forEach((w: any) => {
+                  if (w.reload < w.firerate && t.disabled === false &&
+                    t.shaken === false && t.stunned === false) {
+                    w.reload = w.reload + refreshRate;
+                    if (w.reload > w.firerate) {
+                      w.reload = w.firerate;
+                    }
+                  }
+                });
+
+                // shake of shakes
+                if (t.shaken) {
+                  const motivationTest = callDice(12);
+                  const skillTest = callDice(6);
+                  if (motivationTest < t.motivation && skillTest < t.skill) {
+                    console.log('out of shake. dices: ', motivationTest, skillTest, 'vs: ', t.motivation, t.skill);
+                    t.shaken = false;
+                  }
+                }
+
+                // shake of stuns
+                if (t.stunned) {
+                  const motivationTest = callDice(12);
+                  const skillTest = callDice(6);
+                  if (motivationTest < t.motivation && skillTest < t.skill) {
+                    console.log('out of stun, still shaken. dices: ', motivationTest, skillTest, 'vs: ', t.motivation, t.skill);
+                    t.shaken = true;
+                    t.stunned = false;
+                  }
+                }
+              }
+            });
+          });
+
           console.log('attacksTbR inside setGameO: ', attacksToResolve);
-          return updatedGameObject;
+          return { ...updatedGameObject, attacksToResolve };
         }); // setGameObject ends here
 
         // resolve attacks might work from 
         console.log('attacksToBeResolved', attacksToResolve);
+        console.log('go: ', gameObject);
 
         // draw(canvas, canvasSize, gameObject, selected);
-      }, 100);
+      }, refreshRate);
     }
 
     return () => {

@@ -116,21 +116,23 @@ export const collisionCheck = (gameObject: GameObject, team: any, action: string
   }
 
   // check step by step, to be more efficent, first attackers
-  gameObject.attacker.units.forEach((u: any) => {
-    runArray(u.teams, 'teams');
-  });
-
-  if (collisionResponse.collision === false) {
+  if (action !== 'cover') {
+    gameObject.attacker.units.forEach((u: any) => {
+      runArray(u.teams, 'teams');
+    });
+  }
+  // action === cover is not used at the moment..
+  if (collisionResponse.collision === false && action !== 'cover') {
     gameObject.defender.units.forEach((u: any) => {
       runArray(u.teams, 'teams');
     });
   };
 
-  if (collisionResponse.collision === false) {
+  if (collisionResponse.collision === false && action !== 'cover') {
     runArray(gameObject.terrain.houses, 'houses');
   }
 
-  if (collisionResponse.collision === false && action !== 'los') {
+  if (collisionResponse.collision === false && action !== 'los' && action !== 'cover') {
     runArray(gameObject.terrain.waters, 'waters');
   }
 

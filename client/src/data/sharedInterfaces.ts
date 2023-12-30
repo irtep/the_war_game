@@ -40,7 +40,10 @@ export interface Team {
     kills?: Array<string>,
     uuid?: string,
     targetAngle?: number,
-    moveToTarget?: any
+    moveToTarget?: any,
+    disable?: any,
+    shaken?: boolean,
+    stunned?: boolean
 };
 
 export interface Army {
@@ -66,7 +69,9 @@ export interface GameObject {
     terrain: any,
     player?: '' | 'attacker' | 'defender';
     opponent?: '' | 'attacker' | 'defender';
-    mission?: string
+    mission?: string,
+    attacksToResolve?: any[],
+    smokes?: any[]
 };
 
 export interface ArmyToSend {

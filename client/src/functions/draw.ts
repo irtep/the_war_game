@@ -250,6 +250,15 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
 
             });
         });
+
+        // firing lines
+        gameObject.attacksToResolve?.forEach((shooting: any) => {
+            ctx.beginPath(); // Start a new path
+            ctx.strokeStyle = 'red';
+            ctx.moveTo(shooting.origin.x, shooting.origin.y); // Move the pen to (30, 50)
+            ctx.lineTo(shooting.object.x, shooting.object.y); // Draw a line to (150, 100)
+            ctx.stroke(); // Render the path
+        });
     }
 };
 /*

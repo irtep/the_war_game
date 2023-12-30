@@ -200,10 +200,19 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   }, [gameObject]);
 
+  // Main game loop
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
+    /**
+     *    BATTLE
+     */
+
     if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
+
+      const attacksToResolve: any[] = []; // will be filled in interval
+
+      // interval when game is not paused
       intervalId = setInterval(() => {
         setGameObject((prevGameObject: GameObject) => {
           const updatedGameObject = { ...prevGameObject };
@@ -213,80 +222,121 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               ...unit,
               teams: unit.teams.map((team: Team) => {
 
-                // Move order
+                /*
+                 *  MOVE
+                 */
 
                 if (team && team.order === 'move' && team.target && (team.x !== team.target.x || team.y !== team.target.y)) {
 
                   const getMovement = team.moveToTarget();
-                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+                  const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
                   return resolveCollision(team, getMovement, check);
 
                 }
 
-                /* not done yet, later maybe 
-                else if (team && team.order === 'reverse') {
-                  const getMovement = team.reverse();
-                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
-                  return resolveCollision(team, getMovement, check);
-                }
-                */
-
-                /**
+                /*
                  *  ATTACK
                  */
 
                 else if (team && team.order === 'attack') {
-                  console.log('attack detected');
+                  console.log('attack detected', team);
                   if (typeof (team.target) === 'string') {
-                    //let LOStoTarget = true;
-                    const target = findTeamById(team.target, gameObject);
-                    // check if one of those blocks
-                    losBullet.x = team.x; losBullet.y = team.y;
-                    losBullet.target = { x: target.x, y: target.y };
-                    losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
-                    const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
-                    //console.log('distance: ', checkDistance);
 
-                    let collided = false;
-                    //let i = 0;
-
-                    for (let i = 0; i < checkDistance + 360; i++) {
-                      //console.log('checkD and i', checkDistance, i);
-                      const getMovement = losBullet.moveToTarget();
-                      //console.log('gO.a.u at i:', i, gameObject.attacker.units);
-                      const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet);
-                      if (check.collision) {
-                        // need to get id of collided returned...
-                        console.log('collision: ', check, losBullet.x, losBullet.y);
-                        collided = true;
-                        console.log('returning team');
-                        // check if line of sight
-                        // if line of sight
-
-                        // check if in range of any weapons
-
-                        // if in range, open fire
-
-                        // if not, move closer
-
-                        // if not in line of sight
-                        return { ...team, order: 'wait' };
-                      } else {
-                        //console.log('los check: ', check, losBullet.x, losBullet.y);
-                      }
-                      losBullet.x = getMovement.updatedBullet.x;
-                      losBullet.y = getMovement.updatedBullet.y;
+                    const target: Team = findTeamById(team.target, gameObject);
+                    interface AttacksBox { inRange: boolean; hasLOS: boolean; attacks: any[]; }
+                    let attacksBox: AttacksBox = {
+                      inRange: false,
+                      hasLOS: false,
+                      attacks: []
                     }
-                    console.log('out of loop');
 
+                    // check if object is in weapon range
+                    const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
+
+                    team.combatWeapons?.forEach((w: any) => {
+                      console.log('comparing: ', w.combatRange, checkDistance);
+                      if (checkDistance <= w.combatRange) {
+                        console.log('on range of: ', w.name);
+                        const attack = {
+                          weapon: w,
+                          origin: team,
+                          object: target
+                        };
+                        attacksBox.attacks.push(attack);
+                        attacksBox.inRange = true;
+                      }
+                    });
+
+                    // check LOS to target if in range
+                    if (attacksBox.inRange) {
+                      losBullet.x = team.x; losBullet.y = team.y;
+                      losBullet.target = { x: target.x, y: target.y };
+                      losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+
+                      let collided = false;
+                      // 360, because turning too "uses" i++
+                      for (let i = 0; i < checkDistance + 360; i++) {
+                          // nyt jää tekemään tätä, vaikka löytyy....
+                        const getMovement = losBullet.moveToTarget();
+                        if (getMovement === undefined) { console.log('gM und. at LOS check');}
+                        const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                        if (check.collision) {
+                          // need to get id of collided returned...
+                          console.log('collision: ', check, losBullet.x, losBullet.y);
+                          collided = true;
+                          i = checkDistance+361
+                          if (check.id === target.uuid) {
+                            console.log('is target');
+                            attacksBox.hasLOS = true;
+                          } else {
+                            console.log('collided with something else');
+                          }
+
+                          //return { ...team, order: 'wait' };
+                        }
+
+                        losBullet.x = getMovement.updatedBullet.x;
+                        losBullet.y = getMovement.updatedBullet.y;
+                      }
+                    }
+
+                    console.log('out of loop');
+                    // if in range and in LOS, push to attacksToResolve
+                    if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                      console.log('pushing to attacks to resolve');
+                      attacksBox.attacks.forEach( (a: any) => {
+                        console.log('pushing: ', a);
+                        attacksToResolve.push(a);
+                        console.log('aTr: ', attacksToResolve);
+                      });
+                      console.log('returning team');
+                      return { ...team, order: 'resolving attack' };
+                    } else {
+                      // if not in range (and LOS), move closer, if can
+                      console.log('moving closer');
+                      team.target = {x: target.x, y: target.y}
+                      const getMovement = team.moveToTarget();
+                      if (getMovement === undefined) { console.log('gM und. at moving when no los/range');}
+                      const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+                      
+                      return resolveCollision(team, getMovement, check);
+                    }
+                    
                   } else {
                     console.log('target not string: ', typeof (team.target), team.target);
-                    return team;
+                    const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
+                    console.log('returning back with original target: ', findingTarget);
+                    return { ...team, target: findingTarget};
                   }
 
                 }
 
                 else if (team && team.order === 'bombard') {
+                  return team;
+                }
+
+                else if (team && team.order === 'reverse') {
                   return team;
                 }
 
@@ -315,7 +365,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                   // make collision check:
                   const getMovement = team.moveToTarget();
-                  const check: CollisionResponse = collisionCheck(gameObject, getMovement);
+                  const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
                   return resolveCollision(team, getMovement, check);
 
                 } else {
@@ -324,9 +374,13 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }),
             }));
           }
-
+          // maybe here resolve attacks, because does not seem to work after
+          console.log('attacksTbR inside setGameO: ', attacksToResolve);
           return updatedGameObject;
-        });
+        }); // setGameObject ends here
+
+        // resolve attacks might work from 
+        console.log('attacksToBeResolved', attacksToResolve);
 
         // draw(canvas, canvasSize, gameObject, selected);
       }, 100);
@@ -409,7 +463,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           </> : <></>
       }
       {
-        (gameObject.status === 'battle' && selected.id.length > 0) ?
+        (gameObject.status === 'battle' && selected.id.length > 0 && (isPaused)) ?
           <>
 
             <button onClick={() => {

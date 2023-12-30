@@ -20,6 +20,7 @@ export interface Team {
     desc: string;
     order: any;
     weapons: Array<string>|string;
+    combatWeapons?: Array<string>;
     unit: string;
     transport: number;
     transporting: Array<string>|string;

@@ -169,7 +169,7 @@ const Battle: React.FC = (): React.ReactElement => {
                 return (angle % 360 + 360) % 360;
               }
 
-              if (this.order === 'move' && typeof this.target.x === 'number' && typeof this.target.y === 'number') {
+              if (/*this.order === 'move' && */typeof this.target.x === 'number' && typeof this.target.y === 'number') {
                 const updatedTeam = { ...this };
                 const dx = this.target.x - this.x;
                 const dy = this.target.y - this.y;

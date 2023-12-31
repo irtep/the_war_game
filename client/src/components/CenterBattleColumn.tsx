@@ -271,9 +271,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       { x: target.x, y: target.y },
                       { x: t.x, y: t.y }
                     );
-                    console.log('distance to tree: ', distance);
-                    if (distance < 5 + target.width + t.s) {
-                      console.log('concealed by trees');
+                    //console.log('distance to tree: ', distance);
+                    if (distance < 20) {
+                      console.log('concealed by trees', distance, target.width);
                       concealed = true;
                     }
                   });
@@ -306,6 +306,11 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     console.log('target is hit!');
 
                     if (shooting.object.type === 'tank') {
+                      // check where object is hit.
+
+                      // make distance checks to all corners, and decide by that
+
+                      
                       console.log('target is tank');
                       const armorDice = callDice(6);
                       const finalArmour = armorDice + armourHardeners + shooting.object.armourFront;
@@ -425,7 +430,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     console.log('shooting missed!');
                   }
                 } else {
-                  console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
+                  //console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
                 }
               }
 
@@ -448,7 +453,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 if (team && team.order === 'hold' &&
                   team.disabled === false &&
                   team.stunned === false &&
-                  team.shaken == false) {
+                  team.shaken === false) {
 
                   let attacksBox: AttacksBox = {
                     inRange: false,
@@ -457,68 +462,72 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     inCover: false,
                     distance: 0
                   }
-
+                  //console.log('found holder...');
                   // check if any team is at weapons range
                   updatedGameObject.defender.units.forEach((du: any) => {
 
                     du.teams.forEach((dt: any) => {
-                      const checkDistance: number = distanceCheck(
-                        { x: team.x, y: team.y },
-                        { x: dt.x, y: dt.y }
-                      );
-                      team.combatWeapons?.forEach((weapon: any) => {
-                        if (weapon.range >= checkDistance) {
 
-                          console.log('holder ', team.name, ' on range! ');
-                          console.log('on range of: ', weapon.name);
-                          const attack = {
-                            weapon: weapon,
-                            origin: team,
-                            object: dt
-                          };
-                          attacksBox.attacks.push(attack);
-                          attacksBox.inRange = true;
-                          // if in range, shoot
-                          // check LOS to target if in range
-                          if (attacksBox.inRange) {
-                            losBullet.x = team.x; losBullet.y = team.y;
-                            losBullet.target = { x: dt.x, y: dt.y };
-                            losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+                      if (dt.disabled === false) {
+                        const checkDistance: number = distanceCheck(
+                          { x: team.x, y: team.y },
+                          { x: dt.x, y: dt.y }
+                        );
+                        team.combatWeapons?.forEach((weapon: any) => {
+                          if (weapon.combatRange >= checkDistance) {
 
-                            // 360, because turning too "uses" i++
-                            for (let i = 0; i < checkDistance + 360; i++) {
-                              const getMovement = losBullet.moveToTarget();
-                              if (getMovement === undefined) { console.log('gM und. at LOS check'); }
-                              const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+                            //console.log('holder ', team.name, ' on range! ');
+                            //console.log('on range of: ', weapon.name);
+                            const attack = {
+                              weapon: weapon,
+                              origin: team,
+                              object: dt
+                            };
+                            attacksBox.attacks.push(attack);
+                            attacksBox.inRange = true;
+                            // if in range, shoot
+                            // check LOS to target if in range
+                            if (attacksBox.inRange) {
+                              losBullet.x = team.x; losBullet.y = team.y;
+                              losBullet.target = { x: dt.x, y: dt.y };
+                              losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
 
-                              if (check.collision) {
-                                // need to get id of collided returned...
-                                console.log('collision: ', check, losBullet.x, losBullet.y);
-                                i = checkDistance + 361
-                                if (check.id === dt.uuid) {
-                                  console.log('is target');
-                                  attacksBox.hasLOS = true;
-                                  attacksBox.distance = checkDistance;
-                                } else {
-                                  console.log('collided with something else');
+                              // 360, because turning too "uses" i++
+                              for (let i = 0; i < checkDistance + 360; i++) {
+                                const getMovement = losBullet.moveToTarget();
+                                if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                                const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+
+                                if (check.collision) {
+                                  // need to get id of collided returned...
+                                  //console.log('collision: ', check, losBullet.x, losBullet.y);
+                                  i = checkDistance + 361
+                                  if (check.id === dt.uuid) {
+                                    //console.log('is target');
+                                    attacksBox.hasLOS = true;
+                                    attacksBox.distance = checkDistance;
+                                  } else {
+                                    //console.log('collided with something else');
+                                  }
                                 }
+                                losBullet.x = getMovement.updatedBullet.x;
+                                losBullet.y = getMovement.updatedBullet.y;
                               }
-                              losBullet.x = getMovement.updatedBullet.x;
-                              losBullet.y = getMovement.updatedBullet.y;
+                            }
+                            //console.log('out of loop');
+                            // if in range and in LOS, push to attacksToResolve
+                            if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                              //console.log('pushing to attacks to resolve');
+                              attacksBox.attacks.forEach((a: any) => {
+                                //console.log('pushing: ', a);
+                                attacksToResolve.push(a);
+                                //console.log('aTr: ', attacksToResolve);
+                              });
                             }
                           }
-                          console.log('out of loop');
-                          // if in range and in LOS, push to attacksToResolve
-                          if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
-                            console.log('pushing to attacks to resolve');
-                            attacksBox.attacks.forEach((a: any) => {
-                              console.log('pushing: ', a);
-                              attacksToResolve.push(a);
-                              console.log('aTr: ', attacksToResolve);
-                            });
-                          }
-                        }
-                      })
+                        })
+                      }
+
                     });
                   });
 
@@ -547,7 +556,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                    */
 
                   else if (team && team.order === 'attack') {
-                    console.log('attack detected', team);
+                    //console.log('attack detected', team);
                     if (typeof (team.target) === 'string') {
 
                       const target: Team = findTeamById(team.target, gameObject);
@@ -564,9 +573,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
 
                       team.combatWeapons?.forEach((w: any) => {
-                        console.log('comparing: ', w.combatRange, checkDistance);
+                        //console.log('comparing: ', w.combatRange, checkDistance);
                         if (checkDistance <= w.combatRange) {
-                          console.log('on range of: ', w.name);
+                          //console.log('on range of: ', w.name);
                           const attack = {
                             weapon: w,
                             origin: team,
@@ -591,14 +600,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                           if (check.collision) {
                             // need to get id of collided returned...
-                            console.log('collision: ', check, losBullet.x, losBullet.y);
+                            //console.log('collision: ', check, losBullet.x, losBullet.y);
                             i = checkDistance + 361
                             if (check.id === target.uuid) {
-                              console.log('is target');
+                              //console.log('is target');
                               attacksBox.hasLOS = true;
                               attacksBox.distance = checkDistance;
                             } else {
-                              console.log('collided with something else');
+                              //console.log('collided with something else');
                             }
 
                           }
@@ -608,20 +617,20 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                         }
                       }
 
-                      console.log('out of loop');
+                      //console.log('out of loop');
                       // if in range and in LOS, push to attacksToResolve
                       if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
-                        console.log('pushing to attacks to resolve');
+                        //console.log('pushing to attacks to resolve');
                         attacksBox.attacks.forEach((a: any) => {
-                          console.log('pushing: ', a);
+                          //console.log('pushing: ', a);
                           attacksToResolve.push(a);
-                          console.log('aTr: ', attacksToResolve);
+                          //console.log('aTr: ', attacksToResolve);
                         });
-                        console.log('returning team');
+                        //console.log('returning team');
                         return team;
                       } else {
                         // if not in range (and LOS), move closer, if can
-                        console.log('moving closer');
+                        //console.log('moving closer');
                         team.target = { x: target.x, y: target.y }
                         const getMovement = team.moveToTarget();
                         if (getMovement === undefined) { console.log('gM und. at moving when no los/range'); }
@@ -631,9 +640,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       }
 
                     } else {
-                      console.log('target not string: ', typeof (team.target), team.target);
+                      //console.log('target not string: ', typeof (team.target), team.target);
                       const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
-                      console.log('returning back with original target: ', findingTarget);
+                      //console.log('returning back with original target: ', findingTarget);
                       return { ...team, target: findingTarget };
                     }
 
@@ -677,7 +686,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 if (team && team.order === 'hold' &&
                   team.disabled === false &&
                   team.stunned === false &&
-                  team.shaken == false) {
+                  team.shaken === false) {
 
                   let attacksBox: AttacksBox = {
                     inRange: false,
@@ -691,63 +700,68 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   updatedGameObject.attacker.units.forEach((du: any) => {
 
                     du.teams.forEach((dt: any) => {
-                      const checkDistance: number = distanceCheck(
-                        { x: team.x, y: team.y },
-                        { x: dt.x, y: dt.y }
-                      );
-                      team.combatWeapons?.forEach((weapon: any) => {
-                        if (weapon.range >= checkDistance) {
+                      if (dt.disabled === false) {
+                        const checkDistance: number = distanceCheck(
+                          { x: team.x, y: team.y },
+                          { x: dt.x, y: dt.y }
+                        );
+                        team.combatWeapons?.forEach((weapon: any) => {
+                          if (weapon.combatRange >= checkDistance) {
 
-                          console.log('holder ', team.name, ' on range! ');
-                          console.log('on range of: ', weapon.name);
-                          const attack = {
-                            weapon: weapon,
-                            origin: team,
-                            object: dt
-                          };
-                          attacksBox.attacks.push(attack);
-                          attacksBox.inRange = true;
-                          // if in range, shoot
-                          // check LOS to target if in range
-                          if (attacksBox.inRange) {
-                            losBullet.x = team.x; losBullet.y = team.y;
-                            losBullet.target = { x: dt.x, y: dt.y };
-                            losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
+                            //console.log('holder ', team.name, ' on range! ');
+                            //console.log('on range of: ', weapon.name);
+                            const attack = {
+                              weapon: weapon,
+                              origin: team,
+                              object: dt
+                            };
+                            attacksBox.attacks.push(attack);
+                            attacksBox.inRange = true;
+                            // if in range, shoot
+                            // check LOS to target if in range
+                            if (attacksBox.inRange) {
+                              losBullet.x = team.x; losBullet.y = team.y;
+                              losBullet.target = { x: dt.x, y: dt.y };
+                              losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
 
-                            // 360, because turning too "uses" i++
-                            for (let i = 0; i < checkDistance + 360; i++) {
-                              const getMovement = losBullet.moveToTarget();
-                              if (getMovement === undefined) { console.log('gM und. at LOS check'); }
-                              const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
+                              // 360, because turning too "uses" i++
+                              for (let i = 0; i < checkDistance + 360; i++) {
+                                const getMovement = losBullet.moveToTarget();
+                                if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+                                const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
 
-                              if (check.collision) {
-                                // need to get id of collided returned...
-                                console.log('collision: ', check, losBullet.x, losBullet.y);
-                                i = checkDistance + 361
-                                if (check.id === dt.uuid) {
-                                  console.log('is target');
-                                  attacksBox.hasLOS = true;
-                                  attacksBox.distance = checkDistance;
-                                } else {
-                                  console.log('collided with something else');
+                                if (check.collision) {
+                                  // need to get id of collided returned...
+                                  //console.log('collision: ', check, losBullet.x, losBullet.y);
+                                  i = checkDistance + 361
+                                  if (check.id === dt.uuid) {
+                                    //console.log('is target');
+                                    attacksBox.hasLOS = true;
+                                    attacksBox.distance = checkDistance;
+                                  } else {
+                                    //console.log('collided with something else');
+                                  }
                                 }
+                                losBullet.x = getMovement.updatedBullet.x;
+                                losBullet.y = getMovement.updatedBullet.y;
                               }
-                              losBullet.x = getMovement.updatedBullet.x;
-                              losBullet.y = getMovement.updatedBullet.y;
                             }
+                            //console.log('out of loop');
+                            // if in range and in LOS, push to attacksToResolve
+                            if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
+                              //console.log('pushing to attacks to resolve');
+                              attacksBox.attacks.forEach((a: any) => {
+                                //console.log('pushing: ', a);
+                                attacksToResolve.push(a);
+                                //console.log('aTr: ', attacksToResolve);
+                              });
+                            }
+                          } else {
+                            //console.log('not in range: ', checkDistance, ' vs ', team.combatWeapons);
                           }
-                          console.log('out of loop');
-                          // if in range and in LOS, push to attacksToResolve
-                          if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
-                            console.log('pushing to attacks to resolve');
-                            attacksBox.attacks.forEach((a: any) => {
-                              console.log('pushing: ', a);
-                              attacksToResolve.push(a);
-                              console.log('aTr: ', attacksToResolve);
-                            });
-                          }
-                        }
-                      })
+                        })
+                      }
+
                     });
                   });
 
@@ -776,7 +790,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                    */
 
                   else if (team && team.order === 'attack') {
-                    console.log('attack detected', team);
+                    //console.log('attack detected', team);
                     if (typeof (team.target) === 'string') {
 
                       const target: Team = findTeamById(team.target, gameObject);
@@ -793,9 +807,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       const checkDistance = distanceCheck({ x: team.x, y: team.y }, { x: target.x, y: target.y });
 
                       team.combatWeapons?.forEach((w: any) => {
-                        console.log('comparing: ', w.combatRange, checkDistance);
+                        //console.log('comparing: ', w.combatRange, checkDistance);
                         if (checkDistance <= w.combatRange) {
-                          console.log('on range of: ', w.name);
+                          //console.log('on range of: ', w.name);
                           const attack = {
                             weapon: w,
                             origin: team,
@@ -820,14 +834,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                           if (check.collision) {
                             // need to get id of collided returned...
-                            console.log('collision: ', check, losBullet.x, losBullet.y);
+                            //console.log('collision: ', check, losBullet.x, losBullet.y);
                             i = checkDistance + 361
                             if (check.id === target.uuid) {
-                              console.log('is target');
+                              //console.log('is target');
                               attacksBox.hasLOS = true;
                               attacksBox.distance = checkDistance;
                             } else {
-                              console.log('collided with something else');
+                              //console.log('collided with something else');
                             }
 
                           }
@@ -837,20 +851,20 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                         }
                       }
 
-                      console.log('out of loop');
+                      //console.log('out of loop');
                       // if in range and in LOS, push to attacksToResolve
                       if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
-                        console.log('pushing to attacks to resolve');
+                        //console.log('pushing to attacks to resolve');
                         attacksBox.attacks.forEach((a: any) => {
-                          console.log('pushing: ', a);
+                          //console.log('pushing: ', a);
                           attacksToResolve.push(a);
-                          console.log('aTr: ', attacksToResolve);
+                          //console.log('aTr: ', attacksToResolve);
                         });
-                        console.log('returning team');
+                        //console.log('returning team');
                         return team;
                       } else {
                         // if not in range (and LOS), move closer, if can
-                        console.log('moving closer');
+                        //console.log('moving closer');
                         team.target = { x: target.x, y: target.y }
                         const getMovement = team.moveToTarget();
                         if (getMovement === undefined) { console.log('gM und. at moving when no los/range'); }
@@ -860,9 +874,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       }
 
                     } else {
-                      console.log('target not string: ', typeof (team.target), team.target);
+                      //console.log('target not string: ', typeof (team.target), team.target);
                       const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
-                      console.log('returning back with original target: ', findingTarget);
+                      //console.log('returning back with original target: ', findingTarget);
                       return { ...team, target: findingTarget };
                     }
 
@@ -952,6 +966,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                 // shake of shakes
                 if (t.shaken) {
+                  console.log('shaken: ', t.uuid);
                   const motivationTest = callDice(12);
                   const skillTest = callDice(6);
                   if (motivationTest < t.motivation && skillTest < t.skill) {
@@ -962,6 +977,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                 // shake of stuns
                 if (t.stunned) {
+                  console.log('stunned: ', t.uuid);
                   const motivationTest = callDice(12);
                   const skillTest = callDice(6);
                   if (motivationTest < t.motivation && skillTest < t.skill) {
@@ -974,13 +990,13 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             });
           });
 
-          console.log('attacksTbR inside setGameO: ', attacksToResolve);
+          //console.log('attacksTbR inside setGameO: ', attacksToResolve);
           return { ...updatedGameObject, attacksToResolve };
         }); // setGameObject ends here
 
         // resolve attacks might work from 
-        console.log('attacksToBeResolved', attacksToResolve);
-        console.log('go: ', gameObject);
+        //console.log('attacksToBeResolved', attacksToResolve);
+        //console.log('go: ', gameObject);
 
         // draw(canvas, canvasSize, gameObject, selected);
       }, refreshRate);

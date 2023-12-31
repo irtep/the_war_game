@@ -1,4 +1,6 @@
+import { verify } from "crypto";
 import { GameObject } from "../data/sharedInterfaces";
+import { callDice } from "./battleFunctions";
 
 interface House {
     x: number;
@@ -29,6 +31,28 @@ interface ImageCache {
 
 // Create an object to store loaded images
 const imageCache: ImageCache = {};
+
+// Function to draw a star-like explosion
+const drawExplosion = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, numPoints: number, color: string) => {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    
+    for (let i = 0; i < numPoints * 2; i++) {
+        const angle = (i * Math.PI) / numPoints;
+        const distance = i % 2 === 0 ? radius : radius / 2; // Alternate between outer and inner points
+        const posX = x + distance * Math.cos(angle);
+        const posY = y + distance * Math.sin(angle);
+        
+        if (i === 0) {
+            ctx.moveTo(posX, posY);
+        } else {
+            ctx.lineTo(posX, posY);
+        }
+    }
+
+    ctx.closePath();
+    ctx.fill();
+}
 
 export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject, selected: any): void => {
     const scale: number = 15;
@@ -173,6 +197,45 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                             ctx.closePath();
                         });
                     }
+                    if (team.disabled) {
+                        // if disabled make a smoke effect
+                        const randomDirs1 = callDice(3);
+                        const randomDirs2 = callDice(3);
+                        const horizontalChange = callDice(10);
+                        const verticalChange = callDice(10);
+                        const sizeChange = callDice(5) + 5;
+                        const flameSize = sizeChange/1.8; // Adjust the size of flames relative to smoke
+
+                        const dirs = [
+                            { x: team.x - horizontalChange, y: team.y + verticalChange },
+                            { x: team.x + horizontalChange, y: team.y - verticalChange },
+                            { x: team.x - horizontalChange, y: team.y + verticalChange },
+                            { x: team.x + horizontalChange, y: team.y - verticalChange },
+                        ];
+
+                        // smoke
+                        ctx.beginPath();
+                        ctx.fillStyle = 'rgb(169,169,169)';
+                        ctx.arc(dirs[randomDirs1].x, dirs[randomDirs2].y, sizeChange, 0, Math.PI * 2, true);
+                        ctx.fill();
+                        ctx.closePath();
+
+                        // more smoke
+                        for (let i = 0; i < 3; i++) {
+                            ctx.beginPath();
+                            ctx.fillStyle = 'rgba(160,160,160, 0.8)'; // Adjust the color and opacity of flames
+                            ctx.arc(
+                                dirs[randomDirs2].x,
+                                dirs[randomDirs1].y,
+                                flameSize,
+                                0,
+                                Math.PI * 2,
+                                true
+                            );
+                            ctx.fill();
+                            ctx.closePath();
+                        }
+                    }
                     /*
                                     const colors: string[] = ['orange', 'red', 'blue', 'green'];
                                     corners.forEach((corner: any, ix: number) => {
@@ -246,138 +309,69 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                             ctx.closePath();
                         });
                     }
+                    if (team.disabled) {
+                        // if disabled make a smoke effect
+                        const randomDirs1 = callDice(3);
+                        const randomDirs2 = callDice(3);
+                        const horizontalChange = callDice(10);
+                        const verticalChange = callDice(10);
+                        const sizeChange = callDice(5) + 5;
+                        const flameSize = sizeChange/1.8; // Adjust the size of flames relative to smoke
+
+                        const dirs = [
+                            { x: team.x - horizontalChange, y: team.y + verticalChange },
+                            { x: team.x + horizontalChange, y: team.y - verticalChange },
+                            { x: team.x - horizontalChange, y: team.y + verticalChange },
+                            { x: team.x + horizontalChange, y: team.y - verticalChange },
+                        ];
+
+                        // smoke
+                        ctx.beginPath();
+                        ctx.fillStyle = 'rgb(169,169,169)';
+                        ctx.arc(dirs[randomDirs1].x, dirs[randomDirs2].y, sizeChange, 0, Math.PI * 2, true);
+                        ctx.fill();
+                        ctx.closePath();
+
+                        // more smoke
+                        for (let i = 0; i < 3; i++) {
+                            ctx.beginPath();
+                            ctx.fillStyle = 'rgba(160,160,160, 0.8)'; // Adjust the color and opacity of flames
+                            ctx.arc(
+                                dirs[randomDirs2].x,
+                                dirs[randomDirs1].y,
+                                flameSize,
+                                0,
+                                Math.PI * 2,
+                                true
+                            );
+                            ctx.fill();
+                            ctx.closePath();
+                        }
+                    }
                 }
 
             });
         });
 
-        // firing lines
-        gameObject.attacksToResolve?.forEach((shooting: any) => {
-            ctx.beginPath(); // Start a new path
-            ctx.strokeStyle = 'red';
-            ctx.moveTo(shooting.origin.x, shooting.origin.y); // Move the pen to (30, 50)
-            ctx.lineTo(shooting.object.x, shooting.object.y); // Draw a line to (150, 100)
-            ctx.stroke(); // Render the path
-        });
+// firing lines
+gameObject.attacksToResolve?.forEach((shooting: any) => {
+    // console.log('draw: ', shooting.weapon);
+    if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
+        // Draw firing line
+        ctx.beginPath();
+        ctx.strokeStyle = 'red';
+        ctx.moveTo(shooting.origin.x, shooting.origin.y);
+        ctx.lineTo(shooting.object.x, shooting.object.y);
+        ctx.stroke();
+
+        // Draw explosion (star) at the target
+        drawExplosion(ctx, shooting.object.x, shooting.object.y, 5, 5, 'yellow');
+    }
+});
+
+
     }
 };
-/*
-export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: GameObject, selected: any): void => {
-    const scale = 15;
-    const ctx = canvas?.getContext("2d");
 
-    if (ctx) {
-        ctx.clearRect(0, 0, canvasSize.w, canvasSize.h);
-        //console.log('draw: ', gameObject);
-
-        // Draw terrain:
-        gameObject.terrain.houses.forEach((house: House) => {
-            ctx.beginPath();
-            ctx.fillStyle = "rgb(180,180,180)";
-            ctx.rect(house.x, house.y, house.w, house.h);
-            ctx.fill();
-            ctx.closePath();
-        });
-
-        gameObject.terrain.trees.forEach((tree: Circles) => {
-            ctx.beginPath();
-            ctx.fillStyle = "darkgreen";
-            ctx.arc(tree.x, tree.y, tree.s, 0, Math.PI * 2, true);
-            ctx.fill();
-            ctx.closePath();
-        });
-
-        gameObject.terrain.waters.forEach((water: Circles) => {
-            ctx.beginPath();
-            ctx.fillStyle = "darkblue";
-            ctx.arc(water.x, water.y, water.s, 0, Math.PI * 2, true);
-            ctx.fill();
-            ctx.closePath();
-        });
-        //console.log('game at drw', gameObject);
-        // draw attackers units:
-        gameObject.attacker.units.forEach((unit: any) => {
-            unit.teams.forEach((team: any) => {
-                const img = new Image();
-                img.src = process.env.PUBLIC_URL + `/img/units/${team.imgTop}.png`;
-                img.onload = () => {
-
-                    // Draw the image here
-                    ctx.save(); // Save the current context state
-
-                    // Move the coordinate system to the team's position
-                    ctx.translate(team.x, team.y);
-                    ctx.rotate(team.a * (Math.PI / 180));
-
-                    // Draw the rotated image
-                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
-
-                    // Draw text or other things related to the team
-                    ctx.font = '10px Arial';
-                    ctx.fillStyle = 'white';
-                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
-                    ctx.fillStyle = 'white';
-                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
-
-                    ctx.restore(); // Restore the original context state
-
-                    if (team.order === 'listening') {
-                        ctx.beginPath();
-                        ctx.strokeStyle = 'green';
-                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-
-                    if (team.uuid === selected.id[0]) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = 'navy';
-                        ctx.arc(team.x, team.y, 55, 0, Math.PI * 2, true);
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-                };
-            });
-        });
-
-        gameObject.defender.units.forEach((unit: any) => {
-            unit.teams.forEach((team: any) => {
-                const img = new Image();
-                img.src = process.env.PUBLIC_URL + `/img/units/${team.imgTop}.png`;
-                img.onload = () => {
-
-                    // Draw the image here
-                    ctx.save(); // Save the current context state
-
-                    // Move the coordinate system to the team's position
-                    ctx.translate(team.x, team.y);
-                    ctx.rotate(team.a * (Math.PI / 180));
-
-                    // Draw the rotated image
-                    ctx.drawImage(img, -team.width / (2 * scale), -team.height / (2 * scale), team.width / scale, team.height / scale);
-
-                    // Draw text or other things related to the team
-                    ctx.font = '10px Arial';
-                    ctx.fillStyle = 'black';
-                    ctx.fillText('unit ' + unit.name, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 15);
-                    ctx.fillStyle = 'black';
-                    ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
-
-                    if (team.order === 'listening') {
-
-                        ctx.beginPath();
-                        ctx.strokeStyle = 'green';
-                        ctx.arc(team.x, team.y, 50, 0, Math.PI * 2, true);
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-
-                    ctx.restore(); // Restore the original context state
-                };
-            });
-        });
-    }
-}
-*/
 
 // https://github.com/irtep/TheRockRally/blob/master/public/race/draw.js

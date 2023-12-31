@@ -11,8 +11,8 @@ import {
   collisionCheck,
   callDice,
   resolveCollision,
-  hasLineOfSight,
-  distanceCheck
+  distanceCheck,
+  determineSide
   //  doOrders
 } from '../functions/battleFunctions';
 import { GameObject, CollisionResponse, Team } from '../data/sharedInterfaces';
@@ -272,7 +272,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       { x: t.x, y: t.y }
                     );
                     //console.log('distance to tree: ', distance);
-                    if (distance < 20) {
+                    if (distance < 40) {
                       console.log('concealed by trees', distance, target.width);
                       concealed = true;
                     }
@@ -300,22 +300,56 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   const finalHitScore = hitDice + shooting.origin.rat + hitHelpers;
                   const finalDefScore = shooting.object.def + defHelpers;
                   console.log(`final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}`);
-                  console.log('def of object: ', shooting.object.def);
+                  console.log('def of object: ', shooting.object.def, ' + ', defHelpers, '=', finalDefScore);
 
                   if (finalHitScore >= finalDefScore) {
                     console.log('target is hit!');
 
                     if (shooting.object.type === 'tank') {
+                      console.log('shooter: ', shooting.origin);
+                      console.log('object: ', shooting.object);
                       // check where object is hit.
-
+                      const distanceToLeftTop: number = distanceCheck(
+                        {x: shooting.origin.x, y: shooting.origin.y},
+                        {x: shooting.object.leftTopCorner.x, y: shooting.object.leftTopCorner.y}
+                      );
+                      const distanceToRightTop: number = distanceCheck(
+                        {x: shooting.origin.x, y: shooting.origin.y},
+                        {x: shooting.object.rightTopCorner.x, y: shooting.object.rightTopCorner.y}
+                      );
+                      const distanceToLeftBottom: number = distanceCheck(
+                        {x: shooting.origin.x, y: shooting.origin.y},
+                        {x: shooting.object.leftBottomCorner.x, y: shooting.object.leftBottomCorner.y}
+                      );
+                      const distanceToRightBottom: number = distanceCheck(
+                        {x: shooting.origin.x, y: shooting.origin.y},
+                        {x: shooting.object.rightBottomCorner.x, y: shooting.object.rightBottomCorner.y}
+                      );
                       // make distance checks to all corners, and decide by that
+                      const distances: Record<string, number> = {
+                        distanceToLeftTop: distanceToLeftTop,
+                        distanceToRightTop: distanceToRightTop,
+                        distanceToLeftBottom: distanceToLeftBottom,
+                        distanceToRightBottom: distanceToRightBottom
+                      };
 
-                      
-                      console.log('target is tank');
+                      const tankSide: string = determineSide(distances);
+                      console.log('side is: ', tankSide);
+                      let armourAffected = shooting.object.armourFront;
+                      if (tankSide === 'side') { 
+                        armourAffected = shooting.object.armourSide 
+                        console.log('side armour: ', shooting.object.armourSide);
+                      }
+                      if (tankSide === 'back') { 
+                        armourAffected = shooting.object.armourSide;
+                        armourSofteners++; 
+                      }
+
+                      console.log('target is tank', armourAffected);
                       const armorDice = callDice(6);
-                      const finalArmour = armorDice + armourHardeners + shooting.object.armourFront;
+                      const finalArmour = armorDice + armourHardeners + armourAffected;
                       const finalPenetration = shooting.weapon.AT + armourSofteners;
-                      console.log(`armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${shooting.object.armourFront})`);
+                      console.log(`armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${armourAffected})`);
                       console.log(`pene: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}`);
 
                       if (finalArmour === finalPenetration) {
@@ -335,7 +369,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                               break;
                             case 3:
                               console.log('crew shaken');
-                              shooting.shaken = true;
+                              shooting.object.shaken = true;
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.reload = 0;
                               });
@@ -474,7 +508,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                           { x: dt.x, y: dt.y }
                         );
                         team.combatWeapons?.forEach((weapon: any) => {
-                          if (weapon.combatRange >= checkDistance) {
+                          if (weapon.combatRange >= checkDistance && (!weapon.specials.includes('artillery'))) {
 
                             //console.log('holder ', team.name, ' on range! ');
                             //console.log('on range of: ', weapon.name);
@@ -918,7 +952,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 t.combatWeapons?.forEach((w: any) => {
                   if (w.reload < w.firerate && t.disabled === false &&
                     t.shaken === false && t.stunned === false) {
-                    w.reload = w.reload + refreshRate;
+                    w.reload = w.reload + refreshRate/2;
                     if (w.reload > w.firerate) {
                       w.reload = w.firerate;
                     }

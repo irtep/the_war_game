@@ -329,6 +329,45 @@ export const resolveCollision = (
   }
 }
 
+// Function to determine the side based on two closest distances
+export const determineSide = (distances: Record<string, number>): string => {
+  // Extract distance values from the object
+  const distanceValues = Object.values(distances);
+
+  // Sort distances in ascending order
+  const sortedDistances = distanceValues.sort((a, b) => a - b);
+
+  // Get the two closest distances
+  const closest1 = sortedDistances[0];
+  const closest2 = sortedDistances[1];
+
+  // Find keys corresponding to the closest distances
+  const closestKeys = Object.keys(distances).filter(
+    key => distances[key] === closest1 || distances[key] === closest2,
+  );
+
+  // Determine the side based on the closest keys
+  if (
+    (closestKeys.includes('distanceToLeftTop') && closestKeys.includes('distanceToRightTop')) /*||
+    (closestKeys.includes('distanceToLeftBottom') && closestKeys.includes('distanceToRightBottom'))*/
+  ) {
+    return 'front';
+  } else if (
+    (closestKeys.includes('distanceToLeftTop') && closestKeys.includes('distanceToLeftBottom')) ||
+    (closestKeys.includes('distanceToRightTop') && closestKeys.includes('distanceToRightBottom'))
+  ) {
+    return 'side';
+  } else if (
+    (closestKeys.includes('distanceToLeftBottom') && closestKeys.includes('distanceToRightBottom')) /*||
+    (closestKeys.includes('distanceToLeftTop') && closestKeys.includes('distanceToRightTop'))*/
+  ) {
+    return 'back';
+  } else {
+    // Handle other cases as needed
+    return 'unknown';
+  }
+}
+/*
 export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): boolean => {
   const x1 = point1.x;
   const y1 = point1.y;
@@ -370,7 +409,7 @@ export const hasLineOfSight = (point1: any, point2: any, obstacles: any[]): bool
   console.log('returning true');
   return true; // No obstacles in the path
 };
-
+*/
 export const distanceCheck = (loca1: any, loca2: any): number => {
   const dx = loca2.x - loca1.x;
   const dy = loca2.y - loca1.y;

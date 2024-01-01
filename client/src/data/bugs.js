@@ -2,5 +2,5 @@
  * 
  * 
  * Bug 1:
- * - possible when holding does not check LOS always when firing...
+ * - nyt niin, että jos ase lataa, niin rupee ajaa lähemmäksi... pitisi jäädä siihe...
  */

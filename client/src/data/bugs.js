@@ -2,5 +2,5 @@
  * 
  * 
  * Bug 1:
- * - firerate is too fierce on cannons...
+ * - nyt niin, että jos ase lataa, niin rupee ajaa lähemmäksi... pitisi jäädä siihe...
  */

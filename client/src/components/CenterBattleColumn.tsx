@@ -149,7 +149,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       else if (opponentsUnit.found) {
         // who ever had listening gets selected order and target is uuid of that clicked opponent, clear selected
         const getSelected = findTeamById(selected.id[0], gameObject);
-        console.log('found oppo: ', opponentsUnit);
+        //console.log('found oppo: ', opponentsUnit);
         if (getSelected !== null) {
           // if attack order, goes as target
           if (getSelected.order === 'attack' ||
@@ -464,7 +464,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     console.log('shooting missed!');
                   }
                 } else {
-                  //console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
+                  console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
                 }
               }
 
@@ -511,7 +511,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                           if (weapon.combatRange > checkDistance &&
                             (!weapon.specials.includes('artillery')) &&
-                            weapon.AT > dt.armourSide) {
+                            weapon.AT > dt.armourSide &&
+                            weapon.reload >= weapon.firerate) {
 
                             //console.log('holder ', team.name, ' on range! ');
                             //console.log('on range of: ', weapon.name);
@@ -555,11 +556,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                             // if in range and in LOS, push to attacksToResolve
                             if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
                               //console.log('pushing to attacks to resolve');
-                              attacksBox.attacks.forEach((a: any) => {
-                                //console.log('pushing: ', a);
-                                attacksToResolve.push(a);
-                                //console.log('aTr: ', attacksToResolve);
-                              });
+                              attacksToResolve.push(attacksBox.attacks[0]);
                             }
                           }
                         })
@@ -613,7 +610,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                         //console.log('comparing: ', w.combatRange, checkDistance);
                         if (checkDistance < w.combatRange &&
                           w.AT > target.armourSide &&
-                          (!w.specials.includes('artillery'))) {
+                          (!w.specials.includes('artillery')) &&
+                          w.reload >= w.firerate) {
                           //console.log('on range of: ', w.name);
                           const attack = {
                             weapon: w,
@@ -747,7 +745,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                         team.combatWeapons?.forEach((weapon: any) => {
                           if (weapon.combatRange > checkDistance &&
                             weapon.AT > dt.armourSide &&
-                            (!weapon.specials.includes('artillery'))) {
+                            (!weapon.specials.includes('artillery')) &&
+                            weapon.reload >= weapon.firerate) {
 
                             //console.log('holder ', team.name, ' on range! ');
                             //console.log('on range of: ', weapon.name);
@@ -791,13 +790,15 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                             // if in range and in LOS, push to attacksToResolve
                             if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
                               //console.log('pushing to attacks to resolve');
-                              attacksBox.attacks.forEach((a: any) => {
-                                //console.log('pushing: ', a);
-                                attacksToResolve.push(a);
-                                //console.log('aTr: ', attacksToResolve);
-                              });
+                              attacksToResolve.push(attacksBox.attacks[0]);
                             }
                           } else {
+                            if (checkDistance <= weapon.combatRange) {
+                              //console.log('did not shoot: ');
+                              //console.log(`weapon.AT ${weapon.AT} > dt.armourSide ${dt.armourSide}&&
+                              //(!weapon.specials.includes('artillery') ${!weapon.specials.includes('artillery')}) &&
+                              //weapon.reload >= weapon.firerate) ${weapon.reload} / ${weapon.firerate}`);
+                            }
                             //console.log('not in range: ', checkDistance, ' vs ', team.combatWeapons);
                           }
                         })
@@ -851,7 +852,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                         //console.log('comparing: ', w.combatRange, checkDistance);
                         if (checkDistance < w.combatRange &&
                           w.AT > target.armourSide &&
-                          (!w.specials.includes('artillery'))) {
+                          (!w.specials.includes('artillery')) &&
+                          w.reload >= w.firerate) {
                           //console.log('on range of: ', w.name);
                           const attack = {
                             weapon: w,
@@ -958,9 +960,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 t.combatWeapons?.forEach((w: any) => {
                   if (w.reload < w.firerate && t.disabled === false &&
                     t.shaken === false && t.stunned === false) {
-                    w.reload = w.reload + refreshRate / 3;
+                    w.reload = w.reload + 5;
                     if (w.reload > w.firerate) {
-                      w.reload = w.firerate;
+                      w.reload = w.firerate
                     }
                   }
                 });
@@ -997,7 +999,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 t.combatWeapons?.forEach((w: any) => {
                   if (w.reload < w.firerate && t.disabled === false &&
                     t.shaken === false && t.stunned === false) {
-                    w.reload = w.reload + refreshRate / 3;
+                      w.reload = w.reload + 5;
                     if (w.reload > w.firerate) {
                       w.reload = w.firerate;
                     }

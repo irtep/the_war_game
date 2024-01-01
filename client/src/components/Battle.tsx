@@ -181,7 +181,7 @@ const Battle: React.FC = (): React.ReactElement => {
                 return (angle % 360 + 360) % 360;
               }
 
-              if (/*this.order === 'move' && */
+              if (/*this.order === 'move' && */ this &&
               typeof this.target.x === 'number' && typeof this.target.y === 'number' &&
               this.speed > 0 && this.stunned === false && this.shaken == false) {
                 const updatedTeam = { ...this };

@@ -54,7 +54,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     setSelected,
     setHovered,
     isPaused,
-    setMousePosition
+    setMousePosition,
+    setLog,
+    log
     //   setSelectedOrder,
     //   selectedOrder
   } = useContext(FlamesContext);
@@ -237,7 +239,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 shooting.origin.order = 'hold';
               } else {
                 if (shooting.weapon.reload >= shooting.weapon.firerate &&
-                  shooting.origin.shaken === false && shooting.origin.stunned === false) {
+                  shooting.origin.shaken === false && 
+                  shooting.origin.stunned === false) {
+
+                  let shootLog: string = '';
                   const attacker = shooting.origin;
                   const target = shooting.object;
                   let hitDice = callDice(12);
@@ -249,20 +254,25 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
                   // empty the gun
                   shooting.weapon.reload = 0;
-
+                  shootLog = shootLog + `${shooting.origin.name} fires at ${shooting.object.name} with ${shooting.weapon.name}. `;
+ 
                   // if far away or close
                   if (shooting.distance < 100) {
-                    console.log('point blank');
                     hitHelpers++;
                     armourSofteners++;
+                    shootLog = shootLog + 'target is point blank range. ';
                   }
                   if (shooting.distance > 241) {
                     console.log('long distance');
                     defHelpers++;
+                    shootLog = shootLog + 'target is at long range. ';
                     if (!shooting.weapon.specials.includes('HEAT')) {
-                      console.log('does not have heat');
+                      //console.log('does not have heat');
                       armourHardeners++;
-                    } else { console.log('has HEAT') }
+                    } else { 
+                      //console.log('has HEAT');
+                      shootLog = shootLog + 'but the gun has HEAT round. ';
+                    }
                   }
 
                   // if concealed
@@ -273,7 +283,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     );
                     //console.log('distance to tree: ', distance);
                     if (distance < 40) {
-                      console.log('concealed by trees', distance, target.width);
+                      //console.log('concealed by trees', distance, target.width);
+                      shootLog = shootLog + 'target is concealed by trees and bushes. ';
                       concealed = true;
                     }
                   });
@@ -282,30 +293,37 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       { x: target.x, y: target.y },
                       { x: t.x, y: t.y }
                     );
-                    console.log('distance to smoke: ', distance);
-                    if (distance < 5 + target.width + t.s) {
-                      console.log('concealed by smoke');
+                    //console.log('distance to smoke: ', distance);
+                    if (distance < 40) {
+                      //console.log('concealed by smoke');
+                      shootLog = shootLog + 'target is concealed by smoke. ';
                       concealed = true;
                     }
 
                   });
 
                   // if aiming:
-                  if (attacker.order === 'hold') { hitHelpers++; }
+                  if (attacker.order === 'hold') { 
+                    hitHelpers++; 
+                    shootLog = shootLog + 'shooter is aiming carefully. ';
+                  }
                   // if moving:
-                  if (target.order === 'move') { defHelpers++; }
+                  if (target.order === 'move') { 
+                    defHelpers++; 
+                    shootLog = shootLog + 'target is moving. ';
+                  }
                   // if concealed:
                   if (concealed) { defHelpers++; }
 
-                  console.log('shooter: ', shooting.origin);
-                  console.log('object: ', shooting.object);
+                  //console.log('shooter: ', shooting.origin);
+                  //console.log('object: ', shooting.object);
                   const finalHitScore = hitDice + shooting.origin.rat + hitHelpers;
                   const finalDefScore = shooting.object.def + defHelpers;
-                  console.log(`final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}`);
-                  console.log('def of object: ', shooting.object.def, ' + ', defHelpers, '=', finalDefScore);
+                  shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}. `;
+                  shootLog = shootLog + `def of object: ${shooting.object.def} ${defHelpers} = ${finalDefScore}. `;
 
                   if (finalHitScore >= finalDefScore) {
-                    console.log('target is hit!');
+                    shootLog = shootLog + 'target is hit! ';
 
                     if (shooting.object.type === 'tank') {
                       // check where object is hit.
@@ -334,13 +352,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       };
 
                       const tankSide: string = determineSide(distances);
-                      console.log('side is: ', tankSide);
+                      shootLog = shootLog + 'round hits front plate. ';
                       let armourAffected = shooting.object.armourFront;
                       if (tankSide === 'side') {
                         armourAffected = shooting.object.armourSide
-                        console.log('side armour: ', shooting.object.armourSide);
+                        shootLog = shootLog + `side armour value: ${shooting.object.armourSide}. `;
                       }
                       if (tankSide === 'back') {
+                        shootLog = shootLog + 'round hits back plates. ';
                         armourAffected = shooting.object.armourSide;
                         armourSofteners++;
                       }
@@ -349,96 +368,95 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       const armorDice = callDice(6);
                       const finalArmour = armorDice + armourHardeners + armourAffected;
                       const finalPenetration = shooting.weapon.AT + armourSofteners;
-                      console.log(`armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${armourAffected})`);
-                      console.log(`pene: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}`);
+                      shootLog = shootLog + `armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${armourAffected}). `;
+                      shootLog = shootLog + `penetrating dice: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}. `;
 
                       if (finalArmour === finalPenetration) {
-                        console.log('glancing hit!');
+                        shootLog = shootLog + 'glancing hit! ';
                         const firePowerDice = callDice(6);
                         if (firePowerDice >= shooting.weapon.FP) {
                           const randomDice = callDice(6);
                           switch (randomDice) {
                             case 1:
-                              console.log('track damage');
+                              shootLog = shootLog + 'track damage. ';
                               shooting.object.speed = shooting.object.speed - 10;
                               if (shooting.object.speed < 0) { shooting.object.speed = 0 }
                               break;
                             case 2:
-                              console.log('engine damage');
+                              shootLog = shootLog + 'engine damage. ';
                               shooting.object.motorPower = shooting.object.motorPower / 2;
                               break;
                             case 3:
-                              console.log('crew shaken');
+                              shootLog = shootLog + 'crew shaken. ';
                               shooting.object.shaken = true;
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.reload = 0;
                               });
                               break;
                             case 4:
-                              console.log('crew stunned');
+                              shootLog = shootLog + 'crew stunned. ';
                               shooting.object.stunned = true;
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.reload = 0;
                               });
                               break;
                             case 5:
-                              console.log('immobilized');
+                              shootLog = shootLog + 'immobilized. ';
                               shooting.object.speed = 0;
                               shooting.object.currentSpeed = 0;
                               break;
                             case 6:
-                              console.log('weapons damaged');
+                              shootLog = shootLog + 'weapons damaged. ';
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.firerate = wep.firerate * 2;
                               });
                               break;
-                            default: console.log('glancing dice not found!', randomDice);
+                            default: console.log('glancing dice not found! ', randomDice);
                           };
                         } else {
-                          console.log('no damage!');
+                          shootLog = shootLog + 'no damage!';
                         }
                       } else if (finalArmour < finalPenetration) {
-                        console.log('penetrating hit!');
+                        shootLog = shootLog + 'penetrating hit!. ';
                         const firePowerDice = callDice(6);
 
                         if (firePowerDice >= shooting.weapon.FP) {
-                          console.log('destroyed!');
+                          shootLog = shootLog + 'destroyed!. ';
                           shooting.object.disable();
                           shooting.origin.kills.push(shooting.object.name);
                         } else {
                           const randomDice = callDice(6);
-                          console.log('dice roll: ', randomDice);
                           switch (randomDice) {
                             case 1:
-                              console.log('track damage');
+                              shootLog = shootLog + 'track damage. ';
                               shooting.object.speed = shooting.object.speed - 10;
                               if (shooting.object.speed < 0) { shooting.object.speed = 0 }
                               break;
                             case 2:
-                              console.log('engine damage');
+                              shootLog = shootLog + 'engine damage. ';
                               shooting.object.motorPower = shooting.object.motorPower / 2;
                               break;
                             case 3:
-                              console.log('crew shaken');
+                              shootLog = shootLog + 'crew shaken. ';
                               shooting.object.order = 'shaken';
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.reload = 0;
                               });
                               break;
                             case 4:
-                              console.log('crew stunned');
+                              shootLog = shootLog + 'crew stunned. ';
                               shooting.object.order = 'stunned';
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.reload = 0;
                               });
                               break;
                             case 5:
-                              console.log('immobilized');
+                              shootLog = shootLog + 'immobilized. ';
                               shooting.object.speed = 0;
                               shooting.object.currentSpeed = 0;
                               break;
                             case 6:
-                              console.log('weapons damaged');
+                              shootLog = shootLog + 'weapons damaged. ';
                               shooting.object.combatWeapons.forEach((wep: any) => {
                                 wep.firerate = wep.firerate * 2;
                               });
@@ -452,17 +470,18 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                       const saveDice = callDice(6);
 
                       if (saveDice >= shooting.object.save) {
-                        console.log('save ok, team saved!', saveDice);
+                        shootLog = shootLog + `save ok, team saved: ${saveDice}. `;
                       } else {
-                        console.log('save failed: ', saveDice);
+                        shootLog = shootLog + `save failed: ${saveDice}. `;
                         shooting.object.disable();
                         shooting.origin.kills.push(shooting.object.name);
                       }
                     }
 
                   } else {
-                    console.log('shooting missed!');
+                    shootLog = shootLog + 'it is a miss!';
                   }
+                  setLog([shootLog, ...log]);
                 } else {
                   console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
                 }

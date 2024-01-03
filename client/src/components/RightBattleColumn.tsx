@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { FlamesContext } from '../context/FlamesContext';
-import { Button, Container, Typography } from '@mui/material';
+import { Container, Typography } from '@mui/material';
 
 const RightBattleColumn: React.FC = (): React.ReactElement => {
 
@@ -8,13 +8,18 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
     gameObject,
     setGameObject,
     selected,
-    setSelected
+    setSelected,
+    log
   } = useContext(FlamesContext);
   const rightBattleColumnStyle: React.CSSProperties = {
     flex: '1 0 20%',
     backgroundColor: 'darkgreen', // Optional: Add background color for visualization
   };
-
+/*
+  useEffect( () => {
+    console.log('log: ', log);
+  });
+*/
   return (
     <div style={rightBattleColumnStyle}>
       {
@@ -191,6 +196,27 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
 
           </Container> :
           <></>
+      }
+      {
+        (gameObject.status === 'battle') ?
+        <Container>
+        { 
+          log.map( (entry: string, indx: number) => {
+            return(
+              <Typography 
+                key={`log${indx}`}
+                sx={{
+                  fontSize: 12,
+                  border: 1
+                }}
+                >
+                {entry}
+              </Typography>
+            )
+          })
+        }
+        </Container>:
+        <></>
       }
     </div>);
 };

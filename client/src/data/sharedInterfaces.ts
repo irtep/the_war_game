@@ -108,3 +108,11 @@ export interface CollisionResponse {
     id?: string | undefined;
   };
 // number|string;
+
+export interface AttacksBox {
+    inRange: boolean;
+    hasLOS: boolean;
+    attacks: any[];
+    inCover: boolean;
+    distance: number;
+  }

@@ -47,6 +47,7 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
       });
     const [isPaused, setIsPaused] = useState<boolean>(true);
     const [mousePosition, setMousePosition] = useState<MousePos>({x: '', y: ''});
+    const [log, setLog] = useState<string[]>([]);
 //    const [selectedOrder, setSelectedOrder] = useState<string>('');
 
     const fetchTeams = async (): Promise<void> => {
@@ -150,7 +151,9 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
             isPaused,
             setIsPaused,
             setMousePosition,
-            mousePosition
+            mousePosition,
+            log,
+            setLog
    //         selectedOrder,
    //         setSelectedOrder
         }}>

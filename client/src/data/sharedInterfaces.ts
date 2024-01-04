@@ -115,4 +115,5 @@ export interface AttacksBox {
     attacks: any[];
     inCover: boolean;
     distance: number;
+    bombard?: boolean;
   }

@@ -348,7 +348,7 @@ export const distanceCheck = (loca1: any, loca2: any): number => {
   return distance;
 };
 
-export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], scale: number) => {
+export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], scale: number, setLog: any) => {
 
   inTurn.units = inTurn.units.map((unit: any) => ({
     ...unit,
@@ -559,7 +559,59 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
 
         }
 
-        else if (team && team.order === 'bombard') {
+        /**
+         *        BOMBARD
+         */
+
+        else if (team && team.order === 'bombard' && typeof(team.target.y) === 'number' &&
+                team.stunned === false && team.shaken === false) {
+
+          // check if in range of bombard
+          const checkDistance: number = distanceCheck(
+            { x: team.x, y: team.y },
+            { x: team.target.x, y: team.target.y }
+          );
+
+          let attacksBox: AttacksBox = {
+            inRange: false,
+            hasLOS: false, // can use this to tell if observer
+            attacks: [],
+            inCover: false,
+            distance: 0,
+            bombard: true
+          }
+          // if in range, check if in LOS
+          team.combatWeapons?.forEach((w: any) => {
+            //console.log('comparing: ', w.combatRange, checkDistance);
+            if (checkDistance < w.combatRange &&
+              (w.specials.includes('artillery')) &&
+              w.reload >= w.firerate) {
+
+              const attack = {
+                weapon: w,
+                origin: team,
+                object: {x: team.target.x, y: team.target.y}
+              };
+              attacksBox.inRange = true;
+
+              // check LOS to target if in range
+              if (attacksBox.inRange) {
+                // if not in LOS check if any observer in LOS of target
+                inTurn.units.forEach( (itU: any) => {
+                  itU.teams.forEach( (itUt: Team) => {
+                    if (itUt.order === 'observing') {
+                      setLog([`${itUt.name} observes for ${team.name}'s bombardment.`]);
+                    }
+                  });
+                });
+
+              } else {
+                setLog([`${team.name} out of range of bombarding target`])
+              }
+            }
+          });
+          
+
           return team;
         }
 
@@ -892,7 +944,7 @@ export const upkeepPhase = (t: Team, setLog: any, log: string[]): Team => {
       const motivationTest = callDice(12);
       const skillTest = callDice(6);
       if (motivationTest < t.motivation && skillTest < t.skill) {
-        shootLog = shootLog + t.name + 'out of shake. dices: '+ motivationTest, skillTest+ 'vs: '+ t.motivation, t.skill;
+        shootLog = shootLog + `${t.name} out of shake. dices: ${motivationTest}, ${skillTest} vs: ${t.motivation}, ${t.skill}`;
         t.shaken = false;
       }
     }
@@ -902,7 +954,7 @@ export const upkeepPhase = (t: Team, setLog: any, log: string[]): Team => {
       const motivationTest = callDice(12);
       const skillTest = callDice(6);
       if (motivationTest < t.motivation && skillTest < t.skill) {
-        shootLog = shootLog + t.name + ' out of stun, but shaken. dices: '+ motivationTest, skillTest+ 'vs: '+ t.motivation, t.skill;
+        shootLog = shootLog + `${t.name} out of shake. dices: ${motivationTest}, ${skillTest} vs: ${t.motivation}, ${t.skill}`;
         t.shaken = true;
         t.stunned = false;
       }

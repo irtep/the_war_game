@@ -133,10 +133,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             changePropsOfTeam(selected.id[0], ['target'], [opponentsUnit.id], gameObject, setGameObject);
 
           }
-          else if (getSelected.order === 'move' || 
-          getSelected.order === 'reverse' ||
-          getSelected.order === 'smoke bombard' ||
-          getSelected.order === 'bombard') {
+          else if (getSelected.order === 'move' ||
+            getSelected.order === 'reverse' ||
+            getSelected.order === 'smoke bombard' ||
+            getSelected.order === 'bombard') {
 
             changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
 
@@ -218,24 +218,26 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           attacksToResolve = [];
 
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
-
+            // actions like move, attack, bombard etc.
             updatedGameObject.attacker = resolveActions(
               updatedGameObject.attacker,
               updatedGameObject.defender,
               gameObject,
               attacksToResolve,
-              scale);
+              scale,
+              setLog);
 
           }
 
           if (updatedGameObject.defender && updatedGameObject.defender.units) {
-
+            // actions like move, attack, bombard etc.
             updatedGameObject.defender = resolveActions(
               updatedGameObject.defender,
               updatedGameObject.attacker,
               gameObject,
               attacksToResolve,
-              scale);
+              scale,
+              setLog);
 
           }
 
@@ -251,7 +253,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           updatedGameObject.defender.units.forEach((u: any) => {
             u.teams.forEach((t: Team) => {
 
-                t = upkeepPhase(t, setLog, log);
+              t = upkeepPhase(t, setLog, log);
 
             });
           });
@@ -383,7 +385,12 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   dig foxholes
                 </button> : <></>
             }
-
+            {
+              (selected.all.specials?.includes('observer')) ?
+                <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['observing'], gameObject, setGameObject) }}>
+                  observe
+                </button> : <></>
+            }
             {
               selected.all.combatWeapons.map((wepo: any, ix: number) => {
                 return (
@@ -402,6 +409,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }
               )
             }
+            
           </> : <></>
       }
 

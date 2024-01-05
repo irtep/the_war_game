@@ -8,13 +8,13 @@ import {
   findTeamByLocation,
   findTeamById,
   startMovement,
-  resolveActions,
-  resolveAttacks,
   upkeepPhase
   //  doOrders
 } from '../functions/battleFunctions';
-import { GameObject, CollisionResponse, Team, AttacksBox } from '../data/sharedInterfaces';
-import { losBullet } from '../data/classes';
+import { GameObject, Team } from '../data/sharedInterfaces';
+import { resolveBombs } from '../functions/resolveBombs';
+import { resolveAttacks } from '../functions/resolveAttacks';
+import { resolveActions } from '../functions/resolveActions';
 
 interface Canvas {
   w: number;
@@ -184,7 +184,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   }, [gameObject]);
 
+  // -----------------------------
   // Main game loop
+  // -----------------------------
+
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
@@ -195,6 +198,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     if (gameObject.status === 'battle' && !isPaused && intervalId === null) {
       const refreshRate: number = 100;
       let attacksToResolve: any[] = []; // will be filled in interval
+      let bombsToResolve: any[] = [];
 
       // interval when game is not paused
       intervalId = setInterval(() => {
@@ -202,20 +206,33 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
         setGameObject((prevGameObject: GameObject) => {
           const updatedGameObject = { ...prevGameObject };
 
-          // resolve shooting
-          if (updatedGameObject.attacksToResolve) {
+          // resolve bombardments // ennen taisi mennä updatedGameObject.attacksToResolve jne..
+          if (bombsToResolve && bombsToResolve.length > 0) {
             // sort by origin.reactions
-            updatedGameObject.attacksToResolve.sort((a, b) => a.origin.reactions - b.origin.reactions);
-
-            updatedGameObject.attacksToResolve = resolveAttacks(updatedGameObject.attacksToResolve,
+            bombsToResolve.sort((a, b) => a.origin.reactions - b.origin.reactions);
+            //console.log('calling resolve', updatedGameObject.bombsToResolve);
+            bombsToResolve = resolveBombs(bombsToResolve,
               updatedGameObject,
               setLog,
               log);
 
           }
 
-          // Reset attacksToResolve
+          // resolve shooting
+          if (attacksToResolve && attacksToResolve.length > 0) {
+            // sort by origin.reactions
+            attacksToResolve.sort((a, b) => a.origin.reactions - b.origin.reactions);
+
+            updatedGameObject.attacksToResolve = resolveAttacks(attacksToResolve,
+              updatedGameObject,
+              setLog,
+              log);
+
+          }
+
+          // Reset attacksToResolve and bombs
           attacksToResolve = [];
+          bombsToResolve = [];
 
           if (updatedGameObject.attacker && updatedGameObject.attacker.units) {
             // actions like move, attack, bombard etc.
@@ -224,6 +241,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               updatedGameObject.defender,
               gameObject,
               attacksToResolve,
+              bombsToResolve,
               scale,
               setLog);
 
@@ -236,6 +254,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               updatedGameObject.attacker,
               gameObject,
               attacksToResolve,
+              bombsToResolve,
               scale,
               setLog);
 
@@ -259,7 +278,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           });
 
           //console.log('attacksTbR inside setGameO: ', attacksToResolve);
-          return { ...updatedGameObject, attacksToResolve };
+          return { ...updatedGameObject, attacksToResolve, bombsToResolve };
         }); // setGameObject ends here
 
         // resolve attacks might work from 

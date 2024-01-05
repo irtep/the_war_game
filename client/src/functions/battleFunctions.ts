@@ -352,10 +352,11 @@ export const upkeepPhase = (t: Team, setLog: any, log: string[]): Team => {
   let shootLog = '';
 
   if (t.disabled === false) {
+
     // reload
     t.combatWeapons?.forEach((w: any) => {
       if (w.reload < w.firerate && t.disabled === false &&
-        t.shaken === false && t.stunned === false) {
+        t.shaken === false && t.stunned === false && t.pinned === false) {
         w.reload = w.reload + 5;
         if (w.reload > w.firerate) {
           w.reload = w.firerate
@@ -379,6 +380,17 @@ export const upkeepPhase = (t: Team, setLog: any, log: string[]): Team => {
       const skillTest = callDice(6);
       if (motivationTest < t.motivation && skillTest < t.skill) {
         shootLog = shootLog + `${t.name} out of shake. dices: ${motivationTest}, ${skillTest} vs: ${t.motivation}, ${t.skill}`;
+        t.shaken = true;
+        t.stunned = false;
+      }
+    }
+
+    // shake pins
+    if (t.pinned) {
+      const motivationTest = callDice(12);
+      const skillTest = callDice(6);
+      if (motivationTest < t.motivation && skillTest < t.skill) {
+        shootLog = shootLog + `${t.name} out of pin. dices: ${motivationTest}, ${skillTest} vs: ${t.motivation}, ${t.skill}`;
         t.shaken = true;
         t.stunned = false;
       }

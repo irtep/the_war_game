@@ -60,6 +60,11 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
                                 shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers}. `;
                                 shootLog = shootLog + `def of object: ${t.def} + mod+ ${defHelpers}= ${finalDefScore}. `;
 
+                                // target is pinned if infantry or gun
+                                if (t.type === 'infantry' || t.type === 'gun') {
+                                    t.pinned = true;
+                                }
+
                                 if (finalHitScore >= finalDefScore) {
 
                                     shootLog = shootLog + 'target is hit! ';
@@ -180,7 +185,7 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
                                         } else {
 
                                             // fox hole
-                                            if (t.effects?.includes('foxhole')) {
+                                            if (t.foxhole) {
                                                 const firePowerDice = callDice(6);
 
                                                 if (firePowerDice >= shooting.weapon.FP) {

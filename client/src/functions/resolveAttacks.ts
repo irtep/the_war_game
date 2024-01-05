@@ -249,15 +249,15 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
               } else {
   
                 // gun shield
-                if (shooting.object.specials.includes('gun shield')) {
+                if (shooting.object.specials.includes('gun shield') || shooting.object.foxhole) {
                   const firePowerDice = callDice(6);
   
                   if (firePowerDice >= shooting.weapon.FP) {
-                    shootLog = shootLog + `ammo punches through the gun shield: ${firePowerDice}. `;
+                    shootLog = shootLog + `ammo punches through the bulletproof cover: ${firePowerDice}. `;
                     shooting.object.disable();
                     shooting.origin.kills.push(shooting.object.name);
                   } else {
-                    shootLog = shootLog + `Gun shield saves the team. FP dice: ${firePowerDice}. `;
+                    shootLog = shootLog + `cover saves the team. FP dice: ${firePowerDice}. `;
                   }
   
                   shootLog = shootLog + `save ok, team saved: ${saveDice}. `;
@@ -266,8 +266,6 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
                   shooting.object.disable();
                   shooting.origin.kills.push(shooting.object.name);
                 }
-  
-                // need to add if in cover/foxholes
   
               }
             }

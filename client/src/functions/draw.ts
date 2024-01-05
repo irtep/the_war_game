@@ -35,13 +35,13 @@ const imageCache: ImageCache = {};
 const drawExplosion = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, numPoints: number, color: string) => {
     ctx.beginPath();
     ctx.fillStyle = color;
-    
+
     for (let i = 0; i < numPoints * 2; i++) {
         const angle = (i * Math.PI) / numPoints;
         const distance = i % 2 === 0 ? radius : radius / 2; // Alternate between outer and inner points
         const posX = x + distance * Math.cos(angle);
         const posY = y + distance * Math.sin(angle);
-        
+
         if (i === 0) {
             ctx.moveTo(posX, posY);
         } else {
@@ -168,6 +168,28 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.fillStyle = 'white';
                     ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
 
+                    // draw if...
+                    if (team.pinned) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('pinned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 2);
+                    }
+                    if (team.shaken) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('shaken', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 4);
+                    }
+                    if (team.stunned) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('stunned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 6);
+                    }
+                    if (team.speed === 0) {
+                        if (team.disabled) {
+                            ctx.fillStyle = 'red';
+                            ctx.fillText('destroyed', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 8);                           
+                        } else {
+                            ctx.fillStyle = 'red';
+                            ctx.fillText('immobilized', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 8);
+                        }
+                    }
 
                     ctx.restore();
 
@@ -187,13 +209,16 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                         ctx.closePath();
 
                         // weapon ranges
-                        team.combatWeapons.forEach((w: any) => {
+                        team.combatWeapons.forEach((w: any, i: number) => {
 
                             ctx.beginPath();
                             ctx.strokeStyle = 'black';
                             ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
                             ctx.stroke();
                             ctx.closePath();
+
+                            ctx.fillStyle = 'purple';
+                            ctx.fillText(`${w.name} status: ${w.reload}/${w.firerate}`, team.x + 50, team.y + i*10);
                         });
                     }
                     if (team.disabled) {
@@ -203,7 +228,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                         const horizontalChange = callDice(10);
                         const verticalChange = callDice(10);
                         const sizeChange = callDice(5) + 5;
-                        const flameSize = sizeChange/1.8; // Adjust the size of flames relative to smoke
+                        const flameSize = sizeChange / 1.8; // Adjust the size of flames relative to smoke
 
                         const dirs = [
                             { x: team.x - horizontalChange, y: team.y + verticalChange },
@@ -279,6 +304,28 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                     ctx.fillStyle = 'white';
                     ctx.fillText(team.name + ' ' + team.tacticalNumber, -team.width / (2 * scale) - 20, -team.height / (2 * scale) - 5);
 
+                    // draw if...
+                    if (team.pinned) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('pinned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 2);
+                    }
+                    if (team.shaken) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('shaken', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 4);
+                    }
+                    if (team.stunned) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillText('stunned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 6);
+                    }
+                    if (team.speed === 0) {
+                        if (team.disabled) {
+                            ctx.fillStyle = 'red';
+                            ctx.fillText('destroyed', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 8);                           
+                        } else {
+                            ctx.fillStyle = 'red';
+                            ctx.fillText('immobilized', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 8);
+                        }
+                    }
 
                     ctx.restore();
 
@@ -299,13 +346,16 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                         ctx.closePath();
 
                         // weapon ranges
-                        team.combatWeapons.forEach((w: any) => {
+                        team.combatWeapons.forEach((w: any, i: number) => {
 
                             ctx.beginPath();
                             ctx.strokeStyle = 'black';
                             ctx.arc(team.x, team.y, w.combatRange, 0, Math.PI * 2, true);
                             ctx.stroke();
                             ctx.closePath();
+
+                            ctx.fillStyle = 'purple';
+                            ctx.fillText(`${w.name} status: ${w.reload}/${w.firerate}`, team.x + 50, team.y + i*10);
                         });
                     }
                     if (team.disabled) {
@@ -315,7 +365,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                         const horizontalChange = callDice(10);
                         const verticalChange = callDice(10);
                         const sizeChange = callDice(5) + 5;
-                        const flameSize = sizeChange/1.8; // Adjust the size of flames relative to smoke
+                        const flameSize = sizeChange / 1.8; // Adjust the size of flames relative to smoke
 
                         const dirs = [
                             { x: team.x - horizontalChange, y: team.y + verticalChange },
@@ -352,42 +402,42 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
             });
         });
 
-// firing lines
-gameObject.attacksToResolve?.forEach((shooting: any) => {
-    // console.log('draw: ', shooting.weapon);
-    if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
-        // Draw firing line
-        ctx.beginPath();
-        ctx.strokeStyle = 'red';
-        ctx.moveTo(shooting.origin.x, shooting.origin.y);
-        ctx.lineTo(shooting.object.x, shooting.object.y);
-        ctx.stroke();
+        // firing lines
+        gameObject.attacksToResolve?.forEach((shooting: any) => {
+            // console.log('draw: ', shooting.weapon);
+            if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
+                // Draw firing line
+                ctx.beginPath();
+                ctx.strokeStyle = 'red';
+                ctx.moveTo(shooting.origin.x, shooting.origin.y);
+                ctx.lineTo(shooting.object.x, shooting.object.y);
+                ctx.stroke();
 
-        // Draw explosion (star) at the target
-        drawExplosion(ctx, shooting.object.x, shooting.object.y, 5, 5, 'yellow');
-    }
-});
+                // Draw explosion (star) at the target
+                drawExplosion(ctx, shooting.object.x, shooting.object.y, 5, 5, 'yellow');
+            }
+        });
 
-// bombardments
-gameObject.bombsToResolve?.forEach((shooting: any) => {
-    // console.log('draw: ', shooting.weapon);
-    if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
-        // Draw firing line
-        ctx.beginPath();
-        ctx.strokeStyle = 'red';
-        ctx.moveTo(shooting.origin.x, shooting.origin.y);
-        ctx.lineTo(shooting.object.x, shooting.object.y);
-        ctx.stroke();
+        // bombardments
+        gameObject.bombsToResolve?.forEach((shooting: any) => {
+            // console.log('draw: ', shooting.weapon);
+            if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
+                // Draw firing line
+                ctx.beginPath();
+                ctx.strokeStyle = 'red';
+                ctx.moveTo(shooting.origin.x, shooting.origin.y);
+                ctx.lineTo(shooting.object.x, shooting.object.y);
+                ctx.stroke();
 
-        // Draw explosion (star) at the target
-        drawExplosion(ctx, shooting.object.x, shooting.object.y, 7, 7, 'yellow');
-        ctx.beginPath();
-        ctx.strokeStyle = 'orange';
-        ctx.arc(shooting.object.x, shooting.object.y, 50, 0, Math.PI * 2, true);
-        ctx.stroke();
-        ctx.closePath();
-    }
-});
+                // Draw explosion (star) at the target
+                drawExplosion(ctx, shooting.object.x, shooting.object.y, 7, 7, 'yellow');
+                ctx.beginPath();
+                ctx.strokeStyle = 'orange';
+                ctx.arc(shooting.object.x, shooting.object.y, 50, 0, Math.PI * 2, true);
+                ctx.stroke();
+                ctx.closePath();
+            }
+        });
 
     }
 };

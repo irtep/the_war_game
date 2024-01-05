@@ -1,4 +1,3 @@
-import { verify } from "crypto";
 import { GameObject } from "../data/sharedInterfaces";
 import { callDice } from "./battleFunctions";
 
@@ -369,6 +368,26 @@ gameObject.attacksToResolve?.forEach((shooting: any) => {
     }
 });
 
+// bombardments
+gameObject.bombsToResolve?.forEach((shooting: any) => {
+    // console.log('draw: ', shooting.weapon);
+    if (shooting.weapon.reload < 500 || shooting.weapon.reload === shooting.weapon.firerate) {
+        // Draw firing line
+        ctx.beginPath();
+        ctx.strokeStyle = 'red';
+        ctx.moveTo(shooting.origin.x, shooting.origin.y);
+        ctx.lineTo(shooting.object.x, shooting.object.y);
+        ctx.stroke();
+
+        // Draw explosion (star) at the target
+        drawExplosion(ctx, shooting.object.x, shooting.object.y, 7, 7, 'yellow');
+        ctx.beginPath();
+        ctx.strokeStyle = 'orange';
+        ctx.arc(shooting.object.x, shooting.object.y, 50, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+    }
+});
 
     }
 };

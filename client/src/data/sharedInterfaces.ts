@@ -15,8 +15,8 @@ export interface Team {
     faction: string;
     imgSide: string;
     imgTop: string;
-    effects: number|string;
-    specials: number|string;
+    effects: string;
+    specials: string;
     desc: string;
     order: any;
     weapons: Array<string>|string;
@@ -43,7 +43,9 @@ export interface Team {
     moveToTarget?: any,
     disable?: any,
     shaken?: boolean,
-    stunned?: boolean
+    stunned?: boolean,
+    motorPower?: number,
+    currentSpeed?: number
 };
 
 export interface Army {
@@ -71,6 +73,7 @@ export interface GameObject {
     opponent?: '' | 'attacker' | 'defender';
     mission?: string,
     attacksToResolve?: any[],
+    bombsToResolve?: any[],
     smokes?: any[]
 };
 
@@ -115,5 +118,12 @@ export interface AttacksBox {
     attacks: any[];
     inCover: boolean;
     distance: number;
-    bombard?: boolean;
   }
+
+  export interface BombBox {
+    inRange: boolean;
+    observer: boolean;
+    attacks: any[];
+    inCover: boolean;
+    distance: number;
+  }  

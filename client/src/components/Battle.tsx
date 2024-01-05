@@ -55,6 +55,8 @@ const Battle: React.FC = (): React.ReactElement => {
             team.order = 'hold';
             team.shaken = false;
             team.stunned = false;
+            team.pinned = false;
+            (team.type === 'infantry' || team.type === 'gun')? team.foxhole = true: team.foxhole = false;
             team.x = 1000;
             team.y = 1000;
             team.a = 0;

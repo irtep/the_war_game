@@ -7,5 +7,6 @@
  * - saattaa ehkä maalata myös semmosia, mitkä ei ammu just sillon
  * 
  * Dev:
+ * - hyökkäyksessä, kun lataa pitäisi jäädä siihen, eikä jatkaa kohdetta kohti
  * - pommituksen pitäisi pinnata ja tehdä savua
  */

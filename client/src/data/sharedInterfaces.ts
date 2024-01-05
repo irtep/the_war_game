@@ -15,7 +15,7 @@ export interface Team {
     faction: string;
     imgSide: string;
     imgTop: string;
-    effects: string;
+    effects: string; // not in use at the moment, but maybe later
     specials: string;
     desc: string;
     order: any;
@@ -45,7 +45,9 @@ export interface Team {
     shaken?: boolean,
     stunned?: boolean,
     motorPower?: number,
-    currentSpeed?: number
+    currentSpeed?: number,
+    pinned?: boolean,
+    foxhole?: boolean
 };
 
 export interface Army {

@@ -15,6 +15,7 @@ import { GameObject, Team } from '../data/sharedInterfaces';
 import { resolveBombs } from '../functions/resolveBombs';
 import { resolveAttacks } from '../functions/resolveAttacks';
 import { resolveActions } from '../functions/resolveActions';
+import { decideActions } from '../functions/aiActions';
 
 interface Canvas {
   w: number;
@@ -205,6 +206,13 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
         setGameObject((prevGameObject: GameObject) => {
           const updatedGameObject = { ...prevGameObject };
+
+          // AI makes decides what it wants to do
+          if (gameObject.opponent === 'attacker') {
+            decideActions(updatedGameObject.attacker.units);
+          } else {
+            decideActions(updatedGameObject.defender.units);
+          }
 
           // resolve bombardments // ennen taisi mennä updatedGameObject.attacksToResolve jne..
           if (bombsToResolve && bombsToResolve.length > 0) {
@@ -428,7 +436,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }
               )
             }
-            
+
           </> : <></>
       }
 

@@ -1,5 +1,5 @@
 import { GameObject } from "../data/sharedInterfaces";
-import { callDice, determineSide, distanceCheck } from "./battleFunctions";
+import { callDice, determineSide, distanceCheck } from "./helpFunctions";
 
 export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameObject, setLog: any, log: string[]): any[] => {
 
@@ -86,6 +86,12 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
   
           if (shooting.object.type === 'infantry' && shooting.weapon.specials.includes('No HE')) {
             shootLog = shootLog + 'No HE shell, so harder to hit. ';
+            defHelpers++;
+            defHelpers++;
+          }
+
+          if (shooting.object.foxhole) {
+            shootLog = shootLog + 'Foxhole provides good cover. ';
             defHelpers++;
             defHelpers++;
           }

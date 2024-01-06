@@ -1,6 +1,7 @@
 import { losBullet } from "../data/classes";
 import { AttacksBox, CollisionResponse, GameObject, Team } from "../data/sharedInterfaces";
-import { collisionCheck, distanceCheck, findTeamById, findTeamByLocation, resolveCollision } from "./battleFunctions";
+import { checkLOS, distanceCheck, findTeamById, findTeamByLocation } from "./helpFunctions";
+import { collisionCheck, resolveCollision } from "./collisionDetect";
 
 export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], bombsToResolve: any[], scale: number, setLog: any) => {
 
@@ -160,6 +161,20 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
 
                 // check LOS to target if in range
                 if (attacksBox.inRange) {
+
+                  const losResult: CollisionResponse = checkLOS(team, target, gameObject, checkDistance);
+                  
+                  if (losResult.collision) {
+
+                    if (losResult.id === target.uuid) {
+                      attacksBox.attacks.push(attack);
+                      attacksBox.hasLOS = true;
+                      attacksBox.distance = checkDistance;
+                    } 
+
+                  }
+
+                  /*
                   losBullet.x = team.x; losBullet.y = team.y;
                   losBullet.target = { x: target.x, y: target.y };
                   losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
@@ -188,6 +203,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                     losBullet.x = getMovement.updatedBullet.x;
                     losBullet.y = getMovement.updatedBullet.y;
                   }
+*/
                 }
               } else {
 
@@ -209,7 +225,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
 
               // if not in range (and LOS), move closer, if can
               if (checkDistance >= longestWeaponRange) {
-                console.log('changing to move; ', checkDistance, longestWeaponRange);
+                //console.log('changing to move; ', checkDistance, longestWeaponRange);
 
                 if (team.foxhole) { team.foxhole = false; }
 

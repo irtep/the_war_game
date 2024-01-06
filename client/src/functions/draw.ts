@@ -1,5 +1,5 @@
 import { GameObject } from "../data/sharedInterfaces";
-import { callDice } from "./battleFunctions";
+import { callDice } from "./helpFunctions";
 
 interface House {
     x: number;
@@ -221,7 +221,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                             ctx.fillText(`${w.name} status: ${w.reload}/${w.firerate}`, team.x + 50, team.y + i*10);
                         });
                     }
-                    if (team.disabled) {
+                    if (team.disabled && team.type === 'tank') {
                         // if disabled make a smoke effect
                         const randomDirs1 = callDice(3);
                         const randomDirs2 = callDice(3);
@@ -358,7 +358,7 @@ export const draw = (canvas: HTMLCanvasElement, canvasSize: Canvas, gameObject: 
                             ctx.fillText(`${w.name} status: ${w.reload}/${w.firerate}`, team.x + 50, team.y + i*10);
                         });
                     }
-                    if (team.disabled) {
+                    if (team.disabled && team.type === 'tank') {
                         // if disabled make a smoke effect
                         const randomDirs1 = callDice(3);
                         const randomDirs2 = callDice(3);

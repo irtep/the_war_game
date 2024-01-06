@@ -115,6 +115,10 @@ const Battle: React.FC = (): React.ReactElement => {
               this.order = '';
               this.currentSpeed = 0;
               this.speed = 0;
+              if (this.type === 'infantry'|| this.type === 'gun') {
+                this.x = 2000;
+                this.y = 2000;
+              }
             };
 
             // reverse, not in use, gotta do later...

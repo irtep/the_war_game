@@ -1,5 +1,5 @@
 import { GameObject, Team } from "../data/sharedInterfaces";
-import { callDice } from "./battleFunctions";
+import { callDice } from "./helpFunctions";
 
 export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObject, setLog: any, log: string[]): any => {
     console.log('resolving bobbs');

@@ -15,7 +15,7 @@ import { resolveBombs } from '../functions/resolveBombs';
 import { resolveAttacks } from '../functions/resolveAttacks';
 import { resolveActions } from '../functions/resolveActions';
 import { decideActions } from '../functions/aiActions';
-import { upkeepPhase } from '../functions/upkeepPhase';
+import { handleSmokesAndExplosions, upkeepPhase } from '../functions/upkeepPhase';
 import { closeCombat } from '../functions/closeCombat';
 
 interface Canvas {
@@ -132,7 +132,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           if (getSelected.order === 'attack' ||
             getSelected.order === 'charge' ||
             getSelected.order === 'smoke attack') {
-              console.log('getSelected: ', getSelected);
+              //console.log('getSelected: ', getSelected);
             if (unitSelection) {
               changePropsOfUnit(getSelected.unit, ['target'], [opponentsUnit.id], gameObject, setGameObject);
             } else {
@@ -146,7 +146,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             getSelected.order === 'bombard') {
 
             if (unitSelection) {
-              console.log('unit selection up');
+              //console.log('unit selection up');
               changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
 
               gameObject[gameObject.player].units.forEach((unit: any) => ({
@@ -158,12 +158,14 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                 })
               }))
             } else {
-              console.log('not unit selection');
+              //console.log('not unit selection');
               changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
               startMovement(selected.id[0], setGameObject);
             }
 
-          } else { console.log(' else, ', getSelected); }
+          } else { 
+            //console.log(' else, ', getSelected); 
+          }
           // clear selected
           setSelected({ id: [], type: '', all: {} });
           setUnitSelection(false);
@@ -183,7 +185,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             getSelected.order === 'bombard') {
             
               if (unitSelection) {
-                console.log('unit selection up');
+                //console.log('unit selection up');
                 changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
                 
                 gameObject[gameObject.player].units.forEach((unit: any) => ({
@@ -195,7 +197,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   })
                 }))
               } else {
-                console.log('not unit selection');
+                //console.log('not unit selection');
                 changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
                 startMovement(selected.id[0], setGameObject);
               }
@@ -203,7 +205,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           // oli ennen tässä... startMovement(selected.id[0], setGameObject);
 
-        } else { console.log('not found'); }
+        } else { 
+          //console.log('not found'); 
+        }
 
         // clear selected
         setSelected({ id: [], type: '', all: {} });
@@ -275,7 +279,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               log);
 
           }
-
+          draw(canvas, canvasSize, gameObject, selected);
           // Reset attacksToResolve and bombs
           attacksToResolve = [];
           bombsToResolve = [];
@@ -289,7 +293,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               attacksToResolve,
               bombsToResolve,
               scale,
-              setLog);
+              setLog,
+              log);
 
           }
 
@@ -302,7 +307,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               attacksToResolve,
               bombsToResolve,
               scale,
-              setLog);
+              setLog,
+              log);
 
           }
 
@@ -323,6 +329,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             });
           });
 
+          // smokes and explosions:
+          updatedGameObject.smokes = handleSmokesAndExplosions(updatedGameObject.smokes, false);
+          updatedGameObject.explosions = handleSmokesAndExplosions(updatedGameObject.explosions, true);
+
           // close combat:
           closeCombat(gameObject, setLog, log);
 
@@ -330,11 +340,12 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           return { ...updatedGameObject, attacksToResolve, bombsToResolve };
         }); // setGameObject ends here
 
-        // resolve attacks might work from 
-        //console.log('attacksToBeResolved', attacksToResolve);
-        //console.log('go: ', gameObject);
-
-        // draw(canvas, canvasSize, gameObject, selected);
+        // control log size
+        if (log.length > 20) {
+          let currentLog = log;
+          currentLog.length = 20;
+          setLog([...currentLog]);
+        }
       }, refreshRate);
     }
 

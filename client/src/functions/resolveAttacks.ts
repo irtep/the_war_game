@@ -31,7 +31,7 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
             shootLog = shootLog + 'target is point blank range. ';
           }
           if (shooting.distance > 241) {
-            console.log('long distance');
+            //console.log('long distance');
             defHelpers++;
             shootLog = shootLog + 'target is at long range. ';
             if (!shooting.weapon.specials.includes('HEAT')) {
@@ -56,7 +56,7 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
               concealed = true;
             }
           });
-          updatedGameObject.smokes?.forEach((t: any) => {
+          updatedGameObject.smokes?.forEach((t: any, i: number) => {
             const distance = distanceCheck(
               { x: target.x, y: target.y },
               { x: t.x, y: t.y }
@@ -64,7 +64,9 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
             //console.log('distance to smoke: ', distance);
             if (distance < 40) {
               //console.log('concealed by smoke');
-              shootLog = shootLog + 'target is concealed by smoke. ';
+              if (!shootLog.includes('concealed by smoke')) {
+                shootLog = shootLog + 'target is concealed by smoke. ';
+              }
               concealed = true;
             }
   
@@ -145,7 +147,7 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
                 armourSofteners++;
               }
   
-              console.log('target is tank', armourAffected);
+              //console.log('target is tank', armourAffected);
               const armorDice = callDice(6);
               const finalArmour = armorDice + armourHardeners + armourAffected;
               const finalPenetration = shooting.weapon.AT + armourSofteners;
@@ -247,15 +249,17 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
                 }
               }
             } else {
-              console.log('target is infantry or gun');
+              //console.log('target is infantry or gun');
               const saveDice = callDice(6);
   
               if (saveDice >= shooting.object.save) {
+                shootLog = shootLog + `save of team is: ${shooting.object.save}. `;
                 shootLog = shootLog + `save ok, team saved: ${saveDice}. `;
               } else {
   
                 // gun shield
-                if (shooting.object.specials.includes('gun shield') || shooting.object.foxhole) {
+                console.log('shooting.object', shooting.object);
+                if (shooting.object.specials?.includes('gun shield') || shooting.object.foxhole) {
                   const firePowerDice = callDice(6);
   
                   if (firePowerDice >= shooting.weapon.FP) {
@@ -281,7 +285,7 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
           }
           setLog([shootLog, ...log]);
         } else {
-          console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
+          //console.log('cant fire. ', shooting.weapon.reload, ' / ', shooting.weapon.firerate);
         }
       }
   

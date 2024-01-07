@@ -38,7 +38,9 @@ export const FlamesProvider: React.FC<Props> = (props: Props): React.ReactElemen
         status: 'setup',
         attacker: '',
         defender: '',
-        terrain: ''
+        terrain: '',
+        smokes: [],
+        explosions: []
     });
     const [hovered, setHovered] = useState<Selected>({
         id: [],

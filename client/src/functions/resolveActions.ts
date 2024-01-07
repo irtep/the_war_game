@@ -3,7 +3,7 @@ import { AttacksBox, CollisionResponse, GameObject, Team } from "../data/sharedI
 import { checkLOS, distanceCheck, findTeamById, findTeamByLocation } from "./helpFunctions";
 import { collisionCheck, resolveCollision } from "./collisionDetect";
 
-export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], bombsToResolve: any[], scale: number, setLog: any) => {
+export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], bombsToResolve: any[], scale: number, setLog: any, log: string[]) => {
 
   inTurn.units = inTurn.units.map((unit: any) => ({
     ...unit,
@@ -86,6 +86,12 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                   if (attacksBox.attacks.length > 0 && (attacksBox.hasLOS)) {
                     //console.log('pushing to attacks to resolve');
                     attacksToResolve.push(attacksBox.attacks[0]);
+                    //smoke
+                    gameObject.smokes?.push({ x: team.x, y: team.y, size: (7 - weapon.FP) }); // gun
+                    gameObject.smokes?.push({ x: dt.x, y: dt.y, size: (11 - weapon.FP) }); // target
+                    //explosion
+                    gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
+                    gameObject.explosions?.push({ x: dt.x, y: dt.y, size: (11 - weapon.FP) }); // target
                   }
                 }
               })
@@ -130,7 +136,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
             const target: Team = findTeamById(team.target, gameObject);
 
             if (target.disabled) { team.order = 'hold' }
-            
+
             let attacksBox: AttacksBox = {
               inRange: false,
               hasLOS: false,
@@ -163,47 +169,17 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                 if (attacksBox.inRange) {
 
                   const losResult: CollisionResponse = checkLOS(team, target, gameObject, checkDistance);
-                  
+
                   if (losResult.collision) {
 
                     if (losResult.id === target.uuid) {
                       attacksBox.attacks.push(attack);
                       attacksBox.hasLOS = true;
                       attacksBox.distance = checkDistance;
-                    } 
-
-                  }
-
-                  /*
-                  losBullet.x = team.x; losBullet.y = team.y;
-                  losBullet.target = { x: target.x, y: target.y };
-                  losBullet.uuid = team.uuid; // loaning uuid to ignore shooters collision test
-
-                  // 360, because turning too "uses" i++
-                  for (let i = 0; i < checkDistance + 360; i++) {
-                    const getMovement = losBullet.moveToTarget();
-                    if (getMovement === undefined) { console.log('gM und. at LOS check'); }
-                    const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
-
-                    if (check.collision) {
-                      // need to get id of collided returned...
-                      //console.log('collision: ', check, losBullet.x, losBullet.y);
-                      i = checkDistance + 361
-                      if (check.id === target.uuid) {
-                        //console.log('is target');
-                        attacksBox.attacks.push(attack);
-                        attacksBox.hasLOS = true;
-                        attacksBox.distance = checkDistance;
-                      } else {
-                        //console.log('collided with something else');
-                      }
-
                     }
 
-                    losBullet.x = getMovement.updatedBullet.x;
-                    losBullet.y = getMovement.updatedBullet.y;
                   }
-*/
+
                 }
               } else {
 
@@ -217,7 +193,12 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
               attacksBox.attacks.forEach((a: any) => {
                 //console.log('pushing: ', a);
                 attacksToResolve.push(a);
-                //console.log('aTr: ', attacksToResolve);
+                //smoke
+                gameObject.smokes?.push({ x: team.x, y: team.y, size: (7 - a.weapon.FP) }); // gun
+                gameObject.smokes?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
+                //explosion
+                gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
+                gameObject.explosions?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
               });
               //console.log('returning team');
               return team;
@@ -284,12 +265,18 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                 itU.teams.forEach((itUt: Team) => {
                   if (itUt.order === 'observing') {
                     attack.observer = true;
-                    setLog([`${itUt.name} observes for ${team.name}'s bombardment.`]);
+                    setLog([`${itUt.name} observes for ${team.name}'s bombardment.`, ...log]);
                   }
                 });
               });
-              console.log('pushed to bombs', attack);
+              //console.log('pushed to bombs', attack);
               bombsToResolve.push(attack);
+              //smoke
+              gameObject.smokes?.push({ x: team.x, y: team.y, size: (7 - attack.weapon.FP) }); // gun
+              gameObject.smokes?.push({ x: team.target.x, y: team.target.y, size: (14 - attack.weapon.FP) }); // target
+              //explosion
+              gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
+              gameObject.explosions?.push({ x: team.target.x, y: team.target.y, size: (14 - attack.weapon.FP) }); // target
             }
           });
 

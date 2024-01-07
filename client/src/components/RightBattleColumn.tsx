@@ -33,7 +33,6 @@ const RightBattleColumn: React.FC = (): React.ReactElement => {
                 return (
                   <div key={`a ${i}`}>
                     <button
-                      key={`f ${i}`}
                       value={`u${unit.id}`}
                       style={{
                         background: 'blue',

@@ -76,7 +76,7 @@ export interface GameObject {
     mission?: string,
     attacksToResolve?: any[],
     bombsToResolve?: any[],
-    smokes?: any[],
+    smokes: any[],
     explosions?: any[]
 };
 

@@ -1,6 +1,6 @@
 import { losBullet } from "../data/classes";
 import { AttacksBox, CollisionResponse, GameObject, Team } from "../data/sharedInterfaces";
-import { checkLOS, distanceCheck, findTeamById, findTeamByLocation } from "./helpFunctions";
+import { callDice, checkLOS, distanceCheck, findTeamById, findTeamByLocation } from "./helpFunctions";
 import { collisionCheck, resolveCollision } from "./collisionDetect";
 
 export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObject, attacksToResolve: any[], bombsToResolve: any[], scale: number, setLog: any, log: string[]) => {
@@ -88,7 +88,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                     attacksToResolve.push(attacksBox.attacks[0]);
                     //smoke
                     gameObject.smokes?.push({ x: team.x, y: team.y, size: (7 - weapon.FP) }); // gun
-                    gameObject.smokes?.push({ x: dt.x, y: dt.y, size: (11 - weapon.FP) }); // target
+                    //gameObject.smokes?.push({ x: dt.x, y: dt.y, size: (11 - weapon.FP) }); // target
                     //explosion
                     gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
                     gameObject.explosions?.push({ x: dt.x, y: dt.y, size: (11 - weapon.FP) }); // target
@@ -195,7 +195,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                 attacksToResolve.push(a);
                 //smoke
                 gameObject.smokes?.push({ x: team.x, y: team.y, size: (7 - a.weapon.FP) }); // gun
-                gameObject.smokes?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
+                //gameObject.smokes?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
                 //explosion
                 gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
                 gameObject.explosions?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
@@ -283,7 +283,15 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
           return team;
         }
 
-        else if (team && team.order === 'reverse') {
+        else if (team && team.order === 'dig foxholes' && team.shaken === false && team.stunned === false) {
+          // if test is passed, the fox holes are ok.
+          const skillTest = callDice(12);
+
+          if (skillTest < team.skill) {
+            team.foxhole = true;
+            team.order = 'hold';
+          }
+
           return team;
         }
 

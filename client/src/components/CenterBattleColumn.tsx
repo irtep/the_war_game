@@ -132,7 +132,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           if (getSelected.order === 'attack' ||
             getSelected.order === 'charge' ||
             getSelected.order === 'smoke attack') {
-              //console.log('getSelected: ', getSelected);
+            //console.log('getSelected: ', getSelected);
             if (unitSelection) {
               changePropsOfUnit(getSelected.unit, ['target'], [opponentsUnit.id], gameObject, setGameObject);
             } else {
@@ -163,7 +163,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               startMovement(selected.id[0], setGameObject);
             }
 
-          } else { 
+          } else {
             //console.log(' else, ', getSelected); 
           }
           // clear selected
@@ -183,29 +183,29 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             getSelected.order === 'reverse' ||
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
-            
-              if (unitSelection) {
-                //console.log('unit selection up');
-                changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
-                
-                gameObject[gameObject.player].units.forEach((unit: any) => ({
-                  ...unit,
-                  teams: unit.teams.forEach((team: any) => {
-                    if (selected.all.unit === team.unit) {
-                      startMovement(team.id, setGameObject);
-                    } 
-                  })
-                }))
-              } else {
-                //console.log('not unit selection');
-                changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
-                startMovement(selected.id[0], setGameObject);
-              }
+
+            if (unitSelection) {
+              //console.log('unit selection up');
+              changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+
+              gameObject[gameObject.player].units.forEach((unit: any) => ({
+                ...unit,
+                teams: unit.teams.forEach((team: any) => {
+                  if (selected.all.unit === team.unit) {
+                    startMovement(team.id, setGameObject);
+                  }
+                })
+              }))
+            } else {
+              //console.log('not unit selection');
+              changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+              startMovement(selected.id[0], setGameObject);
+            }
           }
 
           // oli ennen tässä... startMovement(selected.id[0], setGameObject);
 
-        } else { 
+        } else {
           //console.log('not found'); 
         }
 
@@ -233,7 +233,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-
+    console.log('gO ', gameObject);
     /** //  //  //
      *    BATTLE  (loop)
      */ //  //  //
@@ -251,9 +251,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           // AI makes decides what it wants to do
           if (gameObject.opponent === 'attacker') {
-            decideActions(updatedGameObject.attacker.units);
+            decideActions(updatedGameObject.attacker.units, updatedGameObject.defender.units);
           } else {
-            decideActions(updatedGameObject.defender.units);
+            decideActions(updatedGameObject.defender.units, updatedGameObject.attacker.units);
           }
 
           // resolve bombardments // ennen taisi mennä updatedGameObject.attacksToResolve jne..
@@ -484,6 +484,16 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               (selected.all.type === 'infantry') ?
                 <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['dig foxholes'], gameObject, setGameObject) }}>
                   dig foxholes
+                </button> : <></>
+            }
+            {
+              (selected.all.type === 'infantry') ?
+                <button 
+                style={{ background: "gray", color: "black" }}
+                onClick={() => { 
+                  changePropsOfUnit(selected.all.unit, ['order'], ['dig foxholes'], gameObject, setGameObject);
+                  }}>
+                  unit dig foxholes
                 </button> : <></>
             }
             {

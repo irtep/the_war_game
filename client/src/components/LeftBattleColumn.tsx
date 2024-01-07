@@ -49,7 +49,7 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
                     marginTop={2}
                     key={`wep: ${i}`}
                   >
-                    {`${wep.name} AT: ${wep.AT}, FP: ${wep.FP}, range: ${wep.range}, rate: ${wep.firerate}, specials: ${wep.specials}`}
+                    {`${wep.name} AT: ${wep.AT}, FP: ${wep.FP}, range: ${wep.range}, rate: ${wep.reload}/${wep.firerate}, specials: ${wep.specials}`}
 
                   </Typography>
                 )
@@ -75,6 +75,9 @@ const LeftBattleColumn: React.FC = (): React.ReactElement => {
             {`disabled: ${hovered.all.disabled}
             shaken: ${hovered.all.shaken}
             stunned: ${hovered.all.stunned}`}
+          </Typography>
+          <Typography padding={1}>
+            {`kills: ${hovered.all.kills?.length}`}
           </Typography>
         </> : <></>
     }

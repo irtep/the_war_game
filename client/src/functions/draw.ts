@@ -101,11 +101,15 @@ const drawTeams = (ctx: any, teams: any, scale: number, selected: any) => {
                 }
                 if (team.shaken) {
                     ctx.fillStyle = 'red';
-                    ctx.fillText('shaken', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 4);
+                    ctx.fillText('shaken', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 8);
                 }
                 if (team.stunned) {
                     ctx.fillStyle = 'red';
-                    ctx.fillText('stunned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 6);
+                    ctx.fillText('stunned', -team.width / (2 * scale) - 20, team.height / (2 * scale) + 12);
+                }
+                if (team.foxhole) {
+                    ctx.fillStyle = 'navy';
+                    ctx.fillText('in foxholes', -team.width / (2 * scale) - 20, -team.height / (2 * scale) + 2);
                 }
                 if (team.speed === 0) {
                     if (team.disabled) {

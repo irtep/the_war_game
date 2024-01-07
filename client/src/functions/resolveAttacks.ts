@@ -28,18 +28,18 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
           if (shooting.distance < 100) {
             hitHelpers++;
             armourSofteners++;
-            shootLog = shootLog + 'target is point blank range. ';
+            //shootLog = shootLog + 'target is point blank range. ';
           }
           if (shooting.distance > 241) {
             //console.log('long distance');
             defHelpers++;
-            shootLog = shootLog + 'target is at long range. ';
+            //shootLog = shootLog + 'target is at long range. ';
             if (!shooting.weapon.specials.includes('HEAT')) {
               //console.log('does not have heat');
               armourHardeners++;
             } else {
               //console.log('has HEAT');
-              shootLog = shootLog + 'but the gun has HEAT round. ';
+              //shootLog = shootLog + 'but the gun has HEAT round. ';
             }
           }
   
@@ -81,7 +81,7 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
           // if moving:
           if (target.order === 'move') {
             defHelpers++;
-            shootLog = shootLog + 'target is moving. ';
+            //shootLog = shootLog + 'target is moving. ';
           }
           // if concealed:
           if (concealed) { defHelpers++; }
@@ -102,8 +102,8 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
           //console.log('object: ', shooting.object);
           const finalHitScore = hitDice + shooting.origin.rat + hitHelpers;
           const finalDefScore = shooting.object.def + defHelpers;
-          shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}. `;
-          shootLog = shootLog + `def of object: ${shooting.object.def} ${defHelpers} = ${finalDefScore}. `;
+          //shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers} mod-: ${defHelpers}. `;
+          //shootLog = shootLog + `def of object: ${shooting.object.def} ${defHelpers} = ${finalDefScore}. `;
   
           if (finalHitScore >= finalDefScore) {
             shootLog = shootLog + 'target is hit! ';
@@ -135,24 +135,26 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
               };
   
               const tankSide: string = determineSide(distances);
-              shootLog = shootLog + 'round hits front plate. ';
               let armourAffected = shooting.object.armourFront;
+
               if (tankSide === 'side') {
                 armourAffected = shooting.object.armourSide
-                shootLog = shootLog + `side armour value: ${shooting.object.armourSide}. `;
+                shootLog = shootLog + `round hits side plate. `;
               }
-              if (tankSide === 'back') {
-                shootLog = shootLog + 'round hits back plates. ';
+              else if (tankSide === 'back') {
+                shootLog = shootLog + 'round hits back plate. ';
                 armourAffected = shooting.object.armourSide;
                 armourSofteners++;
+              } else {
+                shootLog = shootLog + 'round hits front plate. ';
               }
   
               //console.log('target is tank', armourAffected);
               const armorDice = callDice(6);
               const finalArmour = armorDice + armourHardeners + armourAffected;
               const finalPenetration = shooting.weapon.AT + armourSofteners;
-              shootLog = shootLog + `armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${armourAffected}). `;
-              shootLog = shootLog + `penetrating dice: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}. `;
+              //shootLog = shootLog + `armour: ${finalArmour} (dice: ${armorDice} + mod+ ${armourHardeners} + armour: ${armourAffected}). `;
+              //shootLog = shootLog + `penetrating dice: ${finalPenetration} at: ${shooting.weapon.AT} mod+ ${armourSofteners}. `;
   
               if (finalArmour === finalPenetration) {
                 shootLog = shootLog + 'glancing hit! ';

@@ -76,8 +76,21 @@ export interface GameObject {
     mission?: string,
     attacksToResolve?: any[],
     bombsToResolve?: any[],
-    smokes?: any[]
+    smokes?: any[],
+    explosions?: any[]
 };
+
+export interface Smoke {
+    x: number;
+    y: number;
+    size: number;
+}
+
+export interface Explosion {
+    x: number;
+    y: number;
+    size: number;
+}
 
 export interface ArmyToSend {
     user: string;

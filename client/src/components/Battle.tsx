@@ -41,7 +41,7 @@ const Battle: React.FC = (): React.ReactElement => {
         parsedArmy.units.forEach((unit: any, i: number) => {
 
           unit.teams.forEach((team: any, h: number) => {
-            console.log('team: ', team);
+            //console.log('team: ', team);
             // find team that has same name
             const foundFromDB: Team[] = teams.filter((t: Team) => t.name === team.team);
             //console.log('team from db ', );
@@ -238,7 +238,7 @@ const Battle: React.FC = (): React.ReactElement => {
 
                 return updatedTeam;
               } else {
-                console.log('Cannot move:', this.order, this.target);
+                //console.log('Cannot move:', this.order, this.target);
 
                 return { ...this };
               }

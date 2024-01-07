@@ -12,7 +12,8 @@ export const closeCombat = (gameObject: GameObject, setLog: any, log: string[]) 
                     const distance = distanceCheck(t, t2);
                     let toLog = '';
 
-                    if (distance < 50 && (t.type !== 'tank' && t2.type !== 'tank')) {
+                    if (distance < 60 && (t.type === 'tank' && t2.type === 'tank') === false) {
+                        console.log('closeC')
                         const tDice = callDice(6);
                         const t2Dice = callDice(6);
                         let tHits = tDice + t.mat;
@@ -104,6 +105,10 @@ export const closeCombat = (gameObject: GameObject, setLog: any, log: string[]) 
                         }
 
                         setLog([toLog, ...log]);
+                    } else {
+                        if (distance < 50) {
+                            console.log('tank and tank', (t.type !== 'tank' && t2.type !== 'tank'), distance);
+                        }
                     }
 
                 });

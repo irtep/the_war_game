@@ -20,7 +20,7 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
 
                 // empty the gun
                 shooting.weapon.reload = 0;
-                shootLog = shootLog + `${shooting.origin.name} bombing with ${shooting.weapon.name}. `;
+                //shootLog = shootLog + `${shooting.origin.name} bombing with ${shooting.weapon.name}. `;
 
                 // if aiming:
                 /* disabled for now, always everyone was getting... gotta think about this.
@@ -53,12 +53,12 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
 
                             // if hit:
                             if (testIfHit) {
-                                console.log('found target: ', t.name);
+                                //console.log('found target: ', t.name);
                                 let hitDice = callDice(12);
                                 const finalHitScore = hitDice + shooting.origin.rat + hitHelpers;
                                 const finalDefScore = t.def + defHelpers;
-                                shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers}. `;
-                                shootLog = shootLog + `def of object: ${t.def} + mod+ ${defHelpers}= ${finalDefScore}. `;
+                                //shootLog = shootLog + `final hit: ${finalHitScore} dice ${hitDice} skill: ${shooting.origin.rat} mod+: ${hitHelpers}./n `;
+                                //shootLog = shootLog + `def of object: ${t.def} + mod+ ${defHelpers}= ${finalDefScore}. `;
 
                                 // target is pinned if infantry or gun
                                 if (t.type === 'infantry' || t.type === 'gun') {
@@ -67,7 +67,7 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
 
                                 if (finalHitScore >= finalDefScore) {
 
-                                    shootLog = shootLog + 'target is hit! ';
+                                    shootLog = shootLog + `${t.name} is hit by ${shooting.weapon.name}! `;
 
                                     if (t.type === 'tank') {
                                         let armourAffected = t.armourTop;
@@ -75,8 +75,8 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
                                         const armorDice = callDice(6);
                                         const finalArmour = armorDice + armourAffected;
                                         const finalPenetration = shooting.weapon.AT;
-                                        shootLog = shootLog + `armour: ${finalArmour} (dice: ${armorDice} + armour: ${armourAffected}). `;
-                                        shootLog = shootLog + `penetrating power: ${shooting.weapon.AT}. `;
+                                        //shootLog = shootLog + `armour: ${finalArmour} (dice: ${armorDice} + armour: ${armourAffected}). `;
+                                        //shootLog = shootLog + `penetrating power: ${shooting.weapon.AT}. `;
 
                                         if (finalArmour === finalPenetration) {
                                             shootLog = shootLog + 'glancing hit! ';

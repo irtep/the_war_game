@@ -1,5 +1,5 @@
 import { CollisionResponse, GameObject, Team } from "../data/sharedInterfaces";
-import { callDice } from "./helpFunctions";
+import { callDice, distanceCheck } from "./helpFunctions";
 
 export const collisionCheck = (gameObject: GameObject, team: any, action: string): CollisionResponse => {
     const collisionResponse: CollisionResponse = {
@@ -83,7 +83,7 @@ export const collisionCheck = (gameObject: GameObject, team: any, action: string
                 const colCheck = checkRectangleCollision(team, t);
 
                 if (colCheck === true) {
-                    console.log('is tree');
+                    //console.log('is tree');
                     collisionResponse.collision = true;
                     collisionResponse.withWhat = 'tree';
                 }
@@ -97,6 +97,18 @@ export const collisionCheck = (gameObject: GameObject, team: any, action: string
                     //console.log('is water');
                     collisionResponse.collision = true;
                     collisionResponse.withWhat = 'water';
+                }
+            }
+
+            else if (type === 'smokes') {
+                
+                const distance = distanceCheck(team, t);
+
+                if (distance < t.size + 10) {
+                    //console.log('is water');
+                    collisionResponse.collision = true;
+                    collisionResponse.withWhat = 'smoke';
+                    console.log('smoke collision, shooter, looker: ', team.uuid);
                 }
             }
 
@@ -126,6 +138,10 @@ export const collisionCheck = (gameObject: GameObject, team: any, action: string
 
     if (collisionResponse.collision === false && action !== 'los') {
         runArray(gameObject.terrain.trees, 'trees');
+    }
+
+    if (collisionResponse.collision === false && action === 'los') {
+        runArray(gameObject.smokes, 'smokes');
     }
 
     //console.log('responding: ', collisionResponse);

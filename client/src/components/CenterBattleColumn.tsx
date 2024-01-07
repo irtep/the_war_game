@@ -131,7 +131,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           // if attack order, goes as target
           if (getSelected.order === 'attack' ||
             getSelected.order === 'charge' ||
-            getSelected.order === 'smoke attack') {
+            getSelected.order === 'smoke') {
             //console.log('getSelected: ', getSelected);
             if (unitSelection) {
               changePropsOfUnit(getSelected.unit, ['target'], [opponentsUnit.id], gameObject, setGameObject);
@@ -233,7 +233,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    console.log('gO ', gameObject);
+    //console.log('gO ', gameObject);
     /** //  //  //
      *    BATTLE  (loop)
      */ //  //  //
@@ -251,9 +251,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           // AI makes decides what it wants to do
           if (gameObject.opponent === 'attacker') {
-            decideActions(updatedGameObject.attacker.units, updatedGameObject.defender.units);
+            decideActions(updatedGameObject.attacker.units, updatedGameObject.defender.units, gameObject);
           } else {
-            decideActions(updatedGameObject.defender.units, updatedGameObject.attacker.units);
+            decideActions(updatedGameObject.defender.units, updatedGameObject.attacker.units, gameObject);
           }
 
           // resolve bombardments // ennen taisi mennä updatedGameObject.attacksToResolve jne..
@@ -488,10 +488,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             }
             {
               (selected.all.type === 'infantry') ?
-                <button 
-                style={{ background: "gray", color: "black" }}
-                onClick={() => { 
-                  changePropsOfUnit(selected.all.unit, ['order'], ['dig foxholes'], gameObject, setGameObject);
+                <button
+                  style={{ background: "gray", color: "black" }}
+                  onClick={() => {
+                    changePropsOfUnit(selected.all.unit, ['order'], ['dig foxholes'], gameObject, setGameObject);
                   }}>
                   unit dig foxholes
                 </button> : <></>
@@ -520,6 +520,43 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }
               )
             }
+            {
+              selected.all.combatWeapons.map((wepo: any, ix: number) => {
+                return (
+                  <span key={`artiSmoke: ${ix}`}>
+                    {
+                      (wepo.specials.includes('artillery') && wepo.specials.includes('smoke')) ?
+                        <>
+                          <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['smoke bombard'], gameObject, setGameObject) }}>
+                            smoke bombard
+                          </button>
+                        </> :
+                        <></>
+                    }
+                  </span>
+                )
+              }
+              )
+            }
+            {
+              selected.all.combatWeapons.map((wepo: any, ix: number) => {
+                return (
+                  <span key={`smoke: ${ix}`}>
+                    {
+                      (wepo.specials.includes('smoke') && !wepo.specials.includes('artillery')) ?
+                        <>
+                          <button onClick={() => { changePropsOfTeam(selected.id[0], ['order'], ['smoke'], gameObject, setGameObject) }}>
+                            smoke attack
+                          </button>
+                        </> :
+                        <></>
+                    }
+                  </span>
+                )
+              }
+              )
+            }
+
 
           </> : <></>
       }

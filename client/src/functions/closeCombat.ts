@@ -12,7 +12,11 @@ export const closeCombat = (gameObject: GameObject, setLog: any, log: string[]) 
                     const distance = distanceCheck(t, t2);
                     let toLog = '';
 
-                    if (distance < 60 && (t.type === 'tank' && t2.type === 'tank') === false) {
+                    if (distance < 60 && 
+                        (t.type === 'tank' && 
+                        t2.type === 'tank') === false &&
+                        t.disabled === false &&
+                        t.disabled === false) {
                         console.log('closeC')
                         const tDice = callDice(6);
                         const t2Dice = callDice(6);

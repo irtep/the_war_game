@@ -239,7 +239,9 @@ export const checkLOS = (team: Team,
   // 360, because turning too "uses" i++
   for (let i = 0; i < distance + 360; i++) {
     const getMovement = losBullet.moveToTarget();
+
     if (getMovement === undefined) { console.log('gM und. at LOS check'); }
+    
     const check: CollisionResponse = collisionCheck(gameObject, getMovement.updatedBullet, 'los');
 
     if (check.collision) {

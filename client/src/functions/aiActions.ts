@@ -34,13 +34,13 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
 
                                 if (distance < w.combatRange) {
                                     const targetTeam = findTeamById(ot.uuid, gameObject);
-                                    const losCheck = checkLOS(t, targetTeam, gameObject, distance);
+                                  //  const losCheck = checkLOS(t, targetTeam, gameObject, distance);
 
-                                    if (losCheck.id === ot.uuid) {
+                                   // if (losCheck.id === ot.uuid) {
                                         t.order = 'attack';
                                         t.target = ot.uuid;
                                         decided = true;
-                                    }
+                                   // }
                                 }
                             });
                         });
@@ -68,13 +68,13 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
 
                                 if (distance < w.combatRange) {
                                     const targetTeam = findTeamById(ot.uuid, gameObject);
-                                    const losCheck = checkLOS(t, targetTeam, gameObject, distance);
+                              //      const losCheck = checkLOS(t, targetTeam, gameObject, distance);
 
-                                    if (losCheck.id === ot.uuid) {
+                                //    if (losCheck.id === ot.uuid) {
                                         t.order = 'attack';
                                         t.target = ot.uuid;
                                         decided = true;
-                                    }
+                                  //  }
                                 }
                             });
                         });
@@ -151,11 +151,6 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                 }
             });
 
-            // if any enemy guns or infantry inside bomber range
-            if (decided === false) {
-
-            }
-
             if (decided === false && t.type === 'tank') {
 
                 // check all opponents and if "t" is inside any shooting range, but outside "t" range, go closer
@@ -163,12 +158,19 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                 opponents.forEach((ou: any) => {
                     ou.teams.forEach((ot: any) => {
                         const distanceToTeam = distanceCheck(t, ot);
-                        let inRangeOfOpponentsGun = false;
+                        let inRangeOfOpponentsGun = false;                               
+                      //  const targetTeam = findTeamById(ot.uuid, gameObject);
+                      //  const losCheck = checkLOS(t, targetTeam, gameObject, distanceToTeam);
 
                         ot.combatWeapons.forEach((oCw: any) => {
                             if (distanceToTeam <= oCw.combatRange &&
-                                !oCw.specials.includes('artillery')) { inRangeOfOpponentsGun = true; }
-                            if (inRangeOfOpponentsGun && distanceToTeam > myGunRange) {
+                                !oCw.specials.includes('artillery')) { 
+                                    inRangeOfOpponentsGun = true; 
+                                }
+                            if (inRangeOfOpponentsGun && 
+                                distanceToTeam > myGunRange //&&
+                          //      losCheck.id === ot.uuid
+                                ) {
                                 t.order = 'attack';
                                 console.log('chose as target: ', ot.uuid);
                                 t.target = ot.uuid;

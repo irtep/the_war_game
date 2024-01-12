@@ -335,9 +335,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           // close combat:
           closeCombat(gameObject, setLog, log);
-
+          //console.log('go: ', gameObject)
           //console.log('attacksTbR inside setGameO: ', attacksToResolve);
           return { ...updatedGameObject, attacksToResolve, bombsToResolve };
+          ;
         }); // setGameObject ends here
 
         // control log size

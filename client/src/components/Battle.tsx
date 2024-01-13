@@ -72,21 +72,25 @@ const Battle: React.FC = (): React.ReactElement => {
               team.uuid = 'd' + String(i) + String(i) + String(h);
             }
             // experience bonuses
+            // it seems, that hitting is too hard now... +1 to all to rat
             switch (team.crew) {
-              case 'veteran':
+              case 'rookie':
                 team.rat = team.rat + 1;
+                break;
+              case 'veteran':
+                team.rat = team.rat + 2;
                 team.mat = team.mat + 1;
                 team.reactions = team.reactions + 1;
                 break;
               case 'elite':
-                team.rat = team.rat + 1;
+                team.rat = team.rat + 2;
                 team.mat = team.mat + 1;
                 team.def = team.def + 1;
                 team.reactions = team.reactions + 2;
                 team.skill = team.skill + 1;
                 break;
               case 'ace':
-                team.rat = team.rat + 2;
+                team.rat = team.rat + 3;
                 team.mat = team.mat + 2;
                 team.def = team.def + 2;
                 team.reactions = team.reactions + 3;

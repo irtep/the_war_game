@@ -272,7 +272,6 @@ export const resolveAttacks = (attacksToResolve: any[], updatedGameObject: GameO
                     shootLog = shootLog + `cover saves the team. FP dice: ${firePowerDice}. `;
                   }
   
-                  shootLog = shootLog + `save ok, team saved: ${saveDice}. `;
                 } else {
                   shootLog = shootLog + `save failed: ${saveDice}. Team is dead.`;
                   shooting.object.disable();

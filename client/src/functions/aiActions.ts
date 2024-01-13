@@ -33,7 +33,7 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                                 }
 
                                 if (distance < w.combatRange) {
-                                    const targetTeam = findTeamById(ot.uuid, gameObject);
+                                  //  const targetTeam = findTeamById(ot.uuid, gameObject);
                                   //  const losCheck = checkLOS(t, targetTeam, gameObject, distance);
 
                                    // if (losCheck.id === ot.uuid) {
@@ -58,24 +58,27 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                             //console.log('ou: ', ou);
                             // if gun teams
                             ou.teams.forEach((ot: any) => {
-                                const distance = distanceCheck(t, ot);
+                                if (ot.disabled === false) {
+                                    const distance = distanceCheck(t, ot);
 
-                                if (distance < closestDistance) {
-                                    closestDistance = distance;
-                                    closestEnemy = ot.uuid;
-                                    typeOfClosest = ot.type;
+                                    if (distance < closestDistance) {
+                                        closestDistance = distance;
+                                        closestEnemy = ot.uuid;
+                                        typeOfClosest = ot.type;
+                                    }
+    
+                                    if (distance < w.combatRange) {
+                                  //      const targetTeam = findTeamById(ot.uuid, gameObject);
+                                  //      const losCheck = checkLOS(t, targetTeam, gameObject, distance);
+    
+                                    //    if (losCheck.id === ot.uuid) {
+                                            t.order = 'attack';
+                                            t.target = ot.uuid;
+                                            decided = true;
+                                      //  }
+                                    }
                                 }
-
-                                if (distance < w.combatRange) {
-                                    const targetTeam = findTeamById(ot.uuid, gameObject);
-                              //      const losCheck = checkLOS(t, targetTeam, gameObject, distance);
-
-                                //    if (losCheck.id === ot.uuid) {
-                                        t.order = 'attack';
-                                        t.target = ot.uuid;
-                                        decided = true;
-                                  //  }
-                                }
+ 
                             });
                         });
                     }
@@ -226,6 +229,14 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                 });
             }
 
+            // if attacking, but target is dead, hold
+            if (t.order === 'attack' && typeof(t.target) === 'string') {
+                const targetTeam = findTeamById(t.target, gameObject);
+                if (targetTeam.disabled) {
+                    t.order = 'hold';
+                    t.target = '';
+                }
+            }
         });
     });
 };

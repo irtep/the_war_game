@@ -108,6 +108,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
         team.shaken === false &&
         team.pinned === false &&
         team.speed > 0) {
+
         /*
          *  MOVE
          */
@@ -116,6 +117,27 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
           (team.x !== team.target.x || team.y !== team.target.y)) {
 
           if (team.foxhole) { team.foxhole = false; }
+
+          const getMovement = team.moveToTarget();
+          const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
+          return resolveCollision(team, getMovement, check);
+
+        }
+
+        /*
+        *  TACTICAL MOVE
+        */
+
+        if (team && team.order === 'tactical move' && team.target &&
+          (team.x !== team.target.x || team.y !== team.target.y)) {
+
+          if (team.foxhole) { team.foxhole = false; }
+
+          opponents.forEach( (u: any) => {
+            u.teams.forEach( (t: Team) => {
+              distanceCheck({x: team.x, y: team.y}, {x: t.x, y: t.y});
+            });
+          });
 
           const getMovement = team.moveToTarget();
           const check: CollisionResponse = collisionCheck(gameObject, getMovement, 'move');
@@ -225,9 +247,8 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
             }
 
           } else {
-            console.log('team: ', team);
-            console.log('target not string: ', typeof (team.target), team.target);
-            if (typeof(team.target.x) === 'number') {
+
+            if (typeof (team.target.x) === 'number') {
               const findingTarget = findTeamByLocation(team.target.x, team.target.y, gameObject, scale);
               return { ...team, target: findingTarget };
             } else {
@@ -263,10 +284,41 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
               (w.specials.includes('artillery')) &&
               w.reload >= w.firerate) {
 
+              // bit random, so then don't always hit to mark
+              let randomHorizontal = callDice(25) - team.rat;
+              let randomVertical = callDice(25) - team.rat;
+              const minusOrPlusHorizontal = callDice(2);
+              const minusOrPlusVertical = callDice(2)
+              let bombsHit = {
+                x: team.target.x,
+                y: team.target.y
+              }
+
+              if (randomHorizontal < 0) { randomHorizontal = 0 }
+              if (randomVertical < 0) { randomVertical = 0 }
+
+              if (minusOrPlusHorizontal > 1) {
+                bombsHit.x = team.target.x + randomHorizontal;
+
+                if (minusOrPlusVertical > 1) {
+                  bombsHit.y = team.target.y + randomVertical;
+                } else {
+                  bombsHit.y = team.target.y - randomVertical;
+                }
+              } else {
+                bombsHit.x = team.target.x - randomHorizontal;
+
+                if (minusOrPlusVertical > 1) {
+                  bombsHit.y = team.target.y + randomVertical;
+                } else {
+                  bombsHit.y = team.target.y - randomVertical;
+                }
+              }
+
               const attack = {
                 weapon: w,
                 origin: team,
-                object: { x: team.target.x, y: team.target.y },
+                object: { x: bombsHit.x, y: bombsHit.y },
                 observer: false
               };
 
@@ -437,7 +489,7 @@ export const resolveActions = (inTurn: any, opponents: any, gameObject: GameObje
                 //explosion
                 gameObject.explosions?.push({ x: team.x, y: team.y, size: (2) }); // gun
                 gameObject.explosions?.push({ x: target.x, y: target.y, size: (11 - a.weapon.FP) }); // target
-                
+
               });
               //console.log('returning team');
               return team;

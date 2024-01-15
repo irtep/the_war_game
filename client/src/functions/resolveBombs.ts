@@ -2,14 +2,13 @@ import { GameObject, Team } from "../data/sharedInterfaces";
 import { callDice } from "./helpFunctions";
 
 export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObject, setLog: any, log: string[]): any => {
-    console.log('resolving bobbs');
+
     bombsToResolve.forEach((shooting: any) => {
-        console.log('shooting: ', shooting);
+        
         if (shooting.object.disabled === true) {
             shooting.origin.order = 'hold';
-            //console.log('shooted disabled');
         } else {
-            //console.log('shooted not disabled');
+
             if (shooting.weapon.reload >= shooting.weapon.firerate &&
                 shooting.origin.shaken === false &&
                 shooting.origin.stunned === false) {
@@ -49,6 +48,7 @@ export const resolveBombs = (bombsToResolve: any[], updatedGameObject: GameObjec
                     army.units.forEach((au: any) => {
 
                         au.teams.forEach((t: Team) => {
+
                             const testIfHit = arcVsArc({ x: shooting.object.x, y: shooting.object.y }, { x: t.x, y: t.y });
 
                             // if hit:

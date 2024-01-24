@@ -175,7 +175,7 @@ export const decideActions = (units: any, opponents: any, gameObject: GameObject
                           //      losCheck.id === ot.uuid
                                 ) {
                                 t.order = 'attack';
-                                console.log('chose as target: ', ot.uuid);
+                                //console.log('chose as target: ', ot.uuid);
                                 t.target = ot.uuid;
                                 decided = true;
                             }

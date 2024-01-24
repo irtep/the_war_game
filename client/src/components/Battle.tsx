@@ -67,9 +67,21 @@ const Battle: React.FC = (): React.ReactElement => {
             if (attacker) {
               team.unit = 'a' + String(i);
               team.uuid = 'a' + String(i) + String(i) + String(h);
+
+              if (!unit.uuid) {
+                console.log('unit uuid not found, creating ', 'a' + String(i));
+                unit.uuid = 'a' + String(i);
+              }
+
             } else {
               team.unit = 'd' + String(i);
               team.uuid = 'd' + String(i) + String(i) + String(h);
+
+              if (!unit.uuid) {
+                console.log('unit uuid not found, creating ', 'd' + String(i));
+                unit.uuid = 'd' + String(i);
+              }
+
             }
             // experience bonuses
             // it seems, that hitting is too hard now... +1 to all to rat

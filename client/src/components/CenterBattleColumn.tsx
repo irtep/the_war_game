@@ -141,7 +141,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           }
           else if (getSelected.order === 'move' ||
-            getSelected.order === 'reverse' ||
+            getSelected.order === 'reverse' || // not in use atm.
             getSelected.order === 'smoke bombard' ||
             getSelected.order === 'bombard') {
 
@@ -185,7 +185,34 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             getSelected.order === 'bombard') {
 
             if (unitSelection) {
-              //console.log('unit selection up');
+
+              // Handle unit selection logic
+              
+              //changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
+              console.log('multi target move: ', x, y);
+              gameObject[gameObject.player].units.forEach((unit: any) => {
+                if (selected.all.unit === unit.uuid) {
+                  console.log('found the unit');
+                  // Calculate the relative position of the selected unit in its team
+                  const relativeX = x - unit.teams[0].x;
+                  const relativeY = y - unit.teams[0].y;
+
+                  // Iterate through teams and adjust targets based on relative positions
+                  unit.teams.forEach((team: any) => {
+                    const adjustedX = team.x + relativeX;
+                    const adjustedY = team.y + relativeY;
+                    console.log('adjusted: ', adjustedX, adjustedY);
+                    // Set the adjusted target for each team
+                    changePropsOfTeam(team.uuid, ['target'], [{ x: adjustedX, y: adjustedY }], gameObject, setGameObject);
+                    startMovement(team.id, setGameObject);
+                  });
+                } else {
+         //         console.log('unit not found', selected.all.unit, selected.all.uuid);
+         //         console.log('go: ', gameObject);
+                }
+              });
+              
+              /*
               changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
 
               gameObject[gameObject.player].units.forEach((unit: any) => ({
@@ -196,8 +223,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                   }
                 })
               }))
+              */
             } else {
-              //console.log('not unit selection');
+
               changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
               startMovement(selected.id[0], setGameObject);
             }
@@ -338,7 +366,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
           //console.log('go: ', gameObject)
           //console.log('attacksTbR inside setGameO: ', attacksToResolve);
           return { ...updatedGameObject, attacksToResolve, bombsToResolve };
-          ;
+          
         }); // setGameObject ends here
 
         // control log size

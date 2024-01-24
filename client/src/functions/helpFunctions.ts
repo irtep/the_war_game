@@ -41,7 +41,7 @@ export const checkIfFromHere = (arr: any, x: any, y: any, scale: number) => {
 }
 
 export const startMovement = (id: string, setGameObject: any): void => {
-
+  console.log('changin for : ', id );
   setGameObject((prevGameObject: GameObject) => ({
     ...prevGameObject,
     attacker: {
@@ -108,26 +108,31 @@ export const changePropsOfUnit = (id: string, properties: string[], values: any[
 };
 
 export const changePropsOfTeam = (id: string, properties: string[], values: any[], gameObject: GameObject, setGameObject: any): void => {
-  setGameObject({
-    ...gameObject,
-    attacker: {
-      ...gameObject.attacker,
-      units: gameObject.attacker.units.map((unit: any) => ({
+  setGameObject( (oldGo: GameObject) => {
+    let updatedGo: GameObject = {...oldGo};
+
+    updatedGo.attacker = {
+      ...updatedGo.attacker,
+      units: oldGo.attacker.units.map((unit: any) => ({
         ...unit,
         teams: unit.teams.map((team: any) => {
           return id === team.uuid ? { ...team, ...Object.fromEntries(properties.map((prop, index) => [prop, values[index]])) } : team;
         }),
       })),
-    },
-    defender: {
-      ...gameObject.defender,
-      units: gameObject.defender.units.map((unit: any) => ({
+    };
+
+    updatedGo.defender = {
+      ...updatedGo.defender,
+      units: oldGo.defender.units.map((unit: any) => ({
         ...unit,
         teams: unit.teams.map((team: any) => {
           return id === team.uuid ? { ...team, ...Object.fromEntries(properties.map((prop, index) => [prop, values[index]])) } : team;
         }),
       })),
-    },
+    }
+
+    return updatedGo;
+
   });
 };
 

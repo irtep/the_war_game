@@ -69,18 +69,17 @@ export const losBullet: any = {
         this.leftTopCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
 
         var vecLength = getVectorLength(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale);
-        //console.log('vecLength: ',vecLength);
 
         angle = angle + getAngleForNextCorner(this.width / (2 * scale), vecLength);
-        //console.log('angle: ',angle);
+        
         this.rightTopCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
 
         angle = angle + getAngleForNextCorner(this.height / (2 * scale), vecLength);
-        //console.log('angle: ',angle);
+        
         this.rightBottomCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
 
         angle = angle + getAngleForNextCorner(this.width / (2 * scale), vecLength);
-        //console.log('angle: ',angle);
+        
         this.leftBottomCorner = getRotatedTopLeftCornerOfRect(this.x - this.width / (2 * scale), this.y - this.height / (2 * scale), this.width / scale, this.height / scale, angle);
     },
 

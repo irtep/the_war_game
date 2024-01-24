@@ -96,7 +96,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
     }
 
     //  //  //  //
-    //          Battle phase  (clicks)
+    //          Battle phase  (clicks)  ********************
     //  //  //  //
 
     else if (gameObject.status === 'battle') {
@@ -163,9 +163,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               startMovement(selected.id[0], setGameObject);
             }
 
-          } else {
-            //console.log(' else, ', getSelected); 
           }
+
           // clear selected
           setSelected({ id: [], type: '', all: {} });
           setUnitSelection(false);
@@ -175,7 +174,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
       // if clicked was not any team,
       else {
         const getSelected = findTeamById(selected.id[0], gameObject);
-        //console.log('was not selected');
+
         // if move or bombards
         if (getSelected) {
           //console.log('found selected');
@@ -186,13 +185,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
             if (unitSelection) {
 
-              // Handle unit selection logic
-              
-              //changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
-              console.log('multi target move: ', x, y);
               gameObject[gameObject.player].units.forEach((unit: any) => {
                 if (selected.all.unit === unit.uuid) {
-                  console.log('found the unit');
+
                   // Calculate the relative position of the selected unit in its team
                   const relativeX = x - unit.teams[0].x;
                   const relativeY = y - unit.teams[0].y;
@@ -206,35 +201,17 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
                     changePropsOfTeam(team.uuid, ['target'], [{ x: adjustedX, y: adjustedY }], gameObject, setGameObject);
                     startMovement(team.id, setGameObject);
                   });
-                } else {
-         //         console.log('unit not found', selected.all.unit, selected.all.uuid);
-         //         console.log('go: ', gameObject);
                 }
               });
               
-              /*
-              changePropsOfUnit(selected.all.unit, ['target'], [{ x: x, y: y }], gameObject, setGameObject);
-
-              gameObject[gameObject.player].units.forEach((unit: any) => ({
-                ...unit,
-                teams: unit.teams.forEach((team: any) => {
-                  if (selected.all.unit === team.unit) {
-                    startMovement(team.id, setGameObject);
-                  }
-                })
-              }))
-              */
             } else {
 
               changePropsOfTeam(selected.id[0], ['target'], [{ x: x, y: y }], gameObject, setGameObject);
               startMovement(selected.id[0], setGameObject);
+
             }
           }
 
-          // oli ennen tässä... startMovement(selected.id[0], setGameObject);
-
-        } else {
-          //console.log('not found'); 
         }
 
         // clear selected
@@ -248,7 +225,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     if (gameObject.status === 'deploy' || gameObject.status === 'battle') {
-      //console.log('calling draw as gameObject changed');
+      
       draw(canvas, canvasSize, gameObject, selected);
 
     }
@@ -261,7 +238,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    //console.log('gO ', gameObject);
+    
     /** //  //  //
      *    BATTLE  (loop)
      */ //  //  //
@@ -284,11 +261,10 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
             decideActions(updatedGameObject.defender.units, updatedGameObject.attacker.units, gameObject);
           }
 
-          // resolve bombardments // ennen taisi mennä updatedGameObject.attacksToResolve jne..
+          // resolve bombardments
           if (bombsToResolve && bombsToResolve.length > 0) {
             // sort by origin.reactions
             bombsToResolve.sort((a, b) => a.origin.reactions - b.origin.reactions);
-            //console.log('calling resolve', updatedGameObject.bombsToResolve);
             bombsToResolve = resolveBombs(bombsToResolve,
               updatedGameObject,
               setLog,
@@ -363,8 +339,7 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
           // close combat:
           closeCombat(gameObject, setLog, log);
-          //console.log('go: ', gameObject)
-          //console.log('attacksTbR inside setGameO: ', attacksToResolve);
+
           return { ...updatedGameObject, attacksToResolve, bombsToResolve };
           
         }); // setGameObject ends here
@@ -380,8 +355,9 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 
     return () => {
       if (intervalId !== null) {
-        //console.log('clearing interval', gameObject);
+        
         clearInterval(intervalId);
+
       }
     };
   }, [isPaused, gameObject, selected]);
@@ -585,11 +561,8 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
               }
               )
             }
-
-
           </> : <></>
       }
-
 
       <br />
       <canvas
@@ -612,4 +585,3 @@ const CenterBattleColumn: React.FC = (): React.ReactElement => {
 };
 
 export default CenterBattleColumn;
-

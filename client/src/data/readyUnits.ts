@@ -74,6 +74,11 @@ export const desertRatsUnits: ReadyUnit[] = [
                 points: 0
             },
             {
+                name: 'Bren & SMLE team',
+                exp: 'veteran',
+                points: 0
+            },
+            {
                 name: 'Boys AT-rifle', // need to do to database pg 177
                 exp: 'veteran',
                 points: 0

@@ -34,10 +34,15 @@ export const desertRatsUnits: ReadyUnit[] = [
         desc: 'A HQ unit with two Shermans.'
     },
     {
-        name: 'Tank HQ',
+        name: 'Grant HQ (3 tanks)',
         teams: [
             {
-                name: 'Sherman M4A1 HQ',
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            },
+            {
+                name: 'Grant HQ',
                 exp: 'veteran',
                 points: 0
             },
@@ -48,7 +53,24 @@ export const desertRatsUnits: ReadyUnit[] = [
             }
         ],
         points: 0,
-        desc: 'A HQ unit with tanks. Containing Sherman and Grant.'
+        desc: 'A HQ unit with three powerful tanks.'
+    },
+    {
+        name: 'Grant HQ (2 tanks)',
+        teams: [
+            {
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            },
+            {
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            }
+        ],
+        points: 0,
+        desc: 'A HQ unit with two tanks.'
     },
     {
         name: 'Rifle HQ',
@@ -356,6 +378,28 @@ export const desertRatsUnits: ReadyUnit[] = [
         ],
         points: 0,
         desc: 'Crush your enemies with 2 shermans and 1 grant.'
+    },
+    {
+        name: 'Grant Armoured Troop',
+        teams: [
+            {
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            },
+            {
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            },
+            {
+                name: 'Grant HQ',
+                exp: 'veteran',
+                points: 0
+            }
+        ],
+        points: 0,
+        desc: 'A HQ unit with tanks. Containing Sherman and Grant.'
     }
 ];
 

@@ -2,6 +2,7 @@ export interface ReadyTeam {
     name: string;
     exp: string;
     points: number;
+    howMany: number;
 };
 
 export interface ReadyUnit {
@@ -22,12 +23,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Sherman M4A1 HQ',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Sherman M4A1 HQ',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 2
             }
         ],
         points: 0,
@@ -39,17 +36,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Grant HQ',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Grant HQ',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Grant HQ',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 3
             }
         ],
         points: 0,
@@ -61,12 +49,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Grant HQ',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Grant HQ',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 2
             }
         ],
         points: 0,
@@ -78,13 +62,9 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Rifle company HQ',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Rifle company HQ',
-                exp: 'veteran',
-                points: 0
-            },
+                points: 0,
+                howMany: 2
+            }
         ],
         points: 0,
         desc: 'A HQ unit with tank'
@@ -95,37 +75,20 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Bren & SMLE team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 5
             },
             {
                 name: 'Boys AT-rifle team',
                 exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 1
             },
             {
                 name: '2-inch mortar team',
                 exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 1
             }
         ],
         points: 0,
@@ -137,47 +100,20 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Bren & SMLE team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Bren & SMLE team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 7
             },
             {
                 name: 'Boys AT-rifle team',
                 exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 1
             },
             {
                 name: '2-inch mortar team',
                 exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 1
             }
         ],
         points: 0,
@@ -189,18 +125,9 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '3-inch mortar team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
+                points: 0,
+                howMany: 3
+            }
         ],
         points: 0,
         desc: 'A good infantry support, that can fire smoke bombardment too'
@@ -211,23 +138,9 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '3-inch mortar team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
+                points: 0,
+                howMany: 4
+            }
         ],
         points: 0,
         desc: 'A good infantry support, that can fire smoke bombardment too'
@@ -238,32 +151,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '3-inch mortar team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '3-inch mortar team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 6
             }
         ],
         points: 0,
@@ -275,12 +164,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '6 pdr anti-tank team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 2
             }
         ],
         points: 0,
@@ -292,17 +177,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '6 pdr anti-tank team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 3
             }
         ],
         points: 0,
@@ -314,22 +190,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: '6 pdr anti-tank team',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: '6 pdr anti-tank team',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 4
             }
         ],
         points: 0,
@@ -341,17 +203,8 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Sherman M4A1',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Sherman M4A1',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Sherman M4A1',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 3
             }
         ],
         points: 0,
@@ -363,17 +216,14 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Sherman M4A1',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Sherman M4A1',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 2
             },
             {
                 name: 'Grant',
                 exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 1
             }
         ],
         points: 0,
@@ -385,21 +235,134 @@ export const desertRatsUnits: ReadyUnit[] = [
             {
                 name: 'Grant HQ',
                 exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Grant HQ',
-                exp: 'veteran',
-                points: 0
-            },
-            {
-                name: 'Grant HQ',
-                exp: 'veteran',
-                points: 0
+                points: 0,
+                howMany: 3
             }
         ],
         points: 0,
-        desc: 'A HQ unit with tanks. Containing Sherman and Grant.'
+        desc: 'Three Grants Nothing can go wrong with those.'
+    },
+    {
+        name: 'Crusader HQ',
+        teams: [
+            {
+                name: 'Crusader II HQ', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            },
+            {
+                name: 'Crusader CS HQ', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            }
+        ],
+        points: 0,
+        desc: '2 x Crusader II and 2 x Crusader CS.'
+    },
+    {
+        name: 'Crusader II troop',
+        teams: [
+            {
+                name: 'Crusader II', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 3
+            }
+        ],
+        points: 0,
+        desc: 'Some speedy cruiser tanks with 2 pdr cannon.'
+    },
+    {
+        name: 'Crusader II (2) & III (1)',
+        teams: [
+            {
+                name: 'Crusader II', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            },
+            {
+                name: 'Crusader III', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 1
+            }
+        ],
+        points: 0,
+        desc: '2 x Crusader II and 1 x Crusader III.'
+    },
+    {
+        name: 'Crusader II (1) & III (2)',
+        teams: [
+            {
+                name: 'Crusader II', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 1
+            },
+            {
+                name: 'Crusader III', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            }
+        ],
+        points: 0,
+        desc: '1 x Crusade & 2 x Crusader III.'
+    },
+    {
+        name: 'Honey HQ (3)',
+        teams: [
+            {
+                name: 'M3 Light tank HQ', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 3
+            }
+        ],
+        points: 0,
+        desc: '3 HQ Honeys.'
+    },
+    {
+        name: 'Honey HQ (4)',
+        teams: [
+            {
+                name: 'M3 Light tank HQ', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 4
+            }
+        ],
+        points: 0,
+        desc: '4 HQ Honeys.'
+    },
+    {
+        name: 'Honey Troop',
+        teams: [
+            {
+                name: 'M3 Light tank',
+                exp: 'veteran',
+                points: 0,
+                howMany: 3
+            }
+        ],
+        points: 0,
+        desc: 'Some speedy light tanks with a fine cannon.'
+    },
+    {
+        name: 'Priest Field Troop',
+        teams: [
+            {
+                name: 'Priest', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            }
+        ],
+        points: 0,
+        desc: 'Great SP artillery.'
     }
 ];
 

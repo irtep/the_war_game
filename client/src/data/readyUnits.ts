@@ -316,7 +316,7 @@ export const desertRatsUnits: ReadyUnit[] = [
         name: 'Honey HQ (3)',
         teams: [
             {
-                name: 'M3 Light tank HQ', // not added to db
+                name: 'Honey HQ', // not added to db
                 exp: 'veteran',
                 points: 0,
                 howMany: 3
@@ -329,7 +329,7 @@ export const desertRatsUnits: ReadyUnit[] = [
         name: 'Honey HQ (4)',
         teams: [
             {
-                name: 'M3 Light tank HQ', // not added to db
+                name: 'Honey HQ', // not added to db
                 exp: 'veteran',
                 points: 0,
                 howMany: 4
@@ -342,7 +342,7 @@ export const desertRatsUnits: ReadyUnit[] = [
         name: 'Honey Troop',
         teams: [
             {
-                name: 'M3 Light tank',
+                name: 'Honey',
                 exp: 'veteran',
                 points: 0,
                 howMany: 3
@@ -352,7 +352,7 @@ export const desertRatsUnits: ReadyUnit[] = [
         desc: 'Some speedy light tanks with a fine cannon.'
     },
     {
-        name: 'Priest Field Troop',
+        name: 'Priest Field Troop (2)',
         teams: [
             {
                 name: 'Priest', // not added to db
@@ -363,6 +363,97 @@ export const desertRatsUnits: ReadyUnit[] = [
         ],
         points: 0,
         desc: 'Great SP artillery.'
+    },
+    {
+        name: 'Priest Field Troop (4)',
+        teams: [
+            {
+                name: 'Priest', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 4
+            }
+        ],
+        points: 0,
+        desc: 'Great SP artillery.'
+    },
+    {
+        name: '25 PDR field troop (2)',
+        teams: [
+            {
+                name: '25 pdr gun', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            }
+        ],
+        points: 0,
+        desc: 'Great heavy artillery.'
+    },
+    {
+        name: '25 PDR field troop (4)',
+        teams: [
+            {
+                name: '25 pdr gun', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 4
+            }
+        ],
+        points: 0,
+        desc: 'Great heavy artillery.'
+    },
+    {
+        name: 'Honey OP observation post',
+        teams: [
+            {
+                name: 'Honey OP', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 4
+            }
+        ],
+        points: 0,
+        desc: 'Spotter post for artillery.'
+    },
+    {
+        name: '17/25 PRD Anti-Tank Troop (4)',
+        teams: [
+            {
+                name: '17/25 pdr gun', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 4
+            }
+        ],
+        points: 0,
+        desc: 'An excellent anti-tank team. Even tigers can not ignore this bad boy.'
+    },
+    {
+        name: '17/25 PRD Anti-Tank Troop (3)',
+        teams: [
+            {
+                name: '17/25 pdr gun', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 3
+            }
+        ],
+        points: 0,
+        desc: 'An excellent anti-tank team. Even tigers can not ignore this bad boy.'
+    },
+    {
+        name: '17/25 PRD Anti-Tank Troop (2)',
+        teams: [
+            {
+                name: '17/25 pdr gun', // not added to db
+                exp: 'veteran',
+                points: 0,
+                howMany: 2
+            }
+        ],
+        points: 0,
+        desc: 'An excellent anti-tank team. Even tigers can not ignore this bad boy.'
     }
 ];
 
